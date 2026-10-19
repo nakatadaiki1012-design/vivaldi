@@ -180,6 +180,57 @@ body.present .tch{max-width:none}
   header.top{gap:6px}
 }
 
+/* ---------- goals / knowledge ---------- */
+.goalcard{border:1px solid var(--line);border-radius:14px;padding:10px 14px;margin:6px 0 14px;background:var(--bg);display:flex;flex-direction:column;gap:6px;font-size:15px}
+.gk{display:inline-block;font-weight:800;margin-right:8px;white-space:nowrap}
+.kchip,.achip{display:inline-block;border-radius:999px;padding:1px 10px;margin:2px 4px 2px 0;font-size:13px;background:color-mix(in srgb,var(--theme) 22%,var(--panel));border:1px solid color-mix(in srgb,var(--theme) 45%,var(--line))}
+.achip{background:color-mix(in srgb,var(--accent2) 18%,var(--panel));border-color:color-mix(in srgb,var(--accent2) 45%,var(--line))}
+.axis{border-left:6px solid var(--accent);background:var(--soft);border-radius:10px;padding:12px 14px;margin:8px 0 14px;font-size:16px}
+.ablist{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:8px}
+.ab{border:1px solid var(--line);border-radius:12px;padding:8px 12px;background:var(--bg)}
+.steplist{margin:6px 0;padding-left:1.4em}
+.planck{display:flex;flex-direction:column;gap:6px;margin:8px 0}
+.planck label{display:flex;gap:10px;align-items:flex-start;border:1px solid var(--line);border-radius:12px;padding:8px 12px;background:var(--bg);cursor:pointer}
+.planck label.off{opacity:.6}
+.planck input{margin-top:6px;width:18px;height:18px;flex:none}
+.planck .core{font-size:12px;background:var(--accent);color:#fff;border-radius:6px;padding:0 6px;margin-left:6px}
+.sumbox{display:flex;flex-wrap:wrap;gap:8px 18px;align-items:center;font-weight:700;margin:8px 0}
+.mtx{border-collapse:collapse;width:100%;font-size:14px}
+.mtx th,.mtx td{border:1px solid var(--line);padding:6px;text-align:center;vertical-align:middle}
+.mtx td:first-child,.mtx th:first-child{text-align:left}
+.mtx .dot{color:var(--accent2);font-size:18px}
+.tblwrap{overflow-x:auto}
+.kgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px;margin:8px 0}
+.kcard{border:1px solid var(--line);border-radius:14px;padding:12px 14px;background:var(--bg)}
+.kcard h3{font-size:17px;margin-bottom:.3em}
+.kcard p{margin:0 0 .4em}
+.ktbl{border-collapse:collapse;width:100%;font-size:15px;margin:8px 0}
+.ktbl th,.ktbl td{border:1px solid var(--line);padding:6px 8px;text-align:left;vertical-align:top}
+.ktbl th{background:var(--soft)}
+.ktbl tr.hl td{background:color-mix(in srgb,var(--theme) 20%,var(--panel));font-weight:700}
+.ens{display:flex;flex-direction:column;gap:6px;text-align:center;font-size:14px}
+.ens-solo{background:var(--solo);color:#fff;border-radius:10px;padding:4px;font-weight:800}
+.ens-row{display:flex;gap:4px}
+.ens-row span{flex:1;background:color-mix(in srgb,var(--birds) 25%,var(--panel));border-radius:8px;padding:4px 2px}
+.ens-row.low span{background:color-mix(in srgb,var(--storm) 25%,var(--panel))}
+.range{margin:8px 0}
+.rrow{display:grid;grid-template-columns:130px 1fr;gap:2px 10px;align-items:center;margin-bottom:8px}
+.rname{font-weight:700;font-size:15px}
+.rbar{position:relative;height:14px;background:var(--line);border-radius:7px}
+.rbar i{position:absolute;top:0;bottom:0;border-radius:7px;background:linear-gradient(90deg,var(--storm),var(--birds))}
+.rdesc{grid-column:2;font-size:13px;color:var(--sub)}
+.raxis{display:flex;justify-content:space-between;font-size:12px;color:var(--sub);margin-left:140px}
+.era{display:flex;gap:3px;margin:8px 0;text-align:center;font-size:13px;font-weight:700;color:#222}
+.era div{border-radius:8px;padding:6px 2px}
+.mq{border-top:1px dashed var(--line);padding:8px 0}
+.mqq{margin:0 0 4px}
+.mqfb{font-size:15px;min-height:1.2em}
+.chip.right{background:var(--accent2);border-color:var(--accent2);color:#fff}
+.chip.wrong{border-color:#c44;text-decoration:line-through;opacity:.7}
+.selfrow{display:flex;flex-wrap:wrap;align-items:center;gap:6px 12px;border-bottom:1px solid var(--line);padding:6px 0}
+.selfrow .lbl2{flex:1 1 260px;font-size:15px}
+@media (max-width:480px){ .rrow{grid-template-columns:1fr} .rdesc{grid-column:1} .raxis{margin-left:0} }
+
 /* ---------- print (worksheet) ---------- */
 #printsheet{display:none}
 @media print{
@@ -212,7 +263,7 @@ body.present .tch{max-width:none}
     <div class="card bigcard" data-go="student">
       <div class="ic">🧑‍🎓</div>
       <h2>ひとりで学ぶ</h2>
-      <p>6つのステップで、自分のペースで進めます。</p>
+      <p>ステップに分かれていて、自分のペースで進められます。コースの長さも選べます。</p>
       <ul>
         <li>まず聴いて、感じたことを書く</li>
         <li>ソネット（詩）と音楽を結びつける</li>
@@ -228,7 +279,8 @@ body.present .tch{max-width:none}
         <li>大きな画面で場面ごとに再生・くり返し</li>
         <li>場面名を<b>かくして</b>「何の場面？」と問える</li>
         <li>クラス全員でのクイズ（答えはボタンで表示）</li>
-        <li>指導の流れ・発問例・ワークシート印刷</li>
+        <li>授業時間に合わせて<b>学ぶ内容を増減</b>（協奏曲・楽器・バロック時代も）</li>
+        <li>ねらい・使う知識・高まる力を一覧で確認、指導の流れを自動作成</li>
       </ul>
     </div>
   </div>
@@ -255,9 +307,11 @@ body.present .tch{max-width:none}
 <section id="teacher" class="hidden">
   <div class="tch">
     <div class="tabs" id="ttabs">
+      <button class="tab" data-t="plan">🎯 ねらいとプラン</button>
       <button class="tab on" data-t="show">📺 提示画面</button>
       <button class="tab" data-t="quiz">❓ みんなでクイズ</button>
       <button class="tab" data-t="tap">🌸 主題さがしゲーム</button>
+      <button class="tab" data-t="know">📚 知識カード</button>
       <button class="tab" data-t="guide">📋 指導の流れ</button>
       <button class="tab" data-t="settings">⚙️ 設定</button>
     </div>
@@ -304,6 +358,17 @@ body.present .tch{max-width:none}
         <h2>🌸 主題さがしゲーム（クラス版）</h2>
         <p class="lead">曲を最初から流します。「春の主題がもどってきた！」と思ったら、生徒に手を挙げさせましょう。先生がボタンを押すと記録されます。</p>
         <div id="tTap"></div>
+      </div>
+    </div>
+
+    <div id="t-plan" class="hidden">
+      <div class="panel" id="tPlan"></div>
+    </div>
+
+    <div id="t-know" class="hidden">
+      <div class="panel">
+        <div class="btnrow" id="kSel" style="margin-top:0"></div>
+        <div id="kBody" style="margin-top:12px"></div>
       </div>
     </div>
 
@@ -678,16 +743,215 @@ document.querySelectorAll(".modebtn").forEach(b => b.onclick = () => setMode(b.d
 document.querySelectorAll("[data-go]").forEach(b => b.onclick = () => setMode(b.dataset.go));
 document.getElementById("logo").onclick = () => setMode("home");
 
-/* ================= 生徒モード ================= */
-const STEPS = [
-  {id:"listen",  title:"まず聴いてみよう"},
-  {id:"poem",    title:"詩と音楽"},
-  {id:"which",   title:"場面あてクイズ"},
-  {id:"form",    title:"主題をさがせ"},
-  {id:"elem",    title:"音楽のしくみ"},
-  {id:"write",   title:"紹介文を書こう"},
+/* ================= 学習モジュール（組み合わせて使う） ================= */
+const ABILITIES = {
+  kiku:   {icon:"👂", name:"聴き取る力",       desc:"音色・強弱・旋律・形式などを手がかりに、音楽の特徴を聴き取る",           can:"音色や強弱などを手がかりに、音楽の特徴を聴き取れた"},
+  musubu: {icon:"🔗", name:"結びつける力",     desc:"聴き取った音楽のしくみと、感じ取った情景や気分を関係づける",             can:"音楽のしくみと、情景や気分を結びつけて聴けた"},
+  haikei: {icon:"🏛", name:"背景から味わう力", desc:"作られた時代・文化・楽器などの背景と関わらせて、音楽を味わう",           can:"時代や楽器などの背景を知って、味わい方が深まった"},
+  kataru: {icon:"💬", name:"根拠をもって語る力", desc:"音楽の工夫を根拠にして、よさや美しさを自分のことばで伝える",           can:"音楽の工夫を根拠にして、曲のよさを説明できた"},
+  ikasu:  {icon:"🌱", name:"ほかの曲に生かす力", desc:"ここで身につけた聴き方を、ほかの曲（特に情景や物語を表す曲）にも使う", can:"ほかの曲でも使えそうな聴き方が見つかった"},
+};
+// cs: 中学校学習指導要領 音楽「B鑑賞」との関わり（例）
+const MODULES = [
+  {id:"listen", title:"まず聴いてみよう", mins:10, core:true,
+   aim:"何も知らないまま聴いて、感じたことをことばにする", know:[], ab:["kataru"], cs:["共通事項"],
+   act:"通して聴き、感じたことを書く", ask:"「どんな景色が見えた？ 気分はどう変わった？」", app:"提示画面で🙈場面名をかくす → 通して再生"},
+  {id:"poem", title:"詩と音楽", mins:15, core:true,
+   aim:"ソネット（詩）の場面と、音楽のようすを結びつける", know:["ソネット","音色","音の高さ","強弱"], ab:["musubu","kiku"], cs:["イ(ア)","イ(イ)"],
+   act:"ソネットと音楽を結びつける", ask:"「この部分は詩のどの行に合いそう？」「音のどんなところからそう思った？」", app:"場面名をかくしたまま場面ボタンで再生 → 意見が出たら表示"},
+  {id:"which", title:"場面あてクイズ", mins:10,
+   aim:"音のちがいを手がかりに、場面を聴き分ける", know:["音色","強弱","音の高さ","リズム"], ab:["kiku"], cs:["イ(ア)"],
+   act:"場面を聴き分けて確かめる", ask:"「どの場面かな？ 決め手になった音は？」", app:"❓みんなでクイズ（答えはボタンで表示）"},
+  {id:"form", title:"主題をさがせ", mins:10, core:true,
+   aim:"春の主題がもどってくることに気づき、曲の組み立て（リトルネロ形式）をつかむ", know:["形式","リトルネロ形式","長調と短調"], ab:["kiku","musubu"], cs:["イ(ア)"],
+   act:"主題がもどることに気づき、リトルネロ形式を知る", ask:"「最初のメロディーがもどってきたら手を挙げよう」「なぜ何度ももどってくるのだろう？」", app:"🌸主題さがしゲーム → 提示画面のタイムライン（色の並び）"},
+  {id:"concerto", title:"協奏曲ってなに？", mins:15,
+   aim:"独奏と合奏の関わりを聴き取り、協奏曲というジャンルを知る", know:["協奏曲","独奏と合奏","楽章","速度","テクスチュア"], ab:["kiku","haikei"], cs:["イ(ア)","イ(イ)"],
+   act:"協奏曲（独奏と合奏）と楽章構成を知る", ask:"「いまは独奏？ 合奏？」「独奏と合奏が交代すると、どんな感じがする？」", app:"📚知識カード「協奏曲」"},
+  {id:"instruments", title:"楽器と奏法", mins:15,
+   aim:"楽器や弾き方（奏法）による音色のちがいを知り、情景の表し方に気づく", know:["弦楽器","チェンバロ","通奏低音","トリル","トレモロ","音階","音色"], ab:["kiku","haikei"], cs:["イ(ア)","イ(イ)"],
+   act:"楽器と奏法を知り、音色に注目して聴く", ask:"「小鳥のさえずりや雷は、どんな弾き方で表している？」", app:"📚知識カード「楽器と奏法」の ▶聴く"},
+  {id:"elem", title:"音楽のしくみ", mins:15,
+   aim:"それぞれの場面を表す音楽の工夫を、くわしく聴き取る", know:["トリル","トレモロ","音階","強弱","音の高さ","旋律"], ab:["kiku","musubu"], cs:["イ(ア)"],
+   act:"各場面の音楽の工夫を聴き取る", ask:"「小鳥・泉・雷は、どんな音の工夫で表されている？」", app:"🔁場面をくり返す ＋「聴きどころ」"},
+  {id:"baroque", title:"バロック時代の音楽", mins:15,
+   aim:"作曲者と時代（バロック時代）を知り、背景と結びつけて聴く", know:["バロック時代","通奏低音","強弱の段階的な変化","標題音楽"], ab:["haikei","ikasu"], cs:["イ(イ)"],
+   act:"作品の背景（バロック時代・ヴィヴァルディ）を知る", ask:"「ヴィヴァルディが生きたころ、日本は何時代？」「詩や物語を音で表す曲は、ほかにもあるかな？」", app:"📚知識カード「バロック時代」"},
+  {id:"write", title:"紹介文を書こう", mins:20, core:true,
+   aim:"学んだ知識を根拠にして、曲のよさを紹介し、ふりかえる", know:["これまで使った知識すべて"], ab:["kataru","musubu","ikasu"], cs:["ア(ア)"],
+   act:"紹介文を書き、ふりかえる", ask:"「音楽の工夫を根拠に、この曲のよさを紹介しよう」", app:"ワークシート印刷（設定）／生徒用モードの最後のステップ"},
 ];
-let curStep = store.get("step", 0);
+const MOD = Object.fromEntries(MODULES.map(m => [m.id, m]));
+const PRESETS = [
+  {id:"p1", label:"1時間（50分）", note:"軸だけをしぼって", ids:["listen","poem","form","write"]},
+  {id:"p2", label:"2時間",         note:"聴き分け・協奏曲・工夫を追加", ids:["listen","poem","which","form","concerto","elem","write"]},
+  {id:"p3", label:"3時間",         note:"楽器・時代背景までじっくり", ids:MODULES.map(m => m.id)},
+];
+const CS_LABEL = {
+  "ア(ア)":"思考・判断・表現 ア(ア)：曲や演奏に対する評価とその根拠",
+  "イ(ア)":"知識 イ(ア)：曲想と音楽の構造との関わり",
+  "イ(イ)":"知識 イ(イ)：音楽の特徴とその背景となる文化や歴史、他の芸術との関わり",
+  "共通事項":"〔共通事項〕音色・リズム・速度・旋律・テクスチュア・強弱・形式・構成など",
+};
+const AXIS = "「なぜ、そう聞こえるの？」── 音楽のしくみ（音色・強弱・形式など）が、春の情景や気分をどのように生み出しているのかを、詩と結びつけながら探る。";
+
+function cleanPlan(ids){ const ok = MODULES.map(m => m.id).filter(id => (ids || []).includes(id)); return ok.length ? ok : PRESETS[1].ids.slice(); }
+let plan = cleanPlan(store.get("plan", PRESETS[1].ids));
+let planLocked = store.get("planLocked", false);
+(function planFromURL(){
+  const q = new URLSearchParams(location.search).get("plan");
+  if (q){ plan = cleanPlan(q.split(",")); planLocked = true; store.set("plan", plan); store.set("planLocked", true); }
+})();
+function planModules(){ return MODULES.filter(m => plan.includes(m.id)); }
+function planMinutes(){ return planModules().reduce((a,m) => a + m.mins, 0); }
+function planKnow(){ const s = []; planModules().forEach(m => m.know.forEach(k => { if (!k.startsWith("これまで") && !s.includes(k)) s.push(k); })); return s; }
+function planAbilities(){ return Object.keys(ABILITIES).filter(a => planModules().some(m => m.ab.includes(a))); }
+function presetOf(ids){ const p = PRESETS.find(p => p.ids.length === ids.length && p.ids.every(x => ids.includes(x))); return p ? p.id : "custom"; }
+function lessonsOf(mods){ const out = []; let cur = [], t = 0; mods.forEach(m => { if (t + m.mins > 50 && cur.length){ out.push(cur); cur = []; t = 0; } cur.push(m); t += m.mins; }); if (cur.length) out.push(cur); return out; }
+function studentLink(){ return location.href.split(/[?#]/)[0] + "?mode=student&plan=" + plan.join(","); }
+
+function goalCard(m){
+  return `<div class="goalcard">
+    <div><span class="gk">🎯 めあて</span>${m.aim}</div>
+    <div><span class="gk">🔑 使う知識</span>${m.know.length ? m.know.map(k => `<span class="kchip">${k}</span>`).join("") : '<span class="tip">まだ知識は使わず、感じたままを大切に</span>'}</div>
+    <div><span class="gk">🌱 高まる力</span>${m.ab.map(a => `<span class="achip">${ABILITIES[a].icon} ${ABILITIES[a].name}</span>`).join("")}</div>
+  </div>`;
+}
+function secT(kind, nth=0){ const l = SECTIONS.filter(s => s.kind === kind); return (l[nth] || l[0] || SECTIONS[0]).t; }
+
+/* ---------- 小さな確認クイズ ---------- */
+function miniQuiz(box, qs, doneId){
+  box.innerHTML = qs.map((q,i) => `<div class="mq" data-i="${i}"><p class="mqq"><b>Q${i+1}.</b> ${q.q}</p>
+    ${q.clip ? '<button class="smallbtn" data-clip>▶ 聴く</button>' : ''}
+    <div class="chips">${q.opts.map((o,j) => `<button class="chip" data-j="${j}">${o}</button>`).join("")}</div><div class="mqfb"></div></div>`).join("");
+  let answered = 0;
+  box.querySelectorAll(".mq").forEach(el => {
+    const q = qs[+el.dataset.i]; let fin = false;
+    const c = el.querySelector("[data-clip]"); if (c) c.onclick = () => { const [f,l] = q.clip(); playClip(f, l); };
+    el.querySelectorAll(".chip").forEach(b => b.onclick = () => {
+      if (fin) return; fin = true; const j = +b.dataset.j;
+      el.querySelectorAll(".chip").forEach(x => { if (+x.dataset.j === q.a) x.classList.add("right"); else if (x === b) x.classList.add("wrong"); });
+      el.querySelector(".mqfb").innerHTML = (j === q.a ? "⭕ 正解！ " : "❌ ") + q.exp;
+      if (++answered === qs.length && doneId) markDone(doneId);
+    });
+  });
+}
+
+/* ---------- 知識ページの中身 ---------- */
+const CONTENT = {
+  concerto: {
+    title:"🎻 協奏曲ってなに？",
+    html: () => `
+      <div class="kgrid">
+        <div class="kcard"><h3>協奏曲（コンチェルト）</h3><p><b>独奏</b>（ソロ）の楽器と、<b>合奏</b>（オーケストラ）が、<b>競い合ったり、協力し合ったり</b>する音楽です。「春」は独奏ヴァイオリンが活躍する<b>ヴァイオリン協奏曲</b>です。</p></div>
+        <div class="kcard"><h3>「春」を演奏するメンバー</h3>
+          <div class="ens"><div class="ens-solo">🎻 独奏ヴァイオリン</div>
+          <div class="ens-row"><span>第1ヴァイオリン</span><span>第2ヴァイオリン</span><span>ヴィオラ</span></div>
+          <div class="ens-row low"><span>チェロ</span><span>コントラバス</span><span>チェンバロ</span></div>
+          <div class="tip">下の段は<b>通奏低音</b>：低い音と和音で全体を支えます</div></div></div>
+      </div>
+      <h3>独奏と合奏の「かけ合い」</h3>
+      <p>第1楽章では、<b>合奏</b>が春の主題を演奏し、その間の場面（小鳥・泉・雷…）で<b>独奏ヴァイオリン</b>が活躍します。タイムラインの色の並びは、そのまま「合奏 → 独奏 → 合奏 → …」の交代になっています。</p>
+      <h3>協奏曲は3つの楽章でできている</h3>
+      <table class="ktbl"><tr><th>楽章</th><th>速さ</th><th>「春」のソネットの場面</th></tr>
+        <tr class="hl"><td>第1楽章 ← いま聴いている曲</td><td>アレグロ（速く）</td><td>春の訪れ・小鳥・泉・雷</td></tr>
+        <tr><td>第2楽章</td><td>ラルゴ（ゆるやかに）</td><td>花の咲く野原でねむる羊飼いと、ほえる番犬（ヴィオラが犬の声）</td></tr>
+        <tr><td>第3楽章</td><td>アレグロ（速く）</td><td>バグパイプに合わせて踊るニンフと羊飼い</td></tr></table>
+      <p class="tip">《四季》は、全12曲の協奏曲集『和声と創意の試み』（1725年出版）の最初の4曲です。「春・夏・秋・冬」それぞれが3楽章なので、《四季》全体では12の楽章があります。</p>
+      <h3>確かめよう</h3><div class="mqbox"></div>`,
+    quiz: () => [
+      {q:"この部分は、独奏が中心？ 合奏？", clip:() => [secT("theme",0) + 0.5, 6], opts:["合奏（全員）","独奏が中心"], a:0, exp:"春の主題は合奏で演奏されます。音に厚みがあり、低い音もしっかり聞こえます。"},
+      {q:"この部分は、独奏が中心？ 合奏？", clip:() => [secT("birds",0) + 2, 7], opts:["合奏（全員）","独奏が中心"], a:1, exp:"小鳥の場面は独奏ヴァイオリンが中心。低い楽器がお休みして、音がうすく軽くなります。"},
+      {q:"この部分は、独奏が中心？ 合奏？", clip:() => [secT("theme",2) + 0.5, 5], opts:["合奏（全員）","独奏が中心"], a:0, exp:"場面と場面の間には、合奏の春の主題がもどってきます。"},
+      {q:"協奏曲の3つの楽章の速さは、ふつうどんな並び？", opts:["速い → ゆるやか → 速い","ゆるやか → 速い → ゆるやか","ずっと速い"], a:0, exp:"「速い－ゆるやか－速い」が協奏曲の基本の並びです。「春」もアレグロ－ラルゴ－アレグロです。"},
+    ]},
+  instruments: {
+    title:"🎹 楽器と奏法",
+    html: () => `
+      <h3>使われている楽器と音の高さ</h3>
+      <div class="range">
+        ${[["🎻 ヴァイオリン",38,100,"いちばん高い音。旋律の主役で、独奏もこの楽器"],["ヴィオラ",25,72,"ヴァイオリンより少し大きく、中くらいの音"],["チェロ",10,60,"ひざの間にはさんで弾く、低くあたたかい音"],["コントラバス",0,40,"いちばん大きく、いちばん低い音。立って弾く"],["🎹 チェンバロ",6,90,"鍵盤をおすと、弦を<b>はじいて</b>音が出る。ピアノより前の時代の楽器"]]
+          .map(([n,a,b,d]) => `<div class="rrow"><div class="rname">${n}</div><div class="rbar"><i style="left:${a}%;width:${b-a}%"></i></div><div class="rdesc">${d}</div></div>`).join("")}
+        <div class="raxis"><span>低い</span><span>← 音の高さ →</span><span>高い</span></div>
+      </div>
+      <div class="note"><b>通奏低音（つうそうていおん）</b>：チェロ・コントラバス・チェンバロが、低い音と和音でずっと全体を支えるしくみ。バロック時代の音楽の「土台」です。<br><span class="tip">この録音は1947年のもので、チェンバロの音は聞こえにくいかもしれません。</span></div>
+      <h3>情景を表す弾き方（奏法）</h3>
+      <div class="kgrid">
+        ${[["トリル","となり合う2つの音を、すばやくくり返して音をふるわせる。→ <b>小鳥のさえずり</b>", () => [secT("birds",0) + 2, 7]],
+           ["トレモロ","同じ音を、弓をこまかく動かしてとても速くきざむ。→ <b>雷のゴロゴロ</b>", () => [secT("storm",0), 6]],
+           ["かけ上がる音階","低い音から高い音へ一気にかけ上がる。→ <b>稲妻のピカッ</b>", () => [secT("storm",0) + LIGHTNING_OFFSETS[0] - 1, 4]],
+           ["こだま（強→弱）","同じフレーズを強く→弱くとくり返す。→ <b>春の主題</b>", () => [secT("theme",0) + 2.5, 8]]]
+          .map(([n,d,c],i) => `<div class="kcard"><h3>${n}</h3><p>${d}</p><button class="smallbtn" data-tech="${i}">▶ 聴いてみる</button></div>`).join("")}
+      </div>
+      <h3>確かめよう</h3><div class="mqbox"></div>`,
+    techs: () => [() => [secT("birds",0) + 2, 7], () => [secT("storm",0), 6], () => [secT("storm",0) + LIGHTNING_OFFSETS[0] - 1, 4], () => [secT("theme",0) + 2.5, 8]],
+    quiz: () => [
+      {q:"いちばん低い音を出す楽器は？", opts:["ヴァイオリン","ヴィオラ","コントラバス"], a:2, exp:"コントラバスは弦楽器の中でいちばん大きく、いちばん低い音を出します。"},
+      {q:"チェンバロは、どうやって音を出す？", opts:["弦をハンマーでたたく","弦をはじく","管に息をふきこむ"], a:1, exp:"鍵盤をおすと、中のつめが弦をはじきます。ハンマーでたたくのはピアノです。"},
+      {q:"この音は、どの弾き方？", clip:() => [secT("storm",0), 5], opts:["トリル","トレモロ","こだま"], a:1, exp:"同じ音をとても速くきざむトレモロ。雷のゴロゴロを表しています。"},
+    ]},
+  baroque: {
+    title:"🏛 バロック時代の音楽",
+    html: () => `
+      <h3>作曲者 アントニオ・ヴィヴァルディ（1678〜1741）</h3>
+      <div class="kgrid">
+        <div class="kcard"><p>イタリアの水の都<b>ヴェネツィア</b>生まれ。教会の司祭で、髪が赤かったので「<b>赤毛の司祭</b>」とよばれました。</p></div>
+        <div class="kcard"><p><b>ピエタ慈善院</b>（親のいない子どもたちが暮らす施設）で少女たちに音楽を教え、彼女たちの演奏会のために多くの曲を作りました。</p></div>
+        <div class="kcard"><p>生涯で<b>500曲以上の協奏曲</b>を作ったといわれます。バッハもヴィヴァルディの協奏曲を研究し、編曲しました。</p></div>
+      </div>
+      <h3>いつごろの音楽？</h3>
+      <div class="era">
+        <div style="flex:150;background:#f2a93b">バロック<br><small>1600〜1750ごろ</small></div>
+        <div style="flex:70;background:#4fb3d9">古典派<br><small>〜1820ごろ</small></div>
+        <div style="flex:80;background:#d9667f">ロマン派<br><small>〜1900ごろ</small></div>
+      </div>
+      <table class="ktbl">
+        <tr><th>年</th><th>西洋の音楽</th><th>そのころの日本</th></tr>
+        <tr><td>1603</td><td>（バロック時代のはじまり）</td><td>江戸幕府が開かれる</td></tr>
+        <tr><td>1678</td><td>ヴィヴァルディ誕生</td><td>5代将軍 徳川綱吉のころ（元禄文化）</td></tr>
+        <tr><td>1685</td><td>バッハ、ヘンデルが誕生</td><td>松尾芭蕉が『おくのほそ道』の旅に出る（1689）</td></tr>
+        <tr class="hl"><td>1725</td><td><b>《四季》が出版される</b></td><td>8代将軍 徳川吉宗（享保の改革）</td></tr>
+        <tr><td>1750</td><td>バッハが亡くなる（バロック時代の終わりごろ）</td><td>江戸時代 中ごろ</td></tr>
+        <tr><td>1808</td><td>ベートーヴェン《田園》（いなかの風景を音で表す）</td><td>江戸時代 後半</td></tr>
+        <tr><td>1874</td><td>スメタナ《ブルタバ（モルダウ）》（川の流れを音で表す）</td><td>明治時代</td></tr>
+      </table>
+      <h3>「春」で聴けるバロック音楽の特徴</h3>
+      <ul>
+        <li><b>通奏低音</b>：低い音と和音が、ずっと全体を支える</li>
+        <li><b>強弱が段階的に変わる</b>：だんだん変わるより、「強」と「弱」がパッと切りかわる（こだま）</li>
+        <li><b>くり返しの形式</b>：合奏の主題が何度ももどる（リトルネロ形式）</li>
+        <li><b>装飾</b>：トリルなどで旋律をかざる</li>
+      </ul>
+      <div class="note">🌱 <b>ほかの曲に生かそう</b>：詩や物語、景色を音で表す音楽を<b>標題音楽</b>といいます。「春」はその早い例です。ベートーヴェン《田園》やスメタナ《ブルタバ》を聴くときも、「どんな音の工夫で、どんな情景を表しているのか」という同じ聴き方が使えます。</div>
+      <h3>確かめよう</h3><div class="mqbox"></div>`,
+    quiz: () => [
+      {q:"バロック時代は、だいたいいつごろ？", opts:["1600〜1750年ごろ","1750〜1820年ごろ","1820〜1900年ごろ"], a:0, exp:"バロック時代はおよそ1600〜1750年。バッハが亡くなった1750年ごろが終わりの目安です。"},
+      {q:"《四季》が出版されたころ、日本は何時代？", opts:["平安時代","江戸時代","明治時代"], a:1, exp:"1725年は江戸時代。8代将軍 徳川吉宗のころです。"},
+      {q:"ヴィヴァルディと同じバロック時代の作曲家は？", opts:["J.S.バッハ","ベートーヴェン","ショパン"], a:0, exp:"バッハ（1685〜1750）はバロック時代を代表する作曲家です。"},
+    ]},
+};
+function renderContent(id, root, doneId){
+  const C = CONTENT[id];
+  root.innerHTML = C.html();
+  if (C.techs){ const T = C.techs(); root.querySelectorAll("[data-tech]").forEach(b => b.onclick = () => { const [f,l] = T[+b.dataset.tech](); playClip(f, l); }); }
+  miniQuiz(root.querySelector(".mqbox"), C.quiz(), doneId);
+}
+
+/* ================= 生徒モード ================= */
+function activeSteps(){ return [{id:"goal", title:"はじめに"}, ...planModules()]; }
+let STEPS = activeSteps();
+let curStep = Math.max(0, Math.min(store.get("step", 0), STEPS.length - 1));
+function setPlan(ids){ plan = cleanPlan(ids); store.set("plan", plan); STEPS = activeSteps(); if (curStep >= STEPS.length) curStep = 0; }
+function planChecks(box, onChange){
+  box.innerHTML = MODULES.map(m => `<label class="${plan.includes(m.id) ? "" : "off"}"><input type="checkbox" data-id="${m.id}" ${plan.includes(m.id) ? "checked" : ""}>
+    <span><b>${m.title}</b>${m.core ? '<span class="core">軸</span>' : ''} <span class="tip">${m.mins}分</span><br><span class="tip">${m.aim}</span></span></label>`).join("");
+  box.querySelectorAll("input").forEach(c => c.onchange = () => {
+    const ids = [...box.querySelectorAll("input:checked")].map(x => x.dataset.id);
+    if (!ids.length){ c.checked = true; return; }
+    setPlan(ids); onChange();
+  });
+}
+let stuCustomOpen = false;
 let done = store.get("done", {});
 let notes = store.get("notes", {feel1:[], feel1txt:"", feel2:[], fav:"", why:"", intro:""});
 function saveNotes(){ store.set("notes", notes); }
@@ -699,7 +963,7 @@ const stuPlayer = makePlayer(document.getElementById("stuPlayer"), {nowLabel:tru
 let stuHide = false;
 
 function renderStepNav(){
-  document.getElementById("steps").innerHTML = STEPS.map((s,i) => `<button class="step ${i===curStep?'on':''} ${done[s.id]?'done':''}" data-i="${i}"><span class="no"><span>${i+1}</span></span><span class="lbl">${s.title}</span></button>`).join("");
+  document.getElementById("steps").innerHTML = STEPS.map((s,i) => `<button class="step ${i===curStep?'on':''} ${done[s.id]?'done':''}" data-i="${i}"><span class="no"><span>${i ? i : "🎯"}</span></span><span class="lbl">${s.title}</span></button>`).join("");
   document.querySelectorAll("#steps .step").forEach(b => b.onclick = () => renderStep(+b.dataset.i));
 }
 function stageHTML(){ return `<div class="stage"><canvas></canvas><div class="badge"></div><div class="hidelbl hidden">場面名はまだひみつ</div><div class="caption"><div class="nm"></div><div class="poem"></div></div></div>`; }
@@ -713,15 +977,34 @@ function navBtns(i){
     ${i > 0 ? `<button class="btn sec" data-nav="${i-1}">← もどる</button>` : '<span></span>'}
     ${i < STEPS.length-1 ? `<button class="btn" data-nav="${i+1}">次へ →</button>` : ''}</div>`;
 }
+function H(i){ const m = STEPS[i]; return `<h2>ステップ${i}　${m.title}</h2>` + goalCard(m); }
 function renderStep(i){
+  i = Math.max(0, Math.min(i, STEPS.length - 1));
   curStep = i; store.set("step", i);
   pause(); stopAt = null; loopSec = -1; tapState = null;
   if (stuScene){ scenes.splice(scenes.indexOf(stuScene), 1); stuScene = null; }
   renderStepNav();
   const s = STEPS[i];
   let html = "";
-  if (s.id === "listen"){
-    html = `<div class="panel"><h2>① まず聴いてみよう</h2>
+  if (s.id === "goal"){
+    const pid = presetOf(plan);
+    html = `<div class="panel"><h2>🎯 はじめに：この学習で身につけること</h2>
+      <div class="axis"><span class="gk">🧭 学びの軸</span>${AXIS}</div>
+      <h3>🔑 使う知識</h3><div>${planKnow().map(k => `<span class="kchip">${k}</span>`).join("")}</div>
+      <h3 style="margin-top:1em">🌱 高まる鑑賞の力</h3>
+      <div class="ablist">${planAbilities().map(a => `<div class="ab"><b>${ABILITIES[a].icon} ${ABILITIES[a].name}</b><br><span class="tip">${ABILITIES[a].desc}</span></div>`).join("")}</div>
+      <h3 style="margin-top:1em">📚 コース</h3>
+      ${planLocked
+        ? `<div class="note">先生が選んだコースで学びます。<button class="smallbtn" id="unlockPlan" style="margin-left:6px">自分で選び直す</button></div>`
+        : `<div class="chips" id="coursePick">${PRESETS.map(p => `<button class="chip ${pid === p.id && !stuCustomOpen ? "on" : ""}" data-p="${p.id}">${p.label.replace("（50分）","")}コース</button>`).join("")}<button class="chip ${pid === "custom" || stuCustomOpen ? "on" : ""}" data-p="custom">自分で選ぶ</button></div>
+           <div class="planck ${pid === "custom" || stuCustomOpen ? "" : "hidden"}" id="customPick"></div>`}
+      <p style="margin:.6em 0 0"><b>このコースのステップ</b>（全${plan.length}ステップ・目安${planMinutes()}分）</p>
+      <ol class="steplist">${planModules().map(m => `<li>${m.title} <span class="tip">（${m.mins}分）</span></li>`).join("")}</ol>
+      ${navBtns(i)}</div>`;
+  } else if (["concerto","instruments","baroque"].includes(s.id)){
+    html = `<div class="panel">${H(i)}<div id="contentBox"></div>${navBtns(i)}</div>`;
+  } else if (s.id === "listen"){
+    html = `<div class="panel">${H(i)}
       <p class="lead">何も知らないまま、まずは曲を<b>最後まで</b>聴いてみましょう。下の ▶ ボタンで再生できます。</p>
       <div class="note">🎧 聴きながら考えよう：どんな景色が見える？ 気分はどう変わる？</div>
       <div id="listenStage"></div>
@@ -731,7 +1014,7 @@ function renderStep(i){
       <textarea id="feel1txt" placeholder="例：鳥が鳴いているみたいなところがあった。とちゅうで急にはげしくなった。"></textarea>
       ${navBtns(i)}</div>`;
   } else if (s.id === "poem"){
-    html = `<div class="panel"><h2>② 詩と音楽をむすびつけよう</h2>
+    html = `<div class="panel">${H(i)}
       <p class="lead">ヴィヴァルディは「春」に<b>ソネット（14行の詩）</b>をつけました。第1楽章には、次のような場面がえがかれています。</p>
       <div id="poemStage"></div>
       <div class="note">📜 詩の行をタップすると、その場面の音楽が流れます。<b>音のどんなところ</b>が詩の場面に合っているか、考えながら聴こう。</div>
@@ -739,12 +1022,12 @@ function renderStep(i){
       <p class="it" style="margin-top:12px">原文（イタリア語）の書き出し：Giunt' è la Primavera e festosetti / La salutan gl' augei con lieto canto…</p>
       ${navBtns(i)}</div>`;
   } else if (s.id === "which"){
-    html = `<div class="panel"><h2>③ 場面あてクイズ</h2>
+    html = `<div class="panel">${H(i)}
       <p class="lead">曲の一部が流れます。どの場面か当ててみよう！ 全部で5問です。</p>
       <div id="quizBox"></div>
       ${navBtns(i)}</div>`;
   } else if (s.id === "form"){
-    html = `<div class="panel"><h2>④ 主題をさがせ！（リトルネロ形式）</h2>
+    html = `<div class="panel">${H(i)}
       <p class="lead">この曲では、はじめに出てくる<b>春の主題</b>が、場面と場面のあいだに何度も<b>もどってきます</b>。このような作り方を<b>リトルネロ形式</b>といいます（リトルネロ＝「もどってくるもの」という意味）。</p>
       <div class="formfig">${SECTIONS.map(s => `<div style="background:${KIND[s.kind].hex};flex-grow:${Math.max(1,(secEnd(SECTIONS.indexOf(s)) - s.t)/10)}">${KIND[s.kind].emoji}<br>${s.kind==="theme" ? "主題" : KIND[s.kind].label}</div>`).join("")}</div>
       <h3>ゲーム：主題がもどってきたらボタンを押そう</h3>
@@ -752,12 +1035,12 @@ function renderStep(i){
       <div id="tapBox"></div>
       ${navBtns(i)}</div>`;
   } else if (s.id === "elem"){
-    html = `<div class="panel"><h2>⑤ 音楽のしくみを見つけよう</h2>
+    html = `<div class="panel">${H(i)}
       <p class="lead">それぞれの場面は、どんな<b>音楽の工夫</b>で表されているのかな？ 場面を聴いて、あてはまるものを選ぼう。</p>
       <div id="elemBox"></div>
       ${navBtns(i)}</div>`;
   } else if (s.id === "write"){
-    html = `<div class="panel"><h2>⑥ 「春」の紹介文を書こう</h2>
+    html = `<div class="panel">${H(i)}
       <p class="lead">学んだことを使って、この曲を知らない人に紹介する文章を書こう。</p>
       <h3>もう一度、最後まで聴いて感じたことば</h3>
       <div class="chips" id="feel2"></div>
@@ -769,6 +1052,8 @@ function renderStep(i){
       <textarea id="why" placeholder="例：雷の場面が好き。合奏のトレモロでゴロゴロ鳴る雷と、独奏ヴァイオリンの速い音階の稲妻が、本当に嵐が来たみたいだから。"></textarea>
       <h3>紹介文</h3>
       <textarea id="intro" style="min-height:150px" placeholder="例：ヴィヴァルディの「春」は、春の主題が何度ももどってくるリトルネロ形式で作られています。主題の間には小鳥の歌や…"></textarea>
+      <h3>ふりかえり：どのくらいできたかな？</h3>
+      <div id="selfEval"></div>
       <div class="btnrow">
         <button class="btn green" id="printMine">🖨 印刷する／PDFで保存</button>
         <button class="btn sec" id="copyMine">📋 文章をコピー</button>
@@ -782,6 +1067,19 @@ function renderStep(i){
   stuMain.querySelectorAll("[data-nav]").forEach(b => b.onclick = () => { markDone(STEPS[curStep].id); renderStep(+b.dataset.nav); window.scrollTo(0,0); });
   setStuHide(s.id === "listen" || s.id === "which" || s.id === "form");
 
+  if (s.id === "goal"){
+    const ub = document.getElementById("unlockPlan");
+    if (ub) ub.onclick = () => { planLocked = false; store.set("planLocked", false); renderStep(0); };
+    const cp = document.getElementById("coursePick");
+    if (cp) cp.querySelectorAll(".chip").forEach(b => b.onclick = () => {
+      const pr = PRESETS.find(p => p.id === b.dataset.p);
+      stuCustomOpen = !pr; if (pr) setPlan(pr.ids);
+      renderStep(0);
+    });
+    const ck = document.getElementById("customPick");
+    if (ck) planChecks(ck, () => { stuCustomOpen = true; renderStep(0); });
+  }
+  if (["concerto","instruments","baroque"].includes(s.id)) renderContent(s.id, document.getElementById("contentBox"), s.id);
   if (s.id === "listen"){
     attachStuScene(document.getElementById("listenStage"));
     chipGroup(document.getElementById("feel1"), FEEL_WORDS, notes.feel1, v => { notes.feel1 = v; saveNotes(); });
@@ -804,6 +1102,10 @@ function renderStep(i){
     chipGroup(document.getElementById("favs"), favOpts, notes.fav ? [notes.fav] : [], v => { notes.fav = v[v.length-1] || ""; saveNotes(); }, true);
     bindText("why","why"); bindText("intro","intro");
     showBA();
+    notes.self = notes.self || {};
+    document.getElementById("selfEval").innerHTML = planAbilities().map(a => `<div class="selfrow"><span class="lbl2">${ABILITIES[a].icon} <b>${ABILITIES[a].name}</b>：${ABILITIES[a].can}</span><span class="chips" style="margin:0" data-a="${a}"></span></div>`).join("");
+    document.querySelectorAll("#selfEval [data-a]").forEach(el => { const a = el.dataset.a;
+      chipGroup(el, ["◎ よくできた","○ できた","△ もう少し"], notes.self[a] ? [notes.self[a]] : [], v => { notes.self[a] = v[0] || ""; saveNotes(); }, true); });
     document.getElementById("printMine").onclick = () => { markDone("write"); printSheet(true); };
     document.getElementById("copyMine").onclick = () => {
       const txt = `【ヴィヴァルディ「春」紹介文】\n${notes.intro}\n\nいちばん好きな場面：${notes.fav}\n理由：${notes.why}`;
@@ -855,7 +1157,7 @@ function startQuiz(box, teacher){
   const render = () => {
     if (n >= qs.length){
       const best = Math.max(score, store.get("quizBest", 0)); if (!teacher) store.set("quizBest", best);
-      box.innerHTML = `<div class="answer big">${teacher ? "クイズ終了！" : `結果：${qs.length}問中 <b>${score}問</b> 正解！ ${score === qs.length ? "🎉 パーフェクト！" : score >= 3 ? "👏 よく聴けています！" : "🌱 ②にもどって場面を聴き直してみよう"}`}</div>
+      box.innerHTML = `<div class="answer big">${teacher ? "クイズ終了！" : `結果：${qs.length}問中 <b>${score}問</b> 正解！ ${score === qs.length ? "🎉 パーフェクト！" : score >= 3 ? "👏 よく聴けています！" : "🌱 場面をもう一度聴き直してみよう"}`}</div>
         <div class="btnrow"><button class="btn" id="qAgain">もう一度</button></div>`;
       box.querySelector("#qAgain").onclick = () => startQuiz(box, teacher);
       if (!teacher && score >= 3) markDone("which");
@@ -976,12 +1278,17 @@ function printSheet(filled){
     <table><tr><th style="width:22%">場面</th><th style="width:38%">詩（ソネット）</th><th>気づいた音楽の工夫</th></tr>
     ${["theme","birds","stream","storm"].map(k => { const s = SECTIONS.find(x => x.kind === k); return `<tr><td>${KIND[k].emoji} ${KIND[k].label}</td><td>${esc(k === "theme" ? "春がやってきた" : s.poem)}</td><td style="height:18mm"></td></tr>`; }).join("")}
     </table>
-    <h3>3. 曲のしくみ（リトルネロ形式）</h3>
-    <p>春の主題は全部で（　　）回出てくる。主題の間にはさまる部分を（　　　　　　）という。</p>
+    <h3>3. 曲のしくみ・知識</h3>
+    ${plan.includes("form") ? "<p>春の主題は全部で（　　）回出てくる。このように主題が何度ももどってくる形式を（　　　　　　）形式という。</p>" : ""}
+    ${plan.includes("concerto") ? "<p>独奏楽器と合奏が競い合い、協力し合う音楽を（　　　　　）という。</p>" : ""}
+    ${plan.includes("instruments") ? "<p>小鳥のさえずりは（　　　　）、雷のゴロゴロは（　　　　）という奏法で表されている。</p>" : ""}
+    ${plan.includes("baroque") ? "<p>ヴィヴァルディは（　　　　　）時代の作曲家。《四季》が出版された1725年ごろ、日本は（　　　）時代だった。</p>" : ""}
     <h3>4. いちばん好きな場面とその理由</h3>
     <div class="box">${N.fav ? "好きな場面：" + esc(N.fav) + "\n" : ""}${esc(N.why)}</div>
     <h3>5. 「春」の紹介文</h3>
-    <div class="box tall">${esc(N.intro)}</div>`;
+    <div class="box tall">${esc(N.intro)}</div>
+    <h3>6. ふりかえり（◎ よくできた ○ できた △ もう少し）</h3>
+    <table>${planAbilities().map(a => `<tr><td>${ABILITIES[a].name}：${ABILITIES[a].can}</td><td style="width:22%">${esc(((N.self || {})[a] || "").slice(0,1))}</td></tr>`).join("")}</table>`;
   setTimeout(() => window.print(), 50);
 }
 
@@ -1012,48 +1319,98 @@ document.addEventListener("fullscreenchange", () => { if (!document.fullscreenEl
 function showTab(t){
   curTab = t; pause(); stopAt = null; tapState = null;
   document.querySelectorAll("#ttabs .tab").forEach(b => b.classList.toggle("on", b.dataset.t === t));
-  ["show","quiz","tap","guide","settings"].forEach(k => document.getElementById("t-" + k).classList.toggle("hidden", k !== t));
+  ["plan","show","know","quiz","tap","guide","settings"].forEach(k => document.getElementById("t-" + k).classList.toggle("hidden", k !== t));
   if (t === "quiz") startQuiz(document.getElementById("tQuiz"), true);
   if (t === "tap") startTap(document.getElementById("tTap"), true);
   if (t === "guide") renderGuide();
+  if (t === "plan") renderPlanTab();
+  if (t === "know") renderKnow(kCur);
   if (t === "settings") renderSettings();
   if (t === "show") requestAnimationFrame(() => { tScene.resize(); drawTimeline(tPlayer); tScene.dirty = true; });
 }
 document.querySelectorAll("#ttabs .tab").forEach(b => b.onclick = () => showTab(b.dataset.t));
 
 function renderGuide(){
+  const L = lessonsOf(planModules()), has = id => plan.includes(id);
   document.getElementById("tGuide").innerHTML = `
-  <h2>📋 指導の流れ（例：2時間扱い）</h2>
-  <p class="lead">中学校第1学年「鑑賞」を想定した例です。学級の実態に合わせて自由に組みかえてください。</p>
-  <div class="note"><b>ねらい</b>：曲想と音楽の構造（リトルネロ形式、独奏と合奏、音色・強弱・旋律などの工夫）との関わりを理解し、ソネットの情景と結びつけながら、よさや美しさを味わって聴く。</div>
-  <h3>第1時　詩の情景と音楽をむすびつける</h3>
-  <table>
-    <tr><th style="width:24%">学習活動</th><th>主な発問・指示</th><th style="width:28%">このアプリで</th></tr>
-    <tr><td>① 通して聴く</td><td>「どんな景色が見えますか？ 気分はどう変わりましたか？」<br>→ 感じたことをワークシート1に書く</td><td>提示画面で <b>🙈場面名をかくす</b> にして通して再生</td></tr>
-    <tr><td>② 作品を知る</td><td>作曲者・《四季》・ソネットについて紹介する</td><td>トップ画面「この曲について」</td></tr>
-    <tr><td>③ 詩と場面をむすぶ</td><td>「この部分は、詩のどの行に合いそう？」「音のどんなところからそう思った？」</td><td>場面名をかくしたまま場面ボタンで再生 → 意見が出たら表示</td></tr>
-    <tr><td>④ 確かめる</td><td>どの場面かクイズで確認する</td><td>❓みんなでクイズ（答えはボタンで表示）</td></tr>
-  </table>
-  <h3>第2時　音楽の構造に気づき、紹介文を書く</h3>
-  <table>
-    <tr><th style="width:24%">学習活動</th><th>主な発問・指示</th><th style="width:28%">このアプリで</th></tr>
-    <tr><td>① 主題さがし</td><td>「最初のメロディーがもどってきたら手を挙げよう」</td><td>🌸主題さがしゲーム（先生が記録）</td></tr>
-    <tr><td>② 形式を知る</td><td>リトルネロ形式・エピソード・独奏と合奏（協奏曲）について確認</td><td>提示画面のタイムライン（色の並び）</td></tr>
-    <tr><td>③ 工夫を見つける</td><td>「小鳥・泉・雷は、どんな音の工夫で表されている？」（音色・音の高さ・強弱・リズム・トリル・トレモロ・音階）</td><td>🔁 場面をくり返す ＋「聴きどころ」</td></tr>
-    <tr><td>④ 紹介文</td><td>「この曲を知らない人に、よさを伝える紹介文を書こう」<br>根拠となる音楽の工夫を入れて書く</td><td>ワークシート（設定タブで印刷）／生徒用モード⑥</td></tr>
-  </table>
+  <h2>📋 指導の流れ（${L.length}時間扱い・目安${planMinutes()}分）</h2>
+  <p class="lead">「🎯 ねらいとプラン」で選んだ内容から自動で作っています（50分授業を想定）。学級の実態に合わせて自由に組みかえてください。</p>
+  <div class="note"><b>学びの軸</b>：${AXIS}</div>
+  ${L.map((ms,k) => `<h3>第${k+1}時（目安${ms.reduce((x,m) => x + m.mins, 0)}分）</h3>
+  <div class="tblwrap"><table>
+    <tr><th style="width:22%">学習活動</th><th>主な発問・指示</th><th style="width:28%">このアプリで</th></tr>
+    ${ms.map(m => `<tr><td><b>${m.act}</b><br><span class="tip">${m.mins}分</span></td><td>${m.ask}<br><span class="tip">めあて：${m.aim}</span></td><td>${m.app}</td></tr>`).join("")}
+  </table></div>`).join("")}
   <h3>場面ごとの聴きどころ</h3>
-  <table><tr><th style="width:24%">場面（開始）</th><th>聴きどころ</th></tr>
+  <div class="tblwrap"><table><tr><th style="width:24%">場面（開始）</th><th>聴きどころ</th></tr>
   ${SECTIONS.map(s => `<tr><td>${KIND[s.kind].emoji} ${s.name}<br><span class="tip">${fmt(s.t)}〜</span></td><td>${s.point}</td></tr>`).join("")}
-  </table>
+  </table></div>
   <h3>生徒がひとりで取り組む場合</h3>
-  <p>画面右上の <b>🧑‍🎓 ひとりで学ぶ</b> を選ぶと、①〜⑥のステップで同じ内容を自分のペースで進められます（家庭学習・タブレット学習・欠席者の補充などに）。書いた内容は端末に保存され、最後に印刷やPDF保存ができます。</p>
+  <p>「🎯 ねらいとプラン」にある<b>生徒用リンク</b>を配ると、生徒の画面も同じ内容のステップになります（家庭学習・タブレット学習・欠席者の補充などに）。書いた内容は端末に保存され、最後に印刷やPDF保存ができます。</p>
   <h3>評価の視点（例）</h3>
   <ul>
-    <li>【知識】曲想と、リトルネロ形式・独奏と合奏・各場面の音楽の工夫との関わりを理解している。</li>
+    <li>【知識】曲想と、${[has("form") && "リトルネロ形式", has("concerto") && "独奏と合奏", (has("elem") || has("instruments")) && "トリル・トレモロなどの奏法", "各場面の音楽の工夫"].filter(Boolean).join("・")}との関わりを理解している。${has("concerto") || has("baroque") ? "また、" + [has("concerto") && "協奏曲というジャンル", has("baroque") && "バロック時代という背景"].filter(Boolean).join("や") + "と、音楽の特徴との関わりを理解している。" : ""}</li>
     <li>【思考・判断・表現】音楽の工夫を根拠にして、曲のよさや美しさを紹介文に書いている。</li>
     <li>【主体的に学習に取り組む態度】情景と音楽の関わりに関心をもち、聴き深めようとしている。</li>
   </ul>`;
+}
+
+const COMMON = ["音色","リズム","速度","旋律","テクスチュア","強弱","形式","音の高さ"];
+function renderPlanTab(){
+  const box = document.getElementById("tPlan"), mods = planModules(), L = lessonsOf(mods), pid = presetOf(plan);
+  const know = planKnow(), ab = planAbilities(), cs = Object.keys(CS_LABEL).filter(c => mods.some(m => m.cs.includes(c)));
+  const usedIn = k => mods.filter(m => m.know.includes(k)).map(m => m.title).join("、");
+  box.innerHTML = `
+    <h2>🎯 ねらいとプラン</h2>
+    <div class="axis"><span class="gk">🧭 学びの軸</span>${AXIS}</div>
+    <h3>① 授業時間に合わせて、学ぶ内容を選ぶ</h3>
+    <div class="chips">${PRESETS.map(p => `<button class="chip ${pid === p.id ? "on" : ""}" data-p="${p.id}">${p.label}</button>`).join("")}<span class="chip ${pid === "custom" ? "on" : ""}" style="cursor:default">カスタム</span></div>
+    <p class="tip" style="margin:0">${(PRESETS.find(p => p.id === pid) || {note:"下のチェックで自由に組み合わせています"}).note}。「軸」の印がついた内容は、学びの軸に直接つながる中心の学習です。</p>
+    <div class="planck" id="tPlanCk"></div>
+    <div class="sumbox"><span>合計 目安${planMinutes()}分</span><span>→ 50分授業で <b>${L.length}時間</b></span></div>
+    <p class="tip" style="margin-top:0">${L.map((ms,k) => `第${k+1}時：${ms.map(m => m.title).join("・")}`).join("<br>")}</p>
+
+    <h3>② どんな知識を使って聴くのか</h3>
+    <div class="tblwrap"><table class="mtx">
+      <tr><th style="width:30%">知識</th><th>使う学習</th></tr>
+      <tr><th colspan="2" style="background:var(--soft)">音楽を形づくっている要素（共通事項）</th></tr>
+      ${know.filter(k => COMMON.includes(k)).map(k => `<tr><td><span class="kchip">${k}</span></td><td style="text-align:left">${usedIn(k)}</td></tr>`).join("")}
+      <tr><th colspan="2" style="background:var(--soft)">用語・背景の知識</th></tr>
+      ${know.filter(k => !COMMON.includes(k)).map(k => `<tr><td><span class="kchip">${k}</span></td><td style="text-align:left">${usedIn(k)}</td></tr>`).join("")}
+    </table></div>
+
+    <h3>③ この題材でどんな鑑賞の力が高まるのか</h3>
+    <div class="tblwrap"><table class="mtx">
+      <tr><th style="min-width:200px">高まる力</th>${mods.map(m => `<th style="font-size:12px">${m.title}</th>`).join("")}</tr>
+      ${Object.keys(ABILITIES).map(a => `<tr style="${ab.includes(a) ? "" : "opacity:.45"}"><td><b>${ABILITIES[a].icon} ${ABILITIES[a].name}</b><br><span class="tip">${ABILITIES[a].desc}</span></td>${mods.map(m => `<td>${m.ab.includes(a) ? '<span class="dot">●</span>' : ""}</td>`).join("")}</tr>`).join("")}
+    </table></div>
+    ${Object.keys(ABILITIES).filter(a => !ab.includes(a)).length ? `<p class="tip">うすく表示された力は、いまのプランではあつかっていません（${Object.keys(ABILITIES).filter(a => !ab.includes(a)).map(a => ABILITIES[a].name).join("・")}）。高めたいときは、その力に●がつく内容を加えてください。</p>` : ""}
+
+    <h3>④ 学習指導要領との関わり（例：中学校 音楽「B 鑑賞」）</h3>
+    <ul>${cs.map(c => `<li>${CS_LABEL[c]}<br><span class="tip">→ ${mods.filter(m => m.cs.includes(c)).map(m => m.title).join("、")}</span></li>`).join("")}</ul>
+
+    <h3>⑤ 生徒に配るリンク</h3>
+    <p class="tip" style="margin-top:0">このリンクを開くと、生徒の画面が<b>このプランのステップ</b>になります（GitHub Pages など、公開したURLで開いたときに使えます）。</p>
+    <div class="btnrow" style="margin-top:4px"><input readonly id="stuLink" style="flex:1;min-width:200px;border:1px solid var(--line);border-radius:10px;padding:8px;background:var(--bg)" value="${esc(studentLink())}"><button class="btn sec" id="copyLink">📋 コピー</button><span class="tip" id="copyLinkMsg"></span></div>`;
+  box.querySelectorAll("[data-p]").forEach(b => b.onclick = () => { setPlan(PRESETS.find(p => p.id === b.dataset.p).ids); renderPlanTab(); });
+  planChecks(box.querySelector("#tPlanCk"), renderPlanTab);
+  box.querySelector("#copyLink").onclick = () => {
+    const el = box.querySelector("#stuLink"); el.select();
+    const ok = () => box.querySelector("#copyLinkMsg").textContent = "コピーしました";
+    if (navigator.clipboard) navigator.clipboard.writeText(el.value).then(ok, () => { try{ document.execCommand("copy"); ok(); }catch(e){} });
+  };
+}
+
+let kCur = "concerto";
+function renderKnow(id){
+  kCur = id; pause(); stopAt = null;
+  document.getElementById("kSel").innerHTML = ["concerto","instruments","baroque"].map(k => `<button class="tab ${k === id ? "on" : ""}" data-k="${k}">${CONTENT[k].title}${plan.includes(k) ? "" : ' <span class="tip">（プラン外）</span>'}</button>`).join("");
+  document.querySelectorAll("#kSel [data-k]").forEach(b => b.onclick = () => renderKnow(b.dataset.k));
+  const body = document.getElementById("kBody");
+  body.innerHTML = `<div id="kInner"></div>`;
+  const inner = document.getElementById("kInner");
+  inner.insertAdjacentHTML("beforebegin", goalCard(MOD[id]));
+  renderContent(id, inner, null);
 }
 
 function renderSettings(){
