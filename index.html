@@ -235,12 +235,13 @@ body.present .tch{max-width:none}
 .phgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:12px;margin:8px 0 14px}
 .ph{margin:0;border:1px solid var(--line);border-radius:14px;overflow:hidden;background:var(--bg);cursor:zoom-in;display:flex;flex-direction:column}
 .phimg{aspect-ratio:4/3;background:color-mix(in srgb,var(--line) 60%,var(--panel));display:flex;align-items:center;justify-content:center}
-.phimg img{width:100%;height:100%;object-fit:cover;display:block}
+.phimg img{width:100%;height:100%;object-fit:cover;display:block;background:#fff}
 .phnone{text-align:center;color:var(--sub);font-size:14px;line-height:1.4}
 .phnone.big{font-size:22px;color:#ccc}
 .ph figcaption{padding:8px 10px;font-size:13px;line-height:1.5}
 .ph figcaption b{font-size:15px}
 .ph figcaption span{color:var(--sub)}
+.phcr{font-size:11px;color:var(--sub);margin-top:4px;opacity:.85}
 #lightbox{position:fixed;inset:0;z-index:100;background:rgba(10,8,6,.97);display:flex;align-items:center;justify-content:center;gap:8px;padding:16px;color:#fff}
 #lightbox.hidden{display:none}
 .lbbody{display:flex;gap:20px;align-items:center;max-width:1400px;width:100%;max-height:100%}
@@ -875,26 +876,26 @@ function miniQuiz(box, qs, doneId){
 /* ---------- 写真（楽器・演奏形態など） ---------- */
 // file: photos フォルダに置く写真の名前。credit: 出典（写真を入れたら書く）
 const PHOTOS = {
-  violin:      {group:"楽器", title:"ヴァイオリン", file:"photos/violin.jpg", credit:"",
+  violin:      {group:"楽器", title:"ヴァイオリン", file:"photos/violin.jpg", credit:"CC0（パブリックドメイン）", web:"https://commons.wikimedia.org/wiki/Special:FilePath/Violin_VL100.png?width=1280", page:"https://commons.wikimedia.org/wiki/File:Violin_VL100.png",
     cap:"弦楽器の中でいちばん小さく、いちばん高い音。あごと肩ではさんで構えます。", look:["4本の弦","弓（毛は馬のしっぽの毛）","あごと肩ではさむ構え方"]},
-  viola:       {group:"楽器", title:"ヴィオラ", file:"photos/viola.jpg", credit:"",
+  viola:       {group:"楽器", title:"ヴィオラ", file:"photos/viola.jpg", credit:"Aethir／パブリックドメイン", web:"https://commons.wikimedia.org/wiki/Special:FilePath/Playing_viola.jpg?width=1280", page:"https://commons.wikimedia.org/wiki/File:Playing_viola.jpg",
     cap:"ヴァイオリンより少し大きく、少し低い中くらいの音。構え方はヴァイオリンと同じです。", look:["ヴァイオリンとの大きさのちがい","やわらかく落ち着いた音"]},
-  cello:       {group:"楽器", title:"チェロ", file:"photos/cello.jpg", credit:"",
+  cello:       {group:"楽器", title:"チェロ", file:"photos/cello.jpg", credit:"パブリックドメイン", web:"https://commons.wikimedia.org/wiki/Special:FilePath/A_Cello_Being_Played.JPG?width=1280", page:"https://commons.wikimedia.org/wiki/File:A_Cello_Being_Played.JPG",
     cap:"いすに座り、楽器をひざの間にはさんで弾きます。低くあたたかい音。", look:["床につける「エンドピン」","座って弾く構え方"]},
-  contrabass:  {group:"楽器", title:"コントラバス", file:"photos/contrabass.jpg", credit:"",
+  contrabass:  {group:"楽器", title:"コントラバス", file:"photos/contrabass.jpg", credit:"Žiga／CC0（パブリックドメイン）", web:"https://commons.wikimedia.org/wiki/Special:FilePath/Kontrabasi.jpg?width=1280", page:"https://commons.wikimedia.org/wiki/File:Kontrabasi.jpg",
     cap:"人の背たけほどもある、いちばん大きく低い音の弦楽器。立つか、高いいすに座って弾きます。", look:["人と比べた大きさ","いちばん低い音を受けもつ"]},
-  harpsichord: {group:"楽器", title:"チェンバロ（ハープシコード）", file:"photos/harpsichord.jpg", credit:"",
+  harpsichord: {group:"楽器", title:"チェンバロ（ハープシコード）", file:"photos/harpsichord.jpg", credit:"Daderot／CC0（パブリックドメイン）　カルロ・グリマルディ作（1697年・イタリア）", web:"https://commons.wikimedia.org/wiki/Special:FilePath/Harpsichord%2C_Carlo_Grimaldi%2C_Messina%2C_1697_-_Germanisches_Nationalmuseum_-_Nuremberg%2C_Germany_-_DSC03278.jpg?width=1280", page:"https://commons.wikimedia.org/wiki/File:Harpsichord%2C_Carlo_Grimaldi%2C_Messina%2C_1697_-_Germanisches_Nationalmuseum_-_Nuremberg%2C_Germany_-_DSC03278.jpg",
     cap:"鍵盤をおすと、中のつめが弦をはじいて音が出ます。ピアノが広まる前の時代の鍵盤楽器です。", look:["2段の鍵盤があるものも多い","ふたの内側のかざり絵","ピアノより細くて「チャラン」とした音"]},
   concerto:    {group:"演奏形態", title:"協奏曲の演奏（独奏と合奏）", file:"photos/concerto.jpg", credit:"",
     cap:"独奏者がオーケストラの前に立ち、合奏とかけ合いながら演奏します。", look:["独奏者の立つ位置","独奏者と合奏の人数のちがい"]},
-  strings:     {group:"演奏形態", title:"弦楽合奏（室内オーケストラ）", file:"photos/strings.jpg", credit:"",
-    cap:"ヴァイオリン・ヴィオラ・チェロ・コントラバスによる合奏。「春」はこの編成にチェンバロが加わります。", look:["楽器ごとのまとまり（並び方）","高い楽器と低い楽器の位置"]},
-  continuo:    {group:"演奏形態", title:"通奏低音（チェンバロと低音楽器）", file:"photos/continuo.jpg", credit:"",
-    cap:"チェンバロとチェロ・コントラバスなどが、低い音と和音で全体を支えます。バロック音楽の「土台」です。", look:["チェンバロの位置","チェロと組になっている"]},
-  vivaldi:     {group:"作曲者と時代", title:"アントニオ・ヴィヴァルディ", file:"photos/vivaldi.jpg", credit:"",
-    cap:"1678年ヴェネツィア生まれ。教会の司祭で、「赤毛の司祭」とよばれました。", look:["バロック時代の服装","手にしている楽器や楽譜"]},
-  venice:      {group:"作曲者と時代", title:"ヴェネツィアの街", file:"photos/venice.jpg", credit:"",
-    cap:"ヴィヴァルディが生まれ育った、運河の街。ピエタ慈善院もこの街にありました。", look:["運河と小舟（ゴンドラ）","教会の建物"]},
+  strings:     {group:"演奏形態", title:"バロック・オーケストラ（弦楽合奏）", file:"photos/strings.jpg", credit:"Mrug／CC BY-SA 4.0", web:"https://commons.wikimedia.org/wiki/Special:FilePath/Venice_Baroque_Orchestra.jpg?width=1280", page:"https://commons.wikimedia.org/wiki/File:Venice_Baroque_Orchestra.jpg",
+    cap:"「ヴェニス・バロック・オーケストラ」の演奏会（2009年）。ヴィヴァルディの故郷の名前をもつ楽団で、弦楽器を中心に、チェンバロなどが加わります。", look:["楽器ごとのまとまり（並び方）","高い楽器と低い楽器の位置","立って演奏している人がいるか"]},
+  continuo:    {group:"演奏形態", title:"通奏低音（チェロとチェンバロ）", file:"photos/continuo.jpg", credit:"テル・ボルフ《チェロとチェンバロの合奏》（17世紀）／ワルシャワ国立美術館／パブリックドメイン", web:"https://commons.wikimedia.org/wiki/Special:FilePath/Gerard_ter_Borch_II_-_Concert_for_cello_and_harpsichord_-_M.Ob.2142_MNW_-_National_Museum_in_Warsaw.jpg?width=1280", page:"https://commons.wikimedia.org/wiki/File:Gerard_ter_Borch_II_-_Concert_for_cello_and_harpsichord_-_M.Ob.2142_MNW_-_National_Museum_in_Warsaw.jpg",
+    cap:"17世紀オランダの絵。チェロとチェンバロがいっしょに演奏しています。この2つの楽器は、低い音と和音で全体を支える「通奏低音」の代表的な組み合わせです。", look:["チェンバロをひく人とチェロをひく人","2人が見ているもの（楽譜）","17世紀の服装や部屋のようす"]},
+  vivaldi:     {group:"作曲者と時代", title:"アントニオ・ヴィヴァルディ", file:"photos/vivaldi.jpg", credit:"作者不明《ヴィヴァルディとされる肖像》（1723年ごろ）／ボローニャ国際音楽博物館／パブリックドメイン", web:"https://commons.wikimedia.org/wiki/Special:FilePath/Vivaldi.jpg?width=1280", page:"https://commons.wikimedia.org/wiki/File:Vivaldi.jpg",
+    cap:"1678年ヴェネツィア生まれ。教会の司祭で、「赤毛の司祭」とよばれました。（この肖像画は、ヴィヴァルディを描いたものと考えられています）", look:["バロック時代の服装","手にしている楽器や楽譜"]},
+  venice:      {group:"作曲者と時代", title:"ヴィヴァルディのころのヴェネツィア", file:"photos/venice.jpg", credit:"カナレット《リーヴァ・デッリ・スキアヴォーニの眺め》（18世紀）／トレド美術館／パブリックドメイン", web:"https://commons.wikimedia.org/wiki/Special:FilePath/Giovanni_Antonio_Canal%2C_called_Canaletto_-_View_of_the_Riva_degli_Schiavoni%2C_Venice_-_Google_Art_Project.jpg?width=1280", page:"https://commons.wikimedia.org/wiki/File:Giovanni_Antonio_Canal%2C_called_Canaletto_-_View_of_the_Riva_degli_Schiavoni%2C_Venice_-_Google_Art_Project.jpg",
+    cap:"ヴィヴァルディと同じ時代の画家カナレットが描いた、ヴェネツィアの海沿いの通り。ヴィヴァルディが音楽を教えたピエタ慈善院は、この通りに面していました。", look:["運河と小舟（ゴンドラ）","海沿いに並ぶ建物","18世紀の人々のようす"]},
 };
 const PHOTO_IDS = Object.keys(PHOTOS);
 
@@ -910,8 +911,10 @@ const photoSrc = {};   // id -> {src, own}
 async function resolvePhoto(id){
   const own = await photoDB.get(id);
   if (own) return photoSrc[id] = {src:own, own:true};
-  const ok = await new Promise(res => { const im = new Image(); im.onload = () => res(true); im.onerror = () => res(false); im.src = PHOTOS[id].file; });
-  return photoSrc[id] = ok ? {src:PHOTOS[id].file, own:false} : {src:null, own:false};
+  const tryLoad = u => new Promise(res => { if (!u) return res(false); const im = new Image(); im.onload = () => res(true); im.onerror = () => res(false); im.src = u; });
+  if (await tryLoad(PHOTOS[id].file)) return photoSrc[id] = {src:PHOTOS[id].file, own:false, local:true};
+  if (await tryLoad(PHOTOS[id].web)) return photoSrc[id] = {src:PHOTOS[id].web, own:false};
+  return photoSrc[id] = {src:null, own:false};
 }
 function photoFig(id, size=""){
   const P = PHOTOS[id];
@@ -923,12 +926,12 @@ async function fillPhotos(root){
   const figs = [...root.querySelectorAll("figure[data-ph]")];
   for (const f of figs){
     const id = f.dataset.ph, r = photoSrc[id] || await resolvePhoto(id), box = f.querySelector(".phimg");
-    if (r.src){ box.innerHTML = `<img src="${r.src}" alt="${PHOTOS[id].title}" loading="lazy">`; }
+    if (r.src){ box.innerHTML = `<img src="${r.src}" alt="${PHOTOS[id].title}" loading="lazy">`; const c = creditOf(id); if (c && !f.querySelector(".phcr")) f.querySelector("figcaption").insertAdjacentHTML("beforeend", `<div class="phcr">写真：${esc(c)}</div>`); }
     else box.innerHTML = `<div class="phnone">📷<br>写真を準備中<br><small>${PHOTOS[id].title}</small></div>`;
     f.onclick = () => openLightbox(id, figs.map(x => x.dataset.ph));
   }
 }
-function creditOf(id){ const r = photoSrc[id]; if (r && r.own) return "先生が用意した写真"; return r && r.src ? (PHOTOS[id].credit || "") : ""; }
+function creditOf(id){ const r = photoSrc[id]; if (r && r.own) return "先生が用意した写真"; return r && r.src && !r.local ? (PHOTOS[id].credit || "") + "（Wikimedia Commons）" : ""; }
 
 /* 大きく見る（授業で映す） */
 let lbList = [], lbIdx = 0;
@@ -943,7 +946,7 @@ async function showLb(){
   lb.querySelector(".lbimg").innerHTML = r.src ? `<img src="${r.src}" alt="${P.title}">` : `<div class="phnone big">📷<br>写真を準備中</div>`;
   lb.querySelector(".lbtxt").innerHTML = `<div class="lbt">${P.title}</div><div>${P.cap}</div>
     <div class="lblook"><b>👀 ここを見よう</b><ul>${P.look.map(x => `<li>${x}</li>`).join("")}</ul></div>
-    <div class="tip">${creditOf(id) ? "写真：" + esc(creditOf(id)) : ""}</div>
+    <div class="tip">${creditOf(id) ? "写真：" + esc(creditOf(id)) + (photoSrc[id] && !photoSrc[id].own && P.page ? ` <a href="${P.page}" target="_blank" rel="noopener" style="color:#9cf">出典ページ</a>` : "") : ""}</div>
     <div class="tip">${lbIdx + 1} / ${lbList.length}</div>`;
   lb.querySelector(".lbprev").style.visibility = lbIdx > 0 ? "" : "hidden";
   lb.querySelector(".lbnext").style.visibility = lbIdx < lbList.length - 1 ? "" : "hidden";
@@ -969,6 +972,7 @@ async function renderPhotoTab(){
     ${groups.map(g => `<h3>${g}</h3><div class="phgrid">${PHOTO_IDS.filter(id => PHOTOS[id].group === g).map(id => `<div>${photoFig(id)}
       <div class="btnrow" style="margin-top:4px;gap:6px"><label class="smallbtn" style="cursor:pointer">🖼 写真を変える<input type="file" accept="image/*" data-up="${id}" hidden></label><button class="smallbtn hidden" data-reset="${id}">元にもどす</button></div></div>`).join("")}</div>`).join("")}
     <div class="note" style="margin-top:16px"><b>写真の差しかえについて</b><br>
+    写真は、ネットにつながっているときに <b>Wikimedia Commons</b>（自由に使える写真のサイト）から読み込みます。ネットにつながらない教室では、写真を <code>photos</code> フォルダに入れておくと確実です。<br>
     「🖼 写真を変える」で入れた写真は、<b>この端末のブラウザだけ</b>に保存されます（授業で映す先生の端末向け）。<br>
     生徒の端末にも同じ写真を出したいときは、写真を <code>photos</code> フォルダに次の名前で入れて公開してください：<br>
     <span class="tip">${PHOTO_IDS.map(id => `${PHOTOS[id].file.replace("photos/","")}（${PHOTOS[id].title}）`).join("、")}</span><br>
