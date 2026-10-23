@@ -31,7 +31,7 @@ h1,h2,h3{line-height:1.35;margin:0 0 .5em}
 .hidden{display:none!important}
 
 /* ---------- header ---------- */
-header.top{display:flex;align-items:center;gap:12px;padding:10px 16px;border-bottom:1px solid var(--line);background:var(--panel);position:sticky;top:0;z-index:20}
+header.top{display:flex;align-items:center;gap:12px;padding:0 16px;height:56px;box-sizing:border-box;border-bottom:1px solid var(--line);background:var(--panel);position:sticky;top:0;z-index:20}
 header.top .logo{font-weight:800;font-size:18px;white-space:nowrap;cursor:pointer}
 header.top .logo small{font-weight:600;color:var(--sub);font-size:13px;margin-left:6px}
 header.top .sp{flex:1}
@@ -55,6 +55,8 @@ header.top .sp{flex:1}
 
 /* ---------- scene / player ---------- */
 .stage{position:relative;border-radius:16px;overflow:hidden;background:#cfe9ff;aspect-ratio:16/8;box-shadow:var(--shadow)}
+#teacher .stage{aspect-ratio:16/7.2}
+body.present #teacher .stage{aspect-ratio:auto;height:calc(100dvh - 190px)}
 .stage canvas{width:100%;height:100%;display:block}
 .stage .caption{position:absolute;left:0;right:0;bottom:0;padding:12px 16px;background:linear-gradient(transparent,rgba(0,0,0,.6));color:#fff}
 .stage .caption .nm{font-weight:800;font-size:clamp(18px,3vw,30px);text-shadow:0 1px 4px rgba(0,0,0,.5)}
@@ -74,27 +76,75 @@ header.top .sp{flex:1}
 .legend{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:13px;color:var(--sub);margin-top:6px}
 .legend i{display:inline-block;width:12px;height:12px;border-radius:3px;margin-right:4px;vertical-align:-1px}
 
-.secbtns{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
-.secbtn{border:2px solid transparent;border-radius:10px;padding:4px 10px;font-size:14px;background:var(--bg);border-color:var(--line)}
+.secbtns{display:flex;flex-wrap:wrap;gap:4px;margin-top:6px}
+.secbtn{border:2px solid transparent;border-radius:10px;padding:2px 8px;font-size:13px;background:var(--bg);border-color:var(--line)}
 .secbtn .n{font-weight:800;margin-right:4px}
 .secbtn.cur{border-color:var(--ink);font-weight:700}
 
 /* ---------- student layout ---------- */
-.stu{display:grid;grid-template-columns:230px 1fr;gap:18px;max-width:1200px;margin:0 auto;padding:16px 16px 190px}
-.steps{position:sticky;top:70px;align-self:start;display:flex;flex-direction:column;gap:6px}
+.stu{display:grid;grid-template-columns:230px 1fr;gap:18px;max-width:1200px;margin:0 auto;padding:12px 16px 0;box-sizing:border-box;height:calc(100dvh - 56px);overflow:hidden}
+.steps{display:flex;flex-direction:column;gap:6px;overflow:auto;padding-bottom:170px}
 .step{display:flex;align-items:center;gap:8px;text-align:left;border:1px solid var(--line);background:var(--panel);border-radius:12px;padding:9px 12px;font-size:15px}
 .step .no{width:26px;height:26px;border-radius:50%;background:var(--line);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:13px;flex:none}
 .step.on{border-color:var(--accent);background:var(--soft)}
 .step.done .no{background:var(--accent2);color:#fff}
 .step.done .no::after{content:"✓"}
 .step.done .no span{display:none}
-.main{min-width:0}
-.panel{background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:22px;box-shadow:var(--shadow);margin-bottom:16px}
-.panel h2{font-size:24px}
+.main{min-width:0;overflow:auto;padding-bottom:130px;scrollbar-width:thin}
+#student .stage{aspect-ratio:16/7}
+.split{display:grid;grid-template-columns:1fr;gap:12px}
+@media (min-width:1000px){ .split{grid-template-columns:1fr 1fr;align-items:start} .split .stage{aspect-ratio:16/10} .split h3:first-child{margin-top:0} }
+.tapbig{padding:14px;font-size:22px}
+.elopt{padding:6px 8px;font-size:14px}
+.elgrid{gap:6px}
+.formfig{margin:8px 0}
+.formfig div{padding:4px 2px;font-size:11px}
+.tipcard .think4 .th{font-size:12.5px}
+.tipcard .chips.sm .chip{font-size:12px;padding:2px 8px}
+.tipcard .chips{gap:4px;margin:4px 0}
+.tipcard .think4 textarea{font-size:13px;padding:4px 6px}
+.selfrow{padding:4px 0}
+.lead{font-size:15px;margin-top:-.2em;margin-bottom:.6em}
+.note{padding:8px 12px;margin:8px 0;font-size:14px}
+.chips{gap:6px;margin:6px 0}
+.chip{padding:3px 11px;font-size:14px}
+textarea{min-height:72px}
+.tipcard{padding:12px 14px}
+.tipcard .think4{grid-template-columns:repeat(auto-fit,minmax(230px,1fr))}
+.tipcard .think4 .th{padding:6px 8px;font-size:13px}
+.tipcard .tipbody{font-size:15px}
+.tiphead h3{font-size:18px}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:14px 18px;box-shadow:var(--shadow);margin-bottom:8px}
+.panel h2{font-size:21px;margin-bottom:.25em}
+.panel h3{font-size:18px}
+/* ページ送り */
+.pgnav{display:flex;align-items:center;gap:8px;margin:0 0 6px}
+.pgbtn{width:36px;height:36px;border-radius:50%;border:1px solid var(--line);background:var(--bg);font-size:20px;line-height:1;flex:none}
+.pgbtn:disabled{opacity:.25}
+.pgdots{flex:1;display:flex;gap:5px;flex-wrap:wrap;justify-content:center}
+.pgdot{min-width:30px;height:30px;border-radius:999px;border:1px solid var(--line);background:var(--bg);font-size:13px;padding:0 9px;white-space:nowrap}
+.pgdot.on{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.pgpage > h3:first-child{margin-top:0}
+.h2row{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.h2row h2{flex:1;margin:0}
+.navmini{display:flex;gap:6px}
+.navmini .btn{padding:6px 14px;font-size:14px;border-radius:10px}
+.linkbtn{background:none;border:none;color:var(--accent);font-size:13px;padding:0;text-decoration:underline;cursor:pointer}
+.goalcard{padding:6px 12px;margin:4px 0 8px;gap:4px;font-size:13.5px}
+.goalcard .goalmore{display:flex;flex-direction:column;gap:4px}
+details.keys summary{cursor:pointer;font-weight:700;font-size:14px;list-style:none}
+details.keys summary::-webkit-details-marker{display:none}
+details.keys{font-size:13px;color:var(--sub)}
 .lead{color:var(--sub);margin-top:-.3em}
 .bottomplayer{position:fixed;left:0;right:0;bottom:0;z-index:15;padding:8px 16px calc(8px + env(safe-area-inset-bottom));background:color-mix(in srgb,var(--bg) 85%,transparent);backdrop-filter:blur(8px);border-top:1px solid var(--line)}
-.bottomplayer .player{max-width:1200px;margin:0 auto}
-.nowsec{font-weight:700;font-size:15px;margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.bottomplayer .player{max-width:1200px;margin:0 auto;padding:6px 12px;display:flex;flex-wrap:wrap;align-items:center;gap:4px 14px}
+.bottomplayer .prow:first-of-type{flex:1 1 420px;order:1}
+.bottomplayer .prow + .prow{margin-top:0!important;flex:0 0 auto;order:2;gap:4px!important}
+.bottomplayer .nowsec{order:3;flex:0 1 auto;margin:0;font-size:13px}
+.bottomplayer .tl{height:44px}
+.bottomplayer .playbtn{width:44px;height:44px;font-size:18px}
+.bottomplayer .smallbtn{padding:3px 9px;font-size:13px}
+.nowsec{font-weight:700;font-size:14px;margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 
 .chips{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0}
 .chip{border:1px solid var(--line);background:var(--bg);border-radius:999px;padding:5px 13px;font-size:15px}
@@ -107,8 +157,8 @@ textarea{width:100%;min-height:96px;border:1px solid var(--line);border-radius:1
 .note{background:var(--soft);border-radius:12px;padding:12px 14px;margin:12px 0;font-size:15px}
 .tip{font-size:14px;color:var(--sub)}
 
-.poemlist{display:flex;flex-direction:column;gap:8px}
-.poemline{border-left:6px solid var(--line);padding:6px 12px;border-radius:6px;background:var(--bg);cursor:pointer}
+.poemlist{display:flex;flex-direction:column;gap:5px}
+.poemline{border-left:6px solid var(--line);padding:4px 10px;border-radius:6px;background:var(--bg);cursor:pointer;font-size:15px;line-height:1.5}
 .poemline .t{font-size:13px;color:var(--sub)}
 .poemline.cur{background:var(--soft)}
 .it{font-size:13px;color:var(--sub);font-style:italic}
@@ -136,9 +186,10 @@ textarea{width:100%;min-height:96px;border:1px solid var(--line);border-radius:1
 .formfig div{padding:6px 4px;border-radius:8px;text-align:center;font-size:12px;font-weight:700;color:#222;flex:1 1 60px;min-width:56px}
 
 /* ---------- teacher ---------- */
-.tch{max-width:1300px;margin:0 auto;padding:12px 16px 40px}
-.tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px}
-.tab{border:1px solid var(--line);background:var(--panel);border-radius:12px;padding:7px 14px;font-size:15px}
+.tch{max-width:1300px;margin:0 auto;padding:12px 16px 20px;height:calc(100dvh - 56px);overflow:auto;scrollbar-width:thin;box-sizing:border-box}
+body.present .tch{height:100dvh}
+.tabs{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:10px}
+.tab{border:1px solid var(--line);background:var(--panel);border-radius:12px;padding:5px 12px;font-size:14px}
 .tab.on{background:var(--ink);color:var(--bg);border-color:var(--ink)}
 .tgrid{display:grid;grid-template-columns:1fr 320px;gap:14px}
 .tside{display:flex;flex-direction:column;gap:12px}
@@ -161,8 +212,11 @@ body.present .tgrid{grid-template-columns:1fr}
 body.present .tch{max-width:none}
 
 @media (max-width:860px){
-  .stu{grid-template-columns:1fr;padding-bottom:200px}
-  .steps{position:static;flex-direction:row;overflow-x:auto;padding-bottom:4px}
+  .stu{grid-template-columns:1fr;grid-template-rows:auto 1fr;gap:8px}
+  .steps{flex-direction:row;overflow-x:auto;overflow-y:hidden;padding-bottom:4px}
+  .main{padding-bottom:150px}
+  .bottomplayer .nowsec{display:none}
+  .bottomplayer .prow:first-of-type{flex-basis:100%}
   .step{flex:none}
   .step .lbl{display:none}
   .step.on .lbl{display:inline}
@@ -189,7 +243,7 @@ body.present .tch{max-width:none}
 .ablist{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:8px}
 .ab{border:1px solid var(--line);border-radius:12px;padding:8px 12px;background:var(--bg)}
 .steplist{margin:6px 0;padding-left:1.4em}
-.planck{display:flex;flex-direction:column;gap:6px;margin:8px 0}
+.planck{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:6px;margin:8px 0}
 .planck label{display:flex;gap:10px;align-items:flex-start;border:1px solid var(--line);border-radius:12px;padding:8px 12px;background:var(--bg);cursor:pointer}
 .planck label.off{opacity:.6}
 .planck input{margin-top:6px;width:18px;height:18px;flex:none}
@@ -234,7 +288,7 @@ body.present .tch{max-width:none}
 /* ---------- tips / think ---------- */
 .tchip,.thchip{display:inline-block;border-radius:999px;padding:1px 10px;margin:2px 4px 2px 0;font-size:13px;background:color-mix(in srgb,var(--birds) 22%,var(--panel));border:1px solid color-mix(in srgb,var(--birds) 45%,var(--line))}
 .thchip{background:color-mix(in srgb,var(--solo) 18%,var(--panel));border-color:color-mix(in srgb,var(--solo) 45%,var(--line))}
-.tipcard{margin-top:14px;border-left:8px solid var(--birds)}
+.tipcard{margin-top:0;border-left:8px solid var(--birds)}
 .tiphead{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
 .tiphead h3{margin:0;font-size:20px}
 .elbadge{background:var(--ink);color:var(--bg);border-radius:8px;padding:2px 10px;font-size:13px;font-weight:700}
@@ -368,8 +422,7 @@ body.present .tch{max-width:none}
         </div>
         <div class="tside">
           <div class="card">
-            <h3>見せ方</h3>
-            <div class="btnrow" style="margin-top:4px">
+            <div class="btnrow" style="margin-top:0">
               <button class="smallbtn" id="tHide">🙈 場面名をかくす</button>
               <button class="smallbtn" id="tPoem">📜 詩を表示</button>
               <button class="smallbtn" id="tFull">⛶ 大きく映す</button>
@@ -379,12 +432,11 @@ body.present .tch{max-width:none}
             <h3>いまの場面の聴きどころ</h3>
             <div id="tPoint" style="font-size:15px"></div>
           </div>
-          <div class="card keys">
-            <b>キーボード操作</b><br>
+          <details class="keys"><summary>⌨ キーボード操作 ▾</summary>
             <kbd>Space</kbd> 再生/一時停止　<kbd>←</kbd><kbd>→</kbd> 前/次の場面<br>
             <kbd>1</kbd>〜<kbd>9</kbd>,<kbd>0</kbd> 場面へジャンプ　<kbd>L</kbd> 場面をくり返す<br>
             <kbd>H</kbd> 場面名をかくす　<kbd>F</kbd> 大きく映す（<kbd>Esc</kbd>でもどる）
-          </div>
+          </details>
         </div>
       </div>
     </div>
@@ -644,7 +696,8 @@ function updatePlayers(){
     }
   }
 }
-window.addEventListener("resize", () => { players.forEach(drawTimeline); scenes.forEach(sc => sc.resize()); });
+function fitBottom(){ const bp = document.querySelector(".bottomplayer"), m = document.querySelector("#student .main"), st = document.querySelector("#student .steps"); if (!bp || !m) return; const h = bp.offsetHeight + 6; m.style.paddingBottom = h + "px"; if (st) st.style.paddingBottom = window.innerWidth > 860 ? h + "px" : "4px"; }
+window.addEventListener("resize", () => { players.forEach(drawTimeline); scenes.forEach(sc => sc.resize()); fitBottom(); });
 
 /* ================= 情景アニメーション ================= */
 const scenes = [];
@@ -791,7 +844,7 @@ function setMode(m){
   Object.entries(views).forEach(([k,el]) => el.classList.toggle("hidden", k !== m));
   document.querySelectorAll(".modebtn").forEach(b => b.classList.toggle("on", b.dataset.mode === m));
   document.body.classList.remove("present");
-  if (m === "student") renderStep(curStep);
+  if (m === "student"){ renderStep(curStep); requestAnimationFrame(fitBottom); }
   if (m === "teacher") showTab(curTab);
   store.set("mode", m);
   requestAnimationFrame(() => { players.forEach(drawTimeline); scenes.forEach(sc => { sc.resize(); sc.dirty = true; }); });
@@ -874,13 +927,49 @@ function studentLink(){ return location.href.split(/[?#]/)[0] + "?mode=student&p
 
 function goalCard(m){
   return `<div class="goalcard">
-    <div><span class="gk">🎯 めあて</span>${m.aim}</div>
+    <div><span class="gk">🎯 めあて</span>${m.aim} <button class="linkbtn" data-more>くわしく ▾</button></div>
+    <div class="goalmore hidden">
     <div><span class="gk">🔑 使う知識</span>${m.know.length ? m.know.map(k => `<span class="kchip">${k}</span>`).join("") : '<span class="tip">まだ知識は使わず、感じたままを大切に</span>'}</div>
     ${(m.tips || []).length ? `<div><span class="gk">🎧 使うコツ</span>${m.tips.map(tipChip).join("")}</div>` : ""}
     ${(m.think || []).length ? `<div><span class="gk">💭 考え方</span>${m.think.map(thinkChip).join("")}</div>` : ""}
     <div><span class="gk">🌱 高まる力</span>${m.ab.map(a => `<span class="achip">${ABILITIES[a].icon} ${ABILITIES[a].name}</span>`).join("")}</div>
+    </div>
   </div>`;
 }
+/* ---------- ページ送り：長い内容を1画面ずつ見せる ---------- */
+const CIRC = "①②③④⑤⑥⑦⑧⑨⑩";
+function makePager(container, groups, opts={}){
+  const key = opts.key; let i = key ? Math.min(store.get("pg:" + key, 0) || 0, groups.length - 1) : 0;
+  const nav = document.createElement("div"); nav.className = "pgnav";
+  const page = document.createElement("div"); page.className = "pgpage";
+  container.innerHTML = ""; container.append(nav, page);
+  const show = n => {
+    i = Math.max(0, Math.min(groups.length - 1, n)); if (key) store.set("pg:" + key, i);
+    page.replaceChildren(...groups[i].nodes);
+    nav.innerHTML = `<button class="pgbtn" data-d="-1" ${i === 0 ? "disabled" : ""} aria-label="前へ">‹</button><div class="pgdots">${groups.map((g,k) => `<button class="pgdot ${k === i ? "on" : ""}" data-i="${k}" title="${esc(g.title || "")}">${g.short || (k+1)}</button>`).join("")}</div><button class="pgbtn" data-d="1" ${i === groups.length - 1 ? "disabled" : ""} aria-label="次へ">›</button>`;
+    nav.querySelectorAll("[data-d]").forEach(b => b.onclick = () => show(i + +b.dataset.d));
+    nav.querySelectorAll("[data-i]").forEach(b => b.onclick = () => show(+b.dataset.i));
+    const sc = container.closest(".main,.tch"); if (sc) sc.scrollTop = 0;
+    if (opts.onShow) opts.onShow(i);
+  };
+  show(i); return {show, get index(){ return i; }};
+}
+function shortOf(title, k){ const c = (title || "").trim()[0]; const n = CIRC.indexOf(c); return n >= 0 ? CIRC[n] : String(k + 1); }
+function pageByH3(root, key, firstTitle){
+  const groups = []; let cur = {title:firstTitle || "はじめに", nodes:[]};
+  [...root.childNodes].forEach(n => { if (n.nodeType === 1 && n.tagName === "H3"){ if (cur.nodes.some(x => x.nodeType === 1)) groups.push(cur); cur = {title:n.textContent.trim(), nodes:[n]}; } else cur.nodes.push(n); });
+  if (cur.nodes.some(x => x.nodeType === 1)) groups.push(cur);
+  if (groups.length < 2) return null;
+  groups.forEach((g,k) => g.short = shortOf(g.title, k));
+  return makePager(root, groups, {key});
+}
+function pageBySelector(root, sel, key, labels){
+  const els = [...root.querySelectorAll(":scope > " + sel)]; if (els.length < 2) return null;
+  const groups = els.map((el,k) => ({title:el.dataset.title || "", nodes:[el], short:(labels && labels[k]) || el.dataset.short || String(k+1)}));
+  return makePager(root, groups, {key});
+}
+document.addEventListener("click", e => { const b = e.target.closest("[data-more]"); if (!b) return; const m = b.closest(".goalcard").querySelector(".goalmore"); m.classList.toggle("hidden"); b.textContent = m.classList.contains("hidden") ? "くわしく ▾" : "とじる ▴"; });
+
 function secT(kind, nth=0){ const l = SECTIONS.filter(s => s.kind === kind); return (l[nth] || l[0] || SECTIONS[0]).t; }
 
 /* ================= 鑑賞のコツ（知識）と 4つのステップ（思考・判断・表現） ================= */
@@ -981,15 +1070,16 @@ function checkTipsDone(){ const n = notes.tips || {}; if (Object.values(n).filte
 function renderTipsTab(){
   document.getElementById("tTips").innerHTML = `
     <h2>🎧 鑑賞のコツ（こう聴くと、曲の楽しみ方がよくわかる）</h2>
-    <p class="lead">クラスで共有する「聴き方のコツ」です。コツを<b>知識</b>として教え、下の<b>4つのステップ</b>で問いかけると、思考・判断・表現の活動になります。</p>
-    <div class="defbox">
-      <div><b>📘 知識</b>＝鑑賞のコツ。「このように聴くと、曲の楽しみ方がよくわかる」と教えられるもの。</div>
-      <div><b>💭 思考・判断・表現</b>＝${THINK_DEF}。</div>
-    </div>
+    <p class="tip" style="margin-top:0"><b>📘 知識</b>＝鑑賞のコツ（教えられるもの）　<b>💭 思考・判断・表現</b>＝4つのステップで聴く力</p>
+    <div id="tipPages">
+    <div class="pgsec" data-title="4つのステップ" data-short="💭">
     <div class="think4 big">${THINK.map((s,i) => `<div class="th"><div class="thq">${i+1} ${s.icon} ${s.name}</div><div><b>「${s.q}」</b></div><div class="tip">${s.desc}</div></div>`).join("")}</div>
-    <p class="tip">いまのプランで使うコツには ★ がついています。カードの「▶ 聴いてみる」で、そのコツがいちばん分かりやすい部分が流れます。</p>
-    ${TIPS.map(t => `<div style="position:relative">${planTips().includes(t.id) ? '<span class="star">★ このプランで使う</span>' : ""}${tipCard(t, {teacher:true})}</div>`).join("")}`;
+    <p class="tip">右の › で、コツを1つずつ映せます（いまのプランで使うコツには ★）。カードの「▶ 聴いてみる」で、そのコツがいちばん分かりやすい部分が流れます。</p>
+    </div>
+    ${TIPS.map(t => `<div class="pgsec" data-title="${t.name}" data-short="${t.icon}" style="position:relative">${planTips().includes(t.id) ? '<span class="star">★ このプランで使う</span>' : ""}${tipCard(t, {teacher:true})}</div>`).join("")}
+    </div>`;
   bindTipCards(document.getElementById("tTips"), true);
+  pageBySelector(document.getElementById("tipPages"), ".pgsec", "ttips");
 }
 /* ---------- 小さな確認クイズ ---------- */
 function miniQuiz(box, qs, doneId){
@@ -1268,11 +1358,11 @@ function attachStuScene(container, opts={}){
   stuScene = makeScene(container.querySelector(".stage"), {hideNames:() => stuHide, ...opts});
 }
 function navBtns(i){
-  return `<div class="btnrow" style="justify-content:space-between">
-    ${i > 0 ? `<button class="btn sec" data-nav="${i-1}">← もどる</button>` : '<span></span>'}
+  return `<div class="navmini">
+    ${i > 0 ? `<button class="btn sec" data-nav="${i-1}">← もどる</button>` : ''}
     ${i < STEPS.length-1 ? `<button class="btn" data-nav="${i+1}">次へ →</button>` : ''}</div>`;
 }
-function H(i){ const m = STEPS[i]; return `<h2>ステップ${i}　${m.title}</h2>` + goalCard(m); }
+function H(i){ const m = STEPS[i]; return `<div class="h2row"><h2>ステップ${i}　${m.title}</h2>${navBtns(i)}</div>` + goalCard(m); }
 function renderStep(i){
   i = Math.max(0, Math.min(i, STEPS.length - 1));
   curStep = i; store.set("step", i);
@@ -1283,44 +1373,43 @@ function renderStep(i){
   let html = "";
   if (s.id === "goal"){
     const pid = presetOf(plan);
-    html = `<div class="panel"><h2>🎯 はじめに：この学習で身につけること</h2>
+    html = `<div class="panel"><div class="h2row"><h2>🎯 はじめに：この学習で身につけること</h2>${navBtns(i)}</div>
       <div class="axis"><span class="gk">🧭 学びの軸</span>${AXIS}</div>
       <h3>🔑 使う知識</h3><div>${planKnow().map(k => `<span class="kchip">${k}</span>`).join("")}</div>
-      <h3 style="margin-top:1em">🌱 高まる鑑賞の力</h3>
-      <div class="ablist">${planAbilities().map(a => `<div class="ab"><b>${ABILITIES[a].icon} ${ABILITIES[a].name}</b><br><span class="tip">${ABILITIES[a].desc}</span></div>`).join("")}</div>
-      <h3 style="margin-top:1em">📚 コース</h3>
+      <h3 style="margin-top:.8em">🌱 高まる鑑賞の力</h3>
+      <div>${planAbilities().map(a => `<span class="achip" title="${ABILITIES[a].desc}">${ABILITIES[a].icon} ${ABILITIES[a].name}</span>`).join("")}</div>
+      <h3 style="margin-top:.8em">📚 コース</h3>
       ${planLocked
         ? `<div class="note">先生が選んだコースで学びます。<button class="smallbtn" id="unlockPlan" style="margin-left:6px">自分で選び直す</button></div>`
         : `<div class="chips" id="coursePick">${PRESETS.map(p => `<button class="chip ${pid === p.id && !stuCustomOpen ? "on" : ""}" data-p="${p.id}">${p.label.replace("（50分）","")}コース</button>`).join("")}<button class="chip ${pid === "custom" || stuCustomOpen ? "on" : ""}" data-p="custom">自分で選ぶ</button></div>
            <div class="planck ${pid === "custom" || stuCustomOpen ? "" : "hidden"}" id="customPick"></div>`}
-      <p style="margin:.6em 0 0"><b>このコースのステップ</b>（全${plan.length}ステップ・目安${planMinutes()}分）</p>
-      <ol class="steplist">${planModules().map(m => `<li>${m.title} <span class="tip">（${m.mins}分）</span></li>`).join("")}</ol>
-      ${navBtns(i)}</div>`;
+      <p class="tip" style="margin:.6em 0 0"><b>このコースのステップ</b>（全${plan.length}・目安${planMinutes()}分）：${planModules().map((m,k) => `${k+1} ${m.title}`).join(" → ")}</p>
+      </div>`;
   } else if (["concerto","instruments","baroque"].includes(s.id)){
-    html = `<div class="panel">${H(i)}<div id="contentBox"></div>${navBtns(i)}</div>`;
+    html = `<div class="panel">${H(i)}<div id="contentBox"></div></div>`;
   } else if (s.id === "listen"){
     html = `<div class="panel">${H(i)}
-      <p class="lead">何も知らないまま、まずは曲を<b>最後まで</b>聴いてみましょう。下の ▶ ボタンで再生できます。</p>
-      <div class="note">🎧 聴きながら考えよう：どんな景色が見える？ 気分はどう変わる？</div>
-      <div id="listenStage"></div>
-      <h3 style="margin-top:1em">感じたことに近いことばを選ぼう（いくつでも）</h3>
+      <div class="note">🎧 まずは曲を<b>最後まで</b>聴こう（下の ▶）。どんな景色が見える？ 気分はどう変わる？</div>
+      <div class="split"><div id="listenStage"></div><div>
+      <h3 style="margin-top:.2em">感じたことに近いことばを選ぼう（いくつでも）</h3>
       <div class="chips" id="feel1"></div>
       <h3>思いうかんだ景色や、気づいたことを書こう</h3>
-      <textarea id="feel1txt" placeholder="例：鳥が鳴いているみたいなところがあった。とちゅうで急にはげしくなった。"></textarea>
-      ${navBtns(i)}</div>`;
+      <textarea id="feel1txt" rows="3" placeholder="例：鳥が鳴いているみたいなところがあった。とちゅうで急にはげしくなった。"></textarea>
+      </div></div>
+      </div>`;
   } else if (s.id === "poem"){
     html = `<div class="panel">${H(i)}
-      <p class="lead">ヴィヴァルディは「春」に<b>ソネット（14行の詩）</b>をつけました。第1楽章には、次のような場面がえがかれています。</p>
-      <div id="poemStage"></div>
-      <div class="note">📜 詩の行をタップすると、その場面の音楽が流れます。<b>音のどんなところ</b>が詩の場面に合っているか、考えながら聴こう。</div>
-      <div class="poemlist" id="poemlist"></div>
-      <p class="it" style="margin-top:12px">原文（イタリア語）の書き出し：Giunt' è la Primavera e festosetti / La salutan gl' augei con lieto canto…</p>
-      ${navBtns(i)}</div>`;
+      <p class="lead">ヴィヴァルディは「春」に<b>ソネット（14行の詩）</b>をつけました。第1楽章の場面は次のとおり。</p>
+      <div class="split"><div><div id="poemStage"></div>
+      <p class="it" style="margin:8px 0 0">原文（イタリア語）の書き出し：Giunt' è la Primavera e festosetti / La salutan gl' augei con lieto canto…</p></div>
+      <div><div class="note" style="margin-top:0">📜 詩の行をタップすると、その場面の音楽が流れます。<b>音のどんなところ</b>が詩の場面に合っているか、考えながら聴こう。</div>
+      <div class="poemlist" id="poemlist"></div></div></div>
+      </div>`;
   } else if (s.id === "which"){
     html = `<div class="panel">${H(i)}
       <p class="lead">曲の一部が流れます。どの場面か当ててみよう！ 全部で5問です。</p>
       <div id="quizBox"></div>
-      ${navBtns(i)}</div>`;
+      </div>`;
   } else if (s.id === "form"){
     html = `<div class="panel">${H(i)}
       <p class="lead">この曲では、はじめに出てくる<b>春の主題</b>が、場面と場面のあいだに何度も<b>もどってきます</b>。このような作り方を<b>リトルネロ形式</b>といいます（リトルネロ＝「もどってくるもの」という意味）。</p>
@@ -1328,33 +1417,38 @@ function renderStep(i){
       <h3>ゲーム：主題がもどってきたらボタンを押そう</h3>
       <p class="tip">曲が最初から流れます（はじめの主題は練習です）。<b>小鳥・泉・雷などの場面が終わって、春の主題がもどってきた！</b>と思ったら、すぐに 🌸 ボタンを押してください。</p>
       <div id="tapBox"></div>
-      ${navBtns(i)}</div>`;
+      </div>`;
   } else if (s.id === "tips"){
     html = `<div class="panel">${H(i)}
-      <p class="lead">音楽には「こう聴くと楽しみ方がよくわかる」という<b>コツ</b>があります。コツを知ったら、<b>4つのステップ</b>で聴いてみよう。</p>
-      <div class="think4 big">${THINK.map((t,k) => `<div class="th"><div class="thq">${k+1} ${t.icon} ${t.name}</div><div><b>「${t.q}」</b></div></div>`).join("")}</div>
-      <div class="note">🎧 それぞれのコツで「▶ 聴いてみる」を押すと、そのコツがいちばん分かりやすい部分が流れます。<b>3つ以上</b>のコツで「理由」まで書けたらクリア！</div>
+      <p class="tip" style="margin-top:0">コツを知ったら4つのステップで聴こう：${THINK.map((t,k) => `${k+1}${t.icon}${t.name}「${t.q}」`).join(" → ")}　／　3つ以上のコツで「理由」まで書けたらクリア</p>
       <div id="tipsBox"></div>
-      ${navBtns(i)}</div>`;
+      </div>`;
   } else if (s.id === "elem"){
     html = `<div class="panel">${H(i)}
       <p class="lead">それぞれの場面は、どんな<b>音楽の工夫</b>で表されているのかな？ 場面を聴いて、あてはまるものを選ぼう。</p>
       <div id="elemBox"></div>
-      ${navBtns(i)}</div>`;
+      </div>`;
   } else if (s.id === "write"){
     html = `<div class="panel">${H(i)}
-      <p class="lead">学んだことを使って、この曲を知らない人に紹介する文章を書こう。</p>
+      <div id="writePages">
+      <div class="pgsec" data-title="感じたこと・好きな場面" data-short="💗">
       <h3>もう一度、最後まで聴いて感じたことば</h3>
       <div class="chips" id="feel2"></div>
       <div class="note" id="beforeAfter"></div>
       <h3>いちばん好きな場面</h3>
       <div class="chips" id="favs"></div>
+      </div>
+      <div class="pgsec" data-title="理由" data-short="🔍">
       <h3>その理由（4つのステップで）</h3>
       <div class="think4">${THINK.map(t => `<div class="th"><div class="thq">${t.icon} ${t.name}</div><div class="tip">${t.q}</div></div>`).join("")}</div>
       <p class="tip">👂 聞こえた音 → 💗 感じたこと → 🔍 なぜ（音楽のしくみ）の順に書くと、根拠のある理由になります。<br>使えることば：強弱・音の高さ・速さ・音色・トリル・トレモロ・音階・独奏と合奏・長調と短調・リトルネロ形式・こだま・音の厚み</p>
       <textarea id="why" placeholder="例：雷の場面が好き。👂合奏が同じ音を速くきざむトレモロと、独奏ヴァイオリンのかけ上がる音階が聞こえた。💗こわいけれど、どきどきする。🔍低くゴロゴロ続く音が雷、一気にかけ上がる音が稲妻の光に似ているから、本当に嵐が来たみたいに感じた。"></textarea>
+      </div>
+      <div class="pgsec" data-title="紹介文" data-short="✍️">
       <h3>紹介文</h3>
       <textarea id="intro" style="min-height:150px" placeholder="例：ヴィヴァルディの「春」は、春の主題が何度ももどってくるリトルネロ形式で作られています。主題の間には小鳥の歌や…"></textarea>
+      </div>
+      <div class="pgsec" data-title="ふりかえり・印刷" data-short="🖨">
       <h3>ふりかえり：どのくらいできたかな？</h3>
       <div id="selfEval"></div>
       <div class="btnrow">
@@ -1364,7 +1458,9 @@ function renderStep(i){
       </div>
       <p class="tip">書いた内容は、このブラウザに自動で保存されます。</p>
       <div class="btnrow"><button class="btn sec" id="resetAll">はじめからやり直す（記録を消す）</button></div>
-      ${navBtns(i)}</div>`;
+      </div>
+      </div>
+      </div>`;
   }
   stuMain.innerHTML = html;
   stuMain.querySelectorAll("[data-nav]").forEach(b => b.onclick = () => { markDone(STEPS[curStep].id); renderStep(+b.dataset.nav); window.scrollTo(0,0); });
@@ -1382,7 +1478,7 @@ function renderStep(i){
     const ck = document.getElementById("customPick");
     if (ck) planChecks(ck, () => { stuCustomOpen = true; renderStep(0); });
   }
-  if (["concerto","instruments","baroque"].includes(s.id)) renderContent(s.id, document.getElementById("contentBox"), s.id);
+  if (["concerto","instruments","baroque"].includes(s.id)){ const box = document.getElementById("contentBox"); renderContent(s.id, box, s.id); pageByH3(box, "c:" + s.id, "まず知ろう"); }
   if (s.id === "listen"){
     attachStuScene(document.getElementById("listenStage"));
     chipGroup(document.getElementById("feel1"), FEEL_WORDS, notes.feel1, v => { notes.feel1 = v; saveNotes(); });
@@ -1398,8 +1494,8 @@ function renderStep(i){
   }
   if (s.id === "which") startQuiz(document.getElementById("quizBox"), false);
   if (s.id === "form") startTap(document.getElementById("tapBox"), false);
-  if (s.id === "elem") renderElements(document.getElementById("elemBox"));
-  if (s.id === "tips"){ const box = document.getElementById("tipsBox"); box.innerHTML = TIPS.map(t => tipCard(t)).join(""); bindTipCards(box, false); }
+  if (s.id === "elem"){ const box = document.getElementById("elemBox"); renderElements(box); box.querySelectorAll(".card").forEach(c => c.style.marginTop = 0); pageBySelector(box, ".card", "elem", ["theme","birds","stream","storm"].map(k => KIND[k].emoji)); }
+  if (s.id === "tips"){ const box = document.getElementById("tipsBox"); box.innerHTML = TIPS.map(t => tipCard(t)).join(""); bindTipCards(box, false); pageBySelector(box, ".tipcard", "tips", TIPS.map(t => t.icon)); }
   if (s.id === "write"){
     chipGroup(document.getElementById("feel2"), FEEL_WORDS, notes.feel2, v => { notes.feel2 = v; saveNotes(); showBA(); });
     const favOpts = ["春の主題","小鳥の歌","泉とそよ風","雷と稲妻","小鳥がふたたび歌う","独奏ヴァイオリン"];
@@ -1421,6 +1517,7 @@ function renderStep(i){
       ["notes","done","step","quizBest","tapBest","elem"].forEach(k => store.del(k));
       notes = {feel1:[], feel1txt:"", feel2:[], fav:"", why:"", intro:"", tips:{}}; done = {}; renderStep(0);
     };
+    pageBySelector(document.getElementById("writePages"), ".pgsec", "write");
   }
 }
 function showBA(){
@@ -1644,7 +1741,9 @@ function renderGuide(){
   const L = lessonsOf(planModules()), has = id => plan.includes(id);
   document.getElementById("tGuide").innerHTML = `
   <h2>📋 指導の流れ（${L.length}時間扱い・目安${planMinutes()}分）</h2>
-  <p class="lead">「🎯 ねらいとプラン」で選んだ内容から自動で作っています（50分授業を想定）。学級の実態に合わせて自由に組みかえてください。</p>
+  <p class="tip" style="margin-top:0">「🎯 ねらいとプラン」で選んだ内容から自動で作っています（50分授業）。</p>
+  <div id="guidePages">
+  <h3>ねらい</h3>
   <div class="note"><b>学びの軸</b>：${AXIS}</div>
   <div class="defbox"><div><b>📘 知識</b>＝鑑賞のコツ（${planTips().map(id => TIP[id].name).join("・") || "—"}）</div>
   <div><b>💭 思考・判断・表現</b>＝4つのステップ：${THINK.map(t => `${t.icon}${t.name}「${t.q}」`).join(" → ")}</div></div>
@@ -1664,7 +1763,9 @@ function renderGuide(){
     <li>【知識】鑑賞のコツ（${planTips().map(id => TIP[id].name).join("・") || "—"}）を使って聴き、曲想と、${[has("form") && "リトルネロ形式", has("concerto") && "独奏と合奏", (has("elem") || has("instruments")) && "トリル・トレモロなどの奏法", "各場面の音楽の工夫"].filter(Boolean).join("・")}との関わりを理解している。${has("concerto") || has("baroque") ? "また、" + [has("concerto") && "協奏曲というジャンル", has("baroque") && "バロック時代という背景"].filter(Boolean).join("や") + "と、音楽の特徴との関わりを理解している。" : ""}</li>
     <li>【思考・判断・表現】音楽の要素を知覚し（👂）、特質や雰囲気を感受し（💗）、その理由を音楽のしくみと結びつけて考え（🔍）、ことばで表している（✍️）。紹介文や「理由」の欄で、この4つがそろっているかを見る。</li>
     <li>【主体的に学習に取り組む態度】情景と音楽の関わりに関心をもち、聴き深めようとしている。</li>
-  </ul>`;
+  </ul>
+  </div>`;
+  pageByH3(document.getElementById("guidePages"), "guide");
 }
 
 const COMMON = ["音色","リズム","速度","旋律","テクスチュア","強弱","形式","音の高さ"];
@@ -1675,6 +1776,7 @@ function renderPlanTab(){
   box.innerHTML = `
     <h2>🎯 ねらいとプラン</h2>
     <div class="axis"><span class="gk">🧭 学びの軸</span>${AXIS}</div>
+    <div id="planPages">
     <h3>① 授業時間に合わせて、学ぶ内容を選ぶ</h3>
     <div class="chips">${PRESETS.map(p => `<button class="chip ${pid === p.id ? "on" : ""}" data-p="${p.id}">${p.label}</button>`).join("")}<span class="chip ${pid === "custom" ? "on" : ""}" style="cursor:default">カスタム</span></div>
     <p class="tip" style="margin:0">${(PRESETS.find(p => p.id === pid) || {note:"下のチェックで自由に組み合わせています"}).note}。「軸」の印がついた内容は、学びの軸に直接つながる中心の学習です。</p>
@@ -1718,7 +1820,8 @@ function renderPlanTab(){
 
     <h3>⑦ 生徒に配るリンク</h3>
     <p class="tip" style="margin-top:0">このリンクを開くと、生徒の画面が<b>このプランのステップ</b>になります（GitHub Pages など、公開したURLで開いたときに使えます）。</p>
-    <div class="btnrow" style="margin-top:4px"><input readonly id="stuLink" style="flex:1;min-width:200px;border:1px solid var(--line);border-radius:10px;padding:8px;background:var(--bg)" value="${esc(studentLink())}"><button class="btn sec" id="copyLink">📋 コピー</button><span class="tip" id="copyLinkMsg"></span></div>`;
+    <div class="btnrow" style="margin-top:4px"><input readonly id="stuLink" style="flex:1;min-width:200px;border:1px solid var(--line);border-radius:10px;padding:8px;background:var(--bg)" value="${esc(studentLink())}"><button class="btn sec" id="copyLink">📋 コピー</button><span class="tip" id="copyLinkMsg"></span></div>
+    </div>`;
   box.querySelectorAll("[data-p]").forEach(b => b.onclick = () => { setPlan(PRESETS.find(p => p.id === b.dataset.p).ids); renderPlanTab(); });
   planChecks(box.querySelector("#tPlanCk"), renderPlanTab);
   box.querySelector("#copyLink").onclick = () => {
@@ -1726,6 +1829,7 @@ function renderPlanTab(){
     const ok = () => box.querySelector("#copyLinkMsg").textContent = "コピーしました";
     if (navigator.clipboard) navigator.clipboard.writeText(el.value).then(ok, () => { try{ document.execCommand("copy"); ok(); }catch(e){} });
   };
+  pageByH3(box.querySelector("#planPages"), "plan");
 }
 
 let kCur = "concerto";
@@ -1738,6 +1842,7 @@ function renderKnow(id){
   const inner = document.getElementById("kInner");
   inner.insertAdjacentHTML("beforebegin", goalCard(MOD[id]));
   renderContent(id, inner, null);
+  pageByH3(inner, "k:" + id, "まず知ろう");
 }
 
 function renderSettings(){
