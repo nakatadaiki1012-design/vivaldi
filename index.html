@@ -231,6 +231,23 @@ body.present .tch{max-width:none}
 .selfrow .lbl2{flex:1 1 260px;font-size:15px}
 @media (max-width:480px){ .rrow{grid-template-columns:1fr} .rdesc{grid-column:1} .raxis{margin-left:0} }
 
+/* ---------- tips / think ---------- */
+.tchip,.thchip{display:inline-block;border-radius:999px;padding:1px 10px;margin:2px 4px 2px 0;font-size:13px;background:color-mix(in srgb,var(--birds) 22%,var(--panel));border:1px solid color-mix(in srgb,var(--birds) 45%,var(--line))}
+.thchip{background:color-mix(in srgb,var(--solo) 18%,var(--panel));border-color:color-mix(in srgb,var(--solo) 45%,var(--line))}
+.tipcard{margin-top:14px;border-left:8px solid var(--birds)}
+.tiphead{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.tiphead h3{margin:0;font-size:20px}
+.elbadge{background:var(--ink);color:var(--bg);border-radius:8px;padding:2px 10px;font-size:13px;font-weight:700}
+.tipbody{margin-top:8px;font-size:16px}
+.think4{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:8px;margin-top:10px}
+.think4 .th{border:1px solid var(--line);border-radius:12px;padding:8px 10px;background:var(--bg);font-size:14px}
+.think4 .thq{font-weight:800;margin-bottom:4px}
+.think4 textarea{min-height:0;margin-top:6px;font-size:14px;padding:6px 8px}
+.think4.big .th{text-align:center;font-size:15px;background:var(--soft)}
+.chips.sm .chip{font-size:13px;padding:3px 10px}
+.defbox{border:1px solid var(--line);border-radius:12px;padding:10px 14px;margin:8px 0 12px;background:var(--bg);display:flex;flex-direction:column;gap:6px;font-size:15px}
+.star{position:absolute;right:12px;top:22px;background:var(--theme);color:#3a2500;border-radius:999px;padding:2px 10px;font-size:12px;font-weight:800;z-index:1}
+
 /* ---------- photos ---------- */
 .phgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:12px;margin:8px 0 14px}
 .ph{margin:0;border:1px solid var(--line);border-radius:14px;overflow:hidden;background:var(--bg);cursor:zoom-in;display:flex;flex-direction:column}
@@ -336,6 +353,7 @@ body.present .tch{max-width:none}
       <button class="tab on" data-t="show">📺 提示画面</button>
       <button class="tab" data-t="quiz">❓ みんなでクイズ</button>
       <button class="tab" data-t="tap">🌸 主題さがしゲーム</button>
+      <button class="tab" data-t="tips">🎧 鑑賞のコツ</button>
       <button class="tab" data-t="know">📚 知識カード</button>
       <button class="tab" data-t="photos">📷 写真</button>
       <button class="tab" data-t="guide">📋 指導の流れ</button>
@@ -393,6 +411,10 @@ body.present .tch{max-width:none}
 
     <div id="t-photos" class="hidden">
       <div class="panel" id="tPhotos"></div>
+    </div>
+
+    <div id="t-tips" class="hidden">
+      <div class="panel" id="tTips"></div>
     </div>
 
     <div id="t-know" class="hidden">
@@ -787,40 +809,44 @@ const ABILITIES = {
   kataru: {icon:"💬", name:"根拠をもって語る力", desc:"音楽の工夫を根拠にして、よさや美しさを自分のことばで伝える",           can:"音楽の工夫を根拠にして、曲のよさを説明できた"},
   ikasu:  {icon:"🌱", name:"ほかの曲に生かす力", desc:"ここで身につけた聴き方を、ほかの曲（特に情景や物語を表す曲）にも使う", can:"ほかの曲でも使えそうな聴き方が見つかった"},
 };
+const TIPS_ALL = ["echo","okaeri","atsumi","oto_e","ugoki","kage","kakeai"];
 // cs: 中学校学習指導要領 音楽「B鑑賞」との関わり（例）
 const MODULES = [
   {id:"listen", title:"まず聴いてみよう", mins:10, core:true,
-   aim:"何も知らないまま聴いて、感じたことをことばにする", know:[], ab:["kataru"], cs:["共通事項"],
+   aim:"何も知らないまま聴いて、感じたことをことばにする", know:[], tips:[], think:["kanju","hyogen"], ab:["kataru"], cs:["共通事項"],
    act:"通して聴き、感じたことを書く", ask:"「どんな景色が見えた？ 気分はどう変わった？」", app:"提示画面で🙈場面名をかくす → 通して再生"},
   {id:"poem", title:"詩と音楽", mins:15, core:true,
-   aim:"ソネット（詩）の場面と、音楽のようすを結びつける", know:["ソネット","音色","音の高さ","強弱"], ab:["musubu","kiku"], cs:["イ(ア)","イ(イ)"],
+   aim:"ソネット（詩）の場面と、音楽のようすを結びつける", know:["ソネット","音色","音の高さ","強弱"], tips:["oto_e","ugoki"], think:["chikaku","kanju","riyu"], ab:["musubu","kiku"], cs:["イ(ア)","イ(イ)"],
    act:"ソネットと音楽を結びつける", ask:"「この部分は詩のどの行に合いそう？」「音のどんなところからそう思った？」", app:"場面名をかくしたまま場面ボタンで再生 → 意見が出たら表示"},
+  {id:"tips", title:"聴き方のコツ", mins:15, core:true,
+   aim:"「こう聴くと楽しみ方が分かる」コツを知り、知覚→感受→理由→表現の4ステップで聴く", know:["強弱","形式","テクスチュア","音色","旋律","長調と短調","独奏と合奏"], tips:TIPS_ALL, think:["chikaku","kanju","riyu","hyogen"], ab:["kiku","musubu","kataru"], cs:["共通事項","イ(ア)","ア(ア)"],
+   act:"鑑賞のコツを知り、4つのステップで聴く", ask:"「何が聞こえた？」「どんな感じ？」「なぜそう感じた？」「ひとことで言うと？」", app:"🎧鑑賞のコツ（コツごとに▶で頭出し）"},
   {id:"which", title:"場面あてクイズ", mins:10,
-   aim:"音のちがいを手がかりに、場面を聴き分ける", know:["音色","強弱","音の高さ","リズム"], ab:["kiku"], cs:["イ(ア)"],
+   aim:"音のちがいを手がかりに、場面を聴き分ける", know:["音色","強弱","音の高さ","リズム"], tips:["atsumi","oto_e"], think:["chikaku","riyu"], ab:["kiku"], cs:["イ(ア)"],
    act:"場面を聴き分けて確かめる", ask:"「どの場面かな？ 決め手になった音は？」", app:"❓みんなでクイズ（答えはボタンで表示）"},
   {id:"form", title:"主題をさがせ", mins:10, core:true,
-   aim:"春の主題がもどってくることに気づき、曲の組み立て（リトルネロ形式）をつかむ", know:["形式","リトルネロ形式","長調と短調"], ab:["kiku","musubu"], cs:["イ(ア)"],
+   aim:"春の主題がもどってくることに気づき、曲の組み立て（リトルネロ形式）をつかむ", know:["形式","リトルネロ形式","長調と短調"], tips:["okaeri","kage"], think:["chikaku","riyu"], ab:["kiku","musubu"], cs:["イ(ア)"],
    act:"主題がもどることに気づき、リトルネロ形式を知る", ask:"「最初のメロディーがもどってきたら手を挙げよう」「なぜ何度ももどってくるのだろう？」", app:"🌸主題さがしゲーム → 提示画面のタイムライン（色の並び）"},
   {id:"concerto", title:"協奏曲ってなに？", mins:15,
-   aim:"独奏と合奏の関わりを聴き取り、協奏曲というジャンルを知る", know:["協奏曲","独奏と合奏","楽章","速度","テクスチュア"], ab:["kiku","haikei"], cs:["イ(ア)","イ(イ)"],
+   aim:"独奏と合奏の関わりを聴き取り、協奏曲というジャンルを知る", know:["協奏曲","独奏と合奏","楽章","速度","テクスチュア"], tips:["kakeai","atsumi"], think:["chikaku","riyu"], ab:["kiku","haikei"], cs:["イ(ア)","イ(イ)"],
    act:"協奏曲（独奏と合奏）と楽章構成を知る", ask:"「いまは独奏？ 合奏？」「独奏と合奏が交代すると、どんな感じがする？」", app:"📚知識カード「協奏曲」"},
   {id:"instruments", title:"楽器と奏法", mins:15,
-   aim:"楽器や弾き方（奏法）による音色のちがいを知り、情景の表し方に気づく", know:["弦楽器","チェンバロ","通奏低音","トリル","トレモロ","音階","音色"], ab:["kiku","haikei"], cs:["イ(ア)","イ(イ)"],
+   aim:"楽器や弾き方（奏法）による音色のちがいを知り、情景の表し方に気づく", know:["弦楽器","チェンバロ","通奏低音","トリル","トレモロ","音階","音色"], tips:["oto_e"], think:["chikaku","riyu"], ab:["kiku","haikei"], cs:["イ(ア)","イ(イ)"],
    act:"楽器と奏法を知り、音色に注目して聴く", ask:"「小鳥のさえずりや雷は、どんな弾き方で表している？」", app:"📚知識カード「楽器と奏法」の ▶聴く"},
   {id:"elem", title:"音楽のしくみ", mins:15,
-   aim:"それぞれの場面を表す音楽の工夫を、くわしく聴き取る", know:["トリル","トレモロ","音階","強弱","音の高さ","旋律"], ab:["kiku","musubu"], cs:["イ(ア)"],
+   aim:"それぞれの場面を表す音楽の工夫を、くわしく聴き取る", know:["トリル","トレモロ","音階","強弱","音の高さ","旋律"], tips:["echo","oto_e","ugoki"], think:["chikaku","kanju","riyu"], ab:["kiku","musubu"], cs:["イ(ア)"],
    act:"各場面の音楽の工夫を聴き取る", ask:"「小鳥・泉・雷は、どんな音の工夫で表されている？」", app:"🔁場面をくり返す ＋「聴きどころ」"},
   {id:"baroque", title:"バロック時代の音楽", mins:15,
-   aim:"作曲者と時代（バロック時代）を知り、背景と結びつけて聴く", know:["バロック時代","通奏低音","強弱の段階的な変化","標題音楽"], ab:["haikei","ikasu"], cs:["イ(イ)"],
+   aim:"作曲者と時代（バロック時代）を知り、背景と結びつけて聴く", know:["バロック時代","通奏低音","強弱の段階的な変化","標題音楽"], tips:["echo"], think:["riyu"], ab:["haikei","ikasu"], cs:["イ(イ)"],
    act:"作品の背景（バロック時代・ヴィヴァルディ）を知る", ask:"「ヴィヴァルディが生きたころ、日本は何時代？」「詩や物語を音で表す曲は、ほかにもあるかな？」", app:"📚知識カード「バロック時代」"},
   {id:"write", title:"紹介文を書こう", mins:20, core:true,
-   aim:"学んだ知識を根拠にして、曲のよさを紹介し、ふりかえる", know:["これまで使った知識すべて"], ab:["kataru","musubu","ikasu"], cs:["ア(ア)"],
+   aim:"学んだ知識を根拠にして、曲のよさを紹介し、ふりかえる", know:["これまで使った知識すべて"], tips:[], think:["riyu","hyogen"], ab:["kataru","musubu","ikasu"], cs:["ア(ア)"],
    act:"紹介文を書き、ふりかえる", ask:"「音楽の工夫を根拠に、この曲のよさを紹介しよう」", app:"ワークシート印刷（設定）／生徒用モードの最後のステップ"},
 ];
 const MOD = Object.fromEntries(MODULES.map(m => [m.id, m]));
 const PRESETS = [
-  {id:"p1", label:"1時間（50分）", note:"軸だけをしぼって", ids:["listen","poem","form","write"]},
-  {id:"p2", label:"2時間",         note:"聴き分け・協奏曲・工夫を追加", ids:["listen","poem","which","form","concerto","elem","write"]},
+  {id:"p1", label:"1時間（50分）", note:"軸だけをしぼって（主題さがしは「コツ」の中で）", ids:["listen","poem","tips","write"]},
+  {id:"p2", label:"2時間",         note:"主題さがし・協奏曲・工夫を追加", ids:["listen","poem","tips","form","concerto","elem","write"]},
   {id:"p3", label:"3時間",         note:"楽器・時代背景までじっくり", ids:MODULES.map(m => m.id)},
 ];
 const CS_LABEL = {
@@ -850,11 +876,121 @@ function goalCard(m){
   return `<div class="goalcard">
     <div><span class="gk">🎯 めあて</span>${m.aim}</div>
     <div><span class="gk">🔑 使う知識</span>${m.know.length ? m.know.map(k => `<span class="kchip">${k}</span>`).join("") : '<span class="tip">まだ知識は使わず、感じたままを大切に</span>'}</div>
+    ${(m.tips || []).length ? `<div><span class="gk">🎧 使うコツ</span>${m.tips.map(tipChip).join("")}</div>` : ""}
+    ${(m.think || []).length ? `<div><span class="gk">💭 考え方</span>${m.think.map(thinkChip).join("")}</div>` : ""}
     <div><span class="gk">🌱 高まる力</span>${m.ab.map(a => `<span class="achip">${ABILITIES[a].icon} ${ABILITIES[a].name}</span>`).join("")}</div>
   </div>`;
 }
 function secT(kind, nth=0){ const l = SECTIONS.filter(s => s.kind === kind); return (l[nth] || l[0] || SECTIONS[0]).t; }
 
+/* ================= 鑑賞のコツ（知識）と 4つのステップ（思考・判断・表現） ================= */
+// 知識 ＝「このように聴くと、曲の楽しみ方がよくわかる」と教えられるコツ
+const TIPS = [
+  {id:"echo",   el:"強弱",          icon:"🔊", name:"「こだま」をさがす",
+   tip:"同じメロディーが<b>強く→弱く</b>とくり返されたら、それは「こだま」。近くと遠く、呼びかけと答え、と想像して聴くと、ただのくり返しが<b>会話</b>に聞こえてきます。",
+   clip:() => [secT("theme",0) + 2.5, 8], where:"春の主題（はじめ）",
+   kakaku:["同じメロディーが2回","2回目は弱い","2回目は少ない人数に聞こえる","音の高さは同じ"],
+   kanju:["呼びかけと答え","遠くからひびく","遊んでいるみたい","おだやか","にぎやか"],
+   riyu:"強く→弱くのくり返しが、どうして「会話」や「こだま」に聞こえるのだろう？"},
+  {id:"okaeri", el:"形式",          icon:"🌸", name:"主題の「おかえり」を待つ",
+   tip:"はじめのメロディー（春の主題）は、場面のあとに何度も<b>もどってきます</b>。「そろそろ帰ってくるかな」と<b>待ちながら</b>聴くと、もどった瞬間がうれしくなり、間の場面とのちがいもはっきりします。",
+   clip:() => [Math.max(0, secT("theme",2) - 5), 10], where:"泉の終わり → 春の主題",
+   kakaku:["知っているメロディーがもどった","急に音が厚くなった","急に明るくなった","速さは変わらない"],
+   kanju:["ほっとする","帰ってきた！","明るさが増した","場面が切りかわった"],
+   riyu:"主題がもどると、なぜ「ほっとする」「うれしい」と感じるのだろう？ 間の場面とくらべて考えよう。"},
+  {id:"atsumi", el:"テクスチュア",  icon:"🧱", name:"音の「厚み」をくらべる",
+   tip:"全員で弾く<b>合奏</b>は音が厚く、低い音がしっかり聞こえます。低い楽器がお休みして<b>独奏</b>になると、音がうすく軽くなります。「いま何人くらいで弾いている？」と数えるつもりで聴くと、場面の切りかわりが分かります。",
+   clip:() => [Math.max(0, secT("birds",0) - 3), 9], where:"春の主題 → 小鳥の歌",
+   kakaku:["低い音が消えた","人数が減った","高い音だけになった","ヴァイオリンだけに聞こえる"],
+   kanju:["軽やか","うすい・すきとおる","身軽","さびしい","かわいらしい"],
+   riyu:"低い楽器がいなくなると、なぜ「軽やか」「かわいらしい」と感じるのだろう？"},
+  {id:"oto_e",  el:"音色・奏法",    icon:"🎨", name:"音の「絵」を見つける",
+   tip:"<b>トリル</b>（音をふるわせる）＝小鳥、<b>トレモロ</b>（速くきざむ）＝雷、<b>かけ上がる音階</b>＝稲妻。「この音は何に聞こえる？」と考えると、音が<b>絵</b>に変わります。",
+   clip:() => [secT("storm",0), 9], where:"雷と稲妻",
+   kakaku:["同じ音を速くきざむ（トレモロ）","速くかけ上がる音（音階）","強い音と弱い音が急に変わる","低い音がゴロゴロ"],
+   kanju:["こわい","はげしい","ピカッと光る","ゴロゴロ","どきどきする"],
+   riyu:"トレモロやかけ上がる音階は、なぜ「雷」「稲妻」に聞こえるのだろう？ 本物の雷の音や光と比べて考えよう。"},
+  {id:"ugoki",  el:"旋律（音の動き）", icon:"〰️", name:"音の動きを指でなぞる",
+   tip:"音は<b>上がる・下がる・ゆれる・とどまる</b>。聴きながら指で空中に描くと、さらさら流れる水やそよ風が<b>体で</b>分かります。",
+   clip:() => [secT("stream",0) + 2, 9], where:"泉とそよ風",
+   kakaku:["細かい音がずっと続く","同じ形をくり返している","音が小さくゆれている","大きな音はない"],
+   kanju:["さらさら","なめらか","やさしい","おだやか","ずっと流れている"],
+   riyu:"細かい音のくり返しは、なぜ「流れる水」や「風」に聞こえるのだろう？"},
+  {id:"kage",   el:"調（長調と短調）", icon:"🌥", name:"同じ主題の「かげり」を聴く",
+   tip:"嵐のあとにもどる春の主題は<b>短調</b>。同じメロディーなのに、少し<b>かげった</b>表情になります。「さっきと何がちがう？」と聴きくらべると、調（長調・短調）の力が分かります。",
+   clip:() => [secT("theme",3), 7], where:"嵐のあとの主題（短調）",
+   kakaku:["知っているメロディー","少し暗い音","速さは同じ","音の高さが少しちがう"],
+   kanju:["かげった","なごりがある","しずか","さびしい","落ち着いた"],
+   riyu:"同じメロディーなのに、なぜ「かげった」感じがするのだろう？"},
+  {id:"kakeai", el:"独奏と合奏",    icon:"💬", name:"かけ合いを「会話」として聴く",
+   tip:"協奏曲では、<b>独奏</b>が話し、<b>合奏</b>が答えます。「いまはだれが主役？」と聴くと、交代するところが見えてきて、独奏の見せ場がいっそう楽しめます。",
+   clip:() => [Math.max(0, secT("solo",0) - 3), 10], where:"独奏ヴァイオリン",
+   kakaku:["1本のヴァイオリンが目立つ","合奏が小さく支えている","主役が交代した","速くて細かい音"],
+   kanju:["かっこいい","見せ場","緊張する","会話している","自由"],
+   riyu:"独奏が目立つところは、なぜ「見せ場」に感じるのだろう？ 合奏はそのとき何をしている？"},
+];
+const TIP = Object.fromEntries(TIPS.map(t => [t.id, t]));
+
+// 思考・判断・表現 ＝ 4つのステップ
+const THINK = [
+  {id:"chikaku", icon:"👂", name:"知覚", q:"何が聞こえた？",     desc:"音色・強弱・旋律・形式など、音楽を形づくっている要素に気づく"},
+  {id:"kanju",   icon:"💗", name:"感受", q:"どんな感じがした？", desc:"その要素がもたらす特質や雰囲気を感じ取る"},
+  {id:"riyu",    icon:"🔍", name:"理由", q:"なぜそう感じた？",   desc:"感じたことの理由を、音楽のしくみと結びつけて考える"},
+  {id:"hyogen",  icon:"✍️", name:"表現", q:"ことばや音で表そう", desc:"考えたことを、ことば・体の動き・音などで表す"},
+];
+const THINK_DEF = "音楽を形づくっている要素を知覚し、それらがもたらす特質や雰囲気を感受した上で、その理由や音楽の仕組みについて考え、言葉や音などで表す力";
+
+function planTips(){ const s = []; planModules().forEach(m => (m.tips || []).forEach(t => { if (!s.includes(t)) s.push(t); })); return s; }
+function tipChip(id){ const t = TIP[id]; return `<span class="tchip">${t.icon} ${t.name}</span>`; }
+function thinkChip(id){ const t = THINK.find(x => x.id === id); return `<span class="thchip">${t.icon} ${t.name}</span>`; }
+
+/* ---------- コツのカード（生徒・先生共通） ---------- */
+function tipCard(t, opts={}){
+  const n = (notes.tips || {})[t.id] || {};
+  return `<div class="card tipcard" data-tip="${t.id}">
+    <div class="tiphead"><span class="elbadge">${t.el}</span><h3>${t.icon} ${t.name}</h3></div>
+    <div class="tipbody">💡 <b>コツ</b>：${t.tip}</div>
+    <div class="btnrow" style="margin-top:6px"><button class="smallbtn" data-tipplay="${t.id}">▶ 聴いてみる（${t.where}）</button></div>
+    ${opts.teacher ? `
+    <div class="think4">${THINK.map(s => `<div class="th"><div class="thq">${s.icon} ${s.name}「${s.q}」</div><div class="tip">${
+      s.id === "chikaku" ? "例：" + t.kakaku.slice(0,2).join("、") :
+      s.id === "kanju" ? "例：" + t.kanju.slice(0,3).join("、") :
+      s.id === "riyu" ? t.riyu : "ひとことで言うと？ 体の動きで表すと？"}</div></div>`).join("")}</div>`
+    : `
+    <div class="think4">
+      <div class="th"><div class="thq">👂 知覚「何が聞こえた？」</div><div class="chips sm" data-k="kakaku"></div></div>
+      <div class="th"><div class="thq">💗 感受「どんな感じがした？」</div><div class="chips sm" data-k="kanju"></div></div>
+      <div class="th"><div class="thq">🔍 理由「なぜそう感じた？」</div><div class="tip">${t.riyu}</div><textarea data-k="riyu" rows="2" placeholder="例：…だから、…に聞こえた">${esc(n.riyu || "")}</textarea></div>
+      <div class="th"><div class="thq">✍️ 表現「ひとことで言うと？」</div><textarea data-k="hyogen" rows="1" placeholder="例：春がこだまと遊んでいる">${esc(n.hyogen || "")}</textarea></div>
+    </div>`}
+  </div>`;
+}
+function bindTipCards(root, teacher){
+  root.querySelectorAll("[data-tipplay]").forEach(b => b.onclick = () => { const [f,l] = TIP[b.dataset.tipplay].clip(); loopSec = -1; playClip(f, l); });
+  if (teacher) return;
+  notes.tips = notes.tips || {};
+  root.querySelectorAll(".tipcard").forEach(card => {
+    const t = TIP[card.dataset.tip]; const n = notes.tips[t.id] = notes.tips[t.id] || {kakaku:[], kanju:[], riyu:"", hyogen:""};
+    chipGroup(card.querySelector('[data-k="kakaku"]'), t.kakaku, n.kakaku, v => { n.kakaku = v; saveNotes(); });
+    chipGroup(card.querySelector('[data-k="kanju"]'), t.kanju, n.kanju, v => { n.kanju = v; saveNotes(); });
+    card.querySelectorAll("textarea").forEach(ta => ta.oninput = () => { n[ta.dataset.k] = ta.value; saveNotes(); checkTipsDone(); });
+  });
+}
+function checkTipsDone(){ const n = notes.tips || {}; if (Object.values(n).filter(x => x.riyu && x.riyu.trim()).length >= 3) markDone("tips"); }
+
+function renderTipsTab(){
+  document.getElementById("tTips").innerHTML = `
+    <h2>🎧 鑑賞のコツ（こう聴くと、曲の楽しみ方がよくわかる）</h2>
+    <p class="lead">クラスで共有する「聴き方のコツ」です。コツを<b>知識</b>として教え、下の<b>4つのステップ</b>で問いかけると、思考・判断・表現の活動になります。</p>
+    <div class="defbox">
+      <div><b>📘 知識</b>＝鑑賞のコツ。「このように聴くと、曲の楽しみ方がよくわかる」と教えられるもの。</div>
+      <div><b>💭 思考・判断・表現</b>＝${THINK_DEF}。</div>
+    </div>
+    <div class="think4 big">${THINK.map((s,i) => `<div class="th"><div class="thq">${i+1} ${s.icon} ${s.name}</div><div><b>「${s.q}」</b></div><div class="tip">${s.desc}</div></div>`).join("")}</div>
+    <p class="tip">いまのプランで使うコツには ★ がついています。カードの「▶ 聴いてみる」で、そのコツがいちばん分かりやすい部分が流れます。</p>
+    ${TIPS.map(t => `<div style="position:relative">${planTips().includes(t.id) ? '<span class="star">★ このプランで使う</span>' : ""}${tipCard(t, {teacher:true})}</div>`).join("")}`;
+  bindTipCards(document.getElementById("tTips"), true);
+}
 /* ---------- 小さな確認クイズ ---------- */
 function miniQuiz(box, qs, doneId){
   box.innerHTML = qs.map((q,i) => `<div class="mq" data-i="${i}"><p class="mqq"><b>Q${i+1}.</b> ${q.q}</p>
@@ -1112,7 +1248,7 @@ function planChecks(box, onChange){
 }
 let stuCustomOpen = false;
 let done = store.get("done", {});
-let notes = store.get("notes", {feel1:[], feel1txt:"", feel2:[], fav:"", why:"", intro:""});
+let notes = store.get("notes", {feel1:[], feel1txt:"", feel2:[], fav:"", why:"", intro:"", tips:{}});
 function saveNotes(){ store.set("notes", notes); }
 function markDone(id){ done[id] = true; store.set("done", done); renderStepNav(); }
 
@@ -1193,6 +1329,13 @@ function renderStep(i){
       <p class="tip">曲が最初から流れます（はじめの主題は練習です）。<b>小鳥・泉・雷などの場面が終わって、春の主題がもどってきた！</b>と思ったら、すぐに 🌸 ボタンを押してください。</p>
       <div id="tapBox"></div>
       ${navBtns(i)}</div>`;
+  } else if (s.id === "tips"){
+    html = `<div class="panel">${H(i)}
+      <p class="lead">音楽には「こう聴くと楽しみ方がよくわかる」という<b>コツ</b>があります。コツを知ったら、<b>4つのステップ</b>で聴いてみよう。</p>
+      <div class="think4 big">${THINK.map((t,k) => `<div class="th"><div class="thq">${k+1} ${t.icon} ${t.name}</div><div><b>「${t.q}」</b></div></div>`).join("")}</div>
+      <div class="note">🎧 それぞれのコツで「▶ 聴いてみる」を押すと、そのコツがいちばん分かりやすい部分が流れます。<b>3つ以上</b>のコツで「理由」まで書けたらクリア！</div>
+      <div id="tipsBox"></div>
+      ${navBtns(i)}</div>`;
   } else if (s.id === "elem"){
     html = `<div class="panel">${H(i)}
       <p class="lead">それぞれの場面は、どんな<b>音楽の工夫</b>で表されているのかな？ 場面を聴いて、あてはまるものを選ぼう。</p>
@@ -1206,9 +1349,10 @@ function renderStep(i){
       <div class="note" id="beforeAfter"></div>
       <h3>いちばん好きな場面</h3>
       <div class="chips" id="favs"></div>
-      <h3>その理由（音楽の工夫を使って）</h3>
-      <p class="tip">使えることば：強弱・音の高さ・速さ・音色・トリル・トレモロ・音階・独奏と合奏・長調と短調・リトルネロ形式</p>
-      <textarea id="why" placeholder="例：雷の場面が好き。合奏のトレモロでゴロゴロ鳴る雷と、独奏ヴァイオリンの速い音階の稲妻が、本当に嵐が来たみたいだから。"></textarea>
+      <h3>その理由（4つのステップで）</h3>
+      <div class="think4">${THINK.map(t => `<div class="th"><div class="thq">${t.icon} ${t.name}</div><div class="tip">${t.q}</div></div>`).join("")}</div>
+      <p class="tip">👂 聞こえた音 → 💗 感じたこと → 🔍 なぜ（音楽のしくみ）の順に書くと、根拠のある理由になります。<br>使えることば：強弱・音の高さ・速さ・音色・トリル・トレモロ・音階・独奏と合奏・長調と短調・リトルネロ形式・こだま・音の厚み</p>
+      <textarea id="why" placeholder="例：雷の場面が好き。👂合奏が同じ音を速くきざむトレモロと、独奏ヴァイオリンのかけ上がる音階が聞こえた。💗こわいけれど、どきどきする。🔍低くゴロゴロ続く音が雷、一気にかけ上がる音が稲妻の光に似ているから、本当に嵐が来たみたいに感じた。"></textarea>
       <h3>紹介文</h3>
       <textarea id="intro" style="min-height:150px" placeholder="例：ヴィヴァルディの「春」は、春の主題が何度ももどってくるリトルネロ形式で作られています。主題の間には小鳥の歌や…"></textarea>
       <h3>ふりかえり：どのくらいできたかな？</h3>
@@ -1255,6 +1399,7 @@ function renderStep(i){
   if (s.id === "which") startQuiz(document.getElementById("quizBox"), false);
   if (s.id === "form") startTap(document.getElementById("tapBox"), false);
   if (s.id === "elem") renderElements(document.getElementById("elemBox"));
+  if (s.id === "tips"){ const box = document.getElementById("tipsBox"); box.innerHTML = TIPS.map(t => tipCard(t)).join(""); bindTipCards(box, false); }
   if (s.id === "write"){
     chipGroup(document.getElementById("feel2"), FEEL_WORDS, notes.feel2, v => { notes.feel2 = v; saveNotes(); showBA(); });
     const favOpts = ["春の主題","小鳥の歌","泉とそよ風","雷と稲妻","小鳥がふたたび歌う","独奏ヴァイオリン"];
@@ -1274,7 +1419,7 @@ function renderStep(i){
     document.getElementById("resetAll").onclick = () => {
       if (!confirm("書いた内容やクイズの記録をすべて消して、はじめからやり直しますか？")) return;
       ["notes","done","step","quizBest","tapBest","elem"].forEach(k => store.del(k));
-      notes = {feel1:[], feel1txt:"", feel2:[], fav:"", why:"", intro:""}; done = {}; renderStep(0);
+      notes = {feel1:[], feel1txt:"", feel2:[], fav:"", why:"", intro:"", tips:{}}; done = {}; renderStep(0);
     };
   }
 }
@@ -1427,7 +1572,7 @@ function renderElements(box){
 /* ---------- ワークシート印刷 ---------- */
 function esc(s){ return String(s || "").replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c])); }
 function printSheet(filled){
-  const N = filled ? notes : {feel1:[], feel1txt:"", feel2:[], fav:"", why:"", intro:""};
+  const N = filled ? notes : {feel1:[], feel1txt:"", feel2:[], fav:"", why:"", intro:"", tips:{}};
   document.getElementById("printsheet").innerHTML = `
     <h1>ヴィヴァルディ「春」第1楽章 鑑賞ワークシート</h1>
     <p>　年　　組　　番　名前（　　　　　　　　　　　　）</p>
@@ -1442,7 +1587,11 @@ function printSheet(filled){
     ${plan.includes("concerto") ? "<p>独奏楽器と合奏が競い合い、協力し合う音楽を（　　　　　）という。</p>" : ""}
     ${plan.includes("instruments") ? "<p>小鳥のさえずりは（　　　　）、雷のゴロゴロは（　　　　）という奏法で表されている。</p>" : ""}
     ${plan.includes("baroque") ? "<p>ヴィヴァルディは（　　　　　）時代の作曲家。《四季》が出版された1725年ごろ、日本は（　　　）時代だった。</p>" : ""}
-    <h3>4. いちばん好きな場面とその理由</h3>
+    ${plan.includes("tips") ? `<h3>3'. 鑑賞のコツで聴く（👂何が聞こえた → 💗どんな感じ → 🔍なぜ）</h3>
+    <table><tr><th style="width:24%">コツ</th><th style="width:22%">👂 聞こえた音</th><th style="width:22%">💗 感じ</th><th>🔍 なぜ（音楽のしくみ）</th></tr>
+    ${planTips().map(id => { const t = TIP[id], n = (N.tips || {})[id] || {}; return `<tr><td>${t.icon} ${t.name}</td><td>${esc((n.kakaku || []).join("・"))}</td><td>${esc((n.kanju || []).join("・"))}</td><td style="height:14mm">${esc(n.riyu || "")}</td></tr>`; }).join("")}
+    </table>` : ""}
+    <h3>4. いちばん好きな場面とその理由（👂→💗→🔍の順に）</h3>
     <div class="box">${N.fav ? "好きな場面：" + esc(N.fav) + "\n" : ""}${esc(N.why)}</div>
     <h3>5. 「春」の紹介文</h3>
     <div class="box tall">${esc(N.intro)}</div>
@@ -1478,12 +1627,13 @@ document.addEventListener("fullscreenchange", () => { if (!document.fullscreenEl
 function showTab(t){
   curTab = t; pause(); stopAt = null; tapState = null;
   document.querySelectorAll("#ttabs .tab").forEach(b => b.classList.toggle("on", b.dataset.t === t));
-  ["plan","show","know","photos","quiz","tap","guide","settings"].forEach(k => document.getElementById("t-" + k).classList.toggle("hidden", k !== t));
+  ["plan","show","tips","know","photos","quiz","tap","guide","settings"].forEach(k => document.getElementById("t-" + k).classList.toggle("hidden", k !== t));
   if (t === "quiz") startQuiz(document.getElementById("tQuiz"), true);
   if (t === "tap") startTap(document.getElementById("tTap"), true);
   if (t === "guide") renderGuide();
   if (t === "plan") renderPlanTab();
   if (t === "know") renderKnow(kCur);
+  if (t === "tips") renderTipsTab();
   if (t === "photos") renderPhotoTab();
   if (t === "settings") renderSettings();
   if (t === "show") requestAnimationFrame(() => { tScene.resize(); drawTimeline(tPlayer); tScene.dirty = true; });
@@ -1496,6 +1646,8 @@ function renderGuide(){
   <h2>📋 指導の流れ（${L.length}時間扱い・目安${planMinutes()}分）</h2>
   <p class="lead">「🎯 ねらいとプラン」で選んだ内容から自動で作っています（50分授業を想定）。学級の実態に合わせて自由に組みかえてください。</p>
   <div class="note"><b>学びの軸</b>：${AXIS}</div>
+  <div class="defbox"><div><b>📘 知識</b>＝鑑賞のコツ（${planTips().map(id => TIP[id].name).join("・") || "—"}）</div>
+  <div><b>💭 思考・判断・表現</b>＝4つのステップ：${THINK.map(t => `${t.icon}${t.name}「${t.q}」`).join(" → ")}</div></div>
   ${L.map((ms,k) => `<h3>第${k+1}時（目安${ms.reduce((x,m) => x + m.mins, 0)}分）</h3>
   <div class="tblwrap"><table>
     <tr><th style="width:22%">学習活動</th><th>主な発問・指示</th><th style="width:28%">このアプリで</th></tr>
@@ -1509,8 +1661,8 @@ function renderGuide(){
   <p>「🎯 ねらいとプラン」にある<b>生徒用リンク</b>を配ると、生徒の画面も同じ内容のステップになります（家庭学習・タブレット学習・欠席者の補充などに）。書いた内容は端末に保存され、最後に印刷やPDF保存ができます。</p>
   <h3>評価の視点（例）</h3>
   <ul>
-    <li>【知識】曲想と、${[has("form") && "リトルネロ形式", has("concerto") && "独奏と合奏", (has("elem") || has("instruments")) && "トリル・トレモロなどの奏法", "各場面の音楽の工夫"].filter(Boolean).join("・")}との関わりを理解している。${has("concerto") || has("baroque") ? "また、" + [has("concerto") && "協奏曲というジャンル", has("baroque") && "バロック時代という背景"].filter(Boolean).join("や") + "と、音楽の特徴との関わりを理解している。" : ""}</li>
-    <li>【思考・判断・表現】音楽の工夫を根拠にして、曲のよさや美しさを紹介文に書いている。</li>
+    <li>【知識】鑑賞のコツ（${planTips().map(id => TIP[id].name).join("・") || "—"}）を使って聴き、曲想と、${[has("form") && "リトルネロ形式", has("concerto") && "独奏と合奏", (has("elem") || has("instruments")) && "トリル・トレモロなどの奏法", "各場面の音楽の工夫"].filter(Boolean).join("・")}との関わりを理解している。${has("concerto") || has("baroque") ? "また、" + [has("concerto") && "協奏曲というジャンル", has("baroque") && "バロック時代という背景"].filter(Boolean).join("や") + "と、音楽の特徴との関わりを理解している。" : ""}</li>
+    <li>【思考・判断・表現】音楽の要素を知覚し（👂）、特質や雰囲気を感受し（💗）、その理由を音楽のしくみと結びつけて考え（🔍）、ことばで表している（✍️）。紹介文や「理由」の欄で、この4つがそろっているかを見る。</li>
     <li>【主体的に学習に取り組む態度】情景と音楽の関わりに関心をもち、聴き深めようとしている。</li>
   </ul>`;
 }
@@ -1530,7 +1682,22 @@ function renderPlanTab(){
     <div class="sumbox"><span>合計 目安${planMinutes()}分</span><span>→ 50分授業で <b>${L.length}時間</b></span></div>
     <p class="tip" style="margin-top:0">${L.map((ms,k) => `第${k+1}時：${ms.map(m => m.title).join("・")}`).join("<br>")}</p>
 
-    <h3>② どんな知識を使って聴くのか</h3>
+    <h3>② 知識 ＝ 鑑賞のコツ（「こう聴くと曲の楽しみ方がよくわかる」と教えられるもの）</h3>
+    <div class="tblwrap"><table class="mtx">
+      <tr><th style="width:34%">コツ</th><th style="width:18%">要素</th><th>使う学習</th></tr>
+      ${planTips().map(id => { const t = TIP[id]; return `<tr><td style="text-align:left"><b>${t.icon} ${t.name}</b></td><td>${t.el}</td><td style="text-align:left">${mods.filter(m => (m.tips || []).includes(id)).map(m => m.title).join("、")}</td></tr>`; }).join("")}
+      ${TIPS.filter(t => !planTips().includes(t.id)).map(t => `<tr style="opacity:.45"><td style="text-align:left">${t.icon} ${t.name}</td><td>${t.el}</td><td style="text-align:left">（このプランでは使わない）</td></tr>`).join("")}
+    </table></div>
+    <p class="tip">コツの本文と、聴かせる場所は「🎧 鑑賞のコツ」タブにあります。</p>
+
+    <h3>③ 思考・判断・表現 ＝ 4つのステップで聴く</h3>
+    <div class="defbox"><div>${THINK_DEF}。</div></div>
+    <div class="tblwrap"><table class="mtx">
+      <tr><th style="min-width:180px">ステップ</th>${mods.map(m => `<th style="font-size:12px">${m.title}</th>`).join("")}</tr>
+      ${THINK.map(t => `<tr><td><b>${t.icon} ${t.name}</b>「${t.q}」<br><span class="tip">${t.desc}</span></td>${mods.map(m => `<td>${(m.think || []).includes(t.id) ? '<span class="dot">●</span>' : ""}</td>`).join("")}</tr>`).join("")}
+    </table></div>
+
+    <h3>④ 用語・要素の知識</h3>
     <div class="tblwrap"><table class="mtx">
       <tr><th style="width:30%">知識</th><th>使う学習</th></tr>
       <tr><th colspan="2" style="background:var(--soft)">音楽を形づくっている要素（共通事項）</th></tr>
@@ -1539,17 +1706,17 @@ function renderPlanTab(){
       ${know.filter(k => !COMMON.includes(k)).map(k => `<tr><td><span class="kchip">${k}</span></td><td style="text-align:left">${usedIn(k)}</td></tr>`).join("")}
     </table></div>
 
-    <h3>③ この題材でどんな鑑賞の力が高まるのか</h3>
+    <h3>⑤ この題材でどんな鑑賞の力が高まるのか</h3>
     <div class="tblwrap"><table class="mtx">
       <tr><th style="min-width:200px">高まる力</th>${mods.map(m => `<th style="font-size:12px">${m.title}</th>`).join("")}</tr>
       ${Object.keys(ABILITIES).map(a => `<tr style="${ab.includes(a) ? "" : "opacity:.45"}"><td><b>${ABILITIES[a].icon} ${ABILITIES[a].name}</b><br><span class="tip">${ABILITIES[a].desc}</span></td>${mods.map(m => `<td>${m.ab.includes(a) ? '<span class="dot">●</span>' : ""}</td>`).join("")}</tr>`).join("")}
     </table></div>
     ${Object.keys(ABILITIES).filter(a => !ab.includes(a)).length ? `<p class="tip">うすく表示された力は、いまのプランではあつかっていません（${Object.keys(ABILITIES).filter(a => !ab.includes(a)).map(a => ABILITIES[a].name).join("・")}）。高めたいときは、その力に●がつく内容を加えてください。</p>` : ""}
 
-    <h3>④ 学習指導要領との関わり（例：中学校 音楽「B 鑑賞」）</h3>
+    <h3>⑥ 学習指導要領との関わり（例：中学校 音楽「B 鑑賞」）</h3>
     <ul>${cs.map(c => `<li>${CS_LABEL[c]}<br><span class="tip">→ ${mods.filter(m => m.cs.includes(c)).map(m => m.title).join("、")}</span></li>`).join("")}</ul>
 
-    <h3>⑤ 生徒に配るリンク</h3>
+    <h3>⑦ 生徒に配るリンク</h3>
     <p class="tip" style="margin-top:0">このリンクを開くと、生徒の画面が<b>このプランのステップ</b>になります（GitHub Pages など、公開したURLで開いたときに使えます）。</p>
     <div class="btnrow" style="margin-top:4px"><input readonly id="stuLink" style="flex:1;min-width:200px;border:1px solid var(--line);border-radius:10px;padding:8px;background:var(--bg)" value="${esc(studentLink())}"><button class="btn sec" id="copyLink">📋 コピー</button><span class="tip" id="copyLinkMsg"></span></div>`;
   box.querySelectorAll("[data-p]").forEach(b => b.onclick = () => { setPlan(PRESETS.find(p => p.id === b.dataset.p).ids); renderPlanTab(); });
