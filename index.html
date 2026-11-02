@@ -302,6 +302,32 @@ body.present .tch{max-width:none}
 .defbox{border:1px solid var(--line);border-radius:12px;padding:10px 14px;margin:8px 0 12px;background:var(--bg);display:flex;flex-direction:column;gap:6px;font-size:15px}
 .star{position:absolute;right:12px;top:22px;background:var(--theme);color:#3a2500;border-radius:999px;padding:2px 10px;font-size:12px;font-weight:800;z-index:1}
 
+/* ---------- 3D ensemble ---------- */
+.e3host{position:relative;overflow:hidden;background:#e9dcc8;border-radius:16px}
+.e3box{aspect-ratio:16/7.2;box-shadow:var(--shadow);margin:6px 0}
+.e3layer{position:absolute;inset:0;border-radius:0;z-index:0}
+.e3canvas{position:absolute;inset:0;width:100%;height:100%;display:block;touch-action:none}
+.e3msg{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;text-align:center;padding:16px;color:#6d635b;font-size:15px}
+.e3ov{position:absolute;inset:0;pointer-events:none}
+.e3ov button{pointer-events:auto}
+.e3who{position:absolute;left:10px;bottom:10px;background:rgba(255,255,255,.9);color:#2b2622;border-radius:999px;padding:3px 12px;font-size:13px;font-weight:700;max-width:70%}
+.stage .e3who{bottom:auto;top:40px}
+.e3views{position:absolute;top:8px;right:8px;display:flex;gap:4px;pointer-events:auto}
+.e3views button{border:1px solid rgba(0,0,0,.12);background:rgba(255,255,255,.9);color:#2b2622;border-radius:999px;padding:3px 11px;font-size:12px}
+.e3views button.on{border-color:#b08a2e;color:#8a6a10;font-weight:700}
+.e3legend{position:absolute;right:10px;bottom:10px;display:flex;gap:6px;font-size:11px}
+.e3legend span{background:rgba(255,255,255,.9);color:#2b2622;border-radius:999px;padding:1px 8px;border-left:4px solid}
+.stage .e3legend{bottom:auto;top:40px}
+.e3lab{position:absolute;transform:translate(-50%,-100%);border:1px solid rgba(0,0,0,.1);background:rgba(255,253,247,.95);color:#2b2622;border-radius:10px;padding:2px 9px;line-height:1.25;text-align:center;box-shadow:0 2px 6px rgba(0,0,0,.15);transition:opacity .3s;cursor:pointer;white-space:nowrap}
+.e3lab b{display:block;font-size:13px}
+.e3lab small{display:block;font-size:10.5px}
+.e3lab.solo,.e3legend .solo{border-left:4px solid #c0392b}
+.e3lab.tutti,.e3legend .tutti{border-left:4px solid #2b6cb0}
+.e3lab.cont,.e3legend .cont{border-left:4px solid #8a5a2b}
+.e3lab.solo small{color:#c0392b}.e3lab.tutti small{color:#2b6cb0}.e3lab.cont small{color:#8a5a2b}
+.e3lab.rest{opacity:.38}
+@media (max-width:600px){ .e3lab b{font-size:11px} .e3lab small{display:none} .e3legend{display:none} .stage .e3who{display:none} .e3who{font-size:11px} .e3box{aspect-ratio:4/3} .e3views button{padding:2px 8px} }
+
 /* ---------- photos ---------- */
 .phgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:12px;margin:8px 0 14px}
 .ph{margin:0;border:1px solid var(--line);border-radius:14px;overflow:hidden;background:var(--bg);cursor:zoom-in;display:flex;flex-direction:column}
@@ -422,6 +448,10 @@ body.present .tch{max-width:none}
         </div>
         <div class="tside">
           <div class="card">
+            <div class="btnrow" style="margin-top:0;margin-bottom:6px">
+              <button class="smallbtn on" data-sv="scene">🌸 情景</button>
+              <button class="smallbtn" data-sv="e3d">🎻 3D合奏</button>
+            </div>
             <div class="btnrow" style="margin-top:0">
               <button class="smallbtn" id="tHide">🙈 場面名をかくす</button>
               <button class="smallbtn" id="tPoem">📜 詩を表示</button>
@@ -836,6 +866,381 @@ function loop(now){
 }
 const tick = [];
 
+/* ================= 3Dの合奏（独奏ヴァイオリン＋弦楽合奏＋通奏低音） ================= */
+// 奏者は +z（客席）を向く。奏者の右手は −x、左手は +x（雅楽シミュレーターと同じ向き）。
+const Ens3D = (() => {
+  const THREE_URL = "https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js";
+  const ORBIT_URL = "https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js";
+  // 名札（グループ）。photo は写真の id
+  const GROUPS = [
+    {key:"solo", name:"独奏ヴァイオリン", role:"主役",         cls:"solo", photo:"violin"},
+    {key:"vn1",  name:"第1ヴァイオリン",  role:"旋律",         cls:"tutti", photo:"violin"},
+    {key:"vn2",  name:"第2ヴァイオリン",  role:"旋律を支える", cls:"tutti", photo:"violin"},
+    {key:"va",   name:"ヴィオラ",         role:"中の音",       cls:"tutti", photo:"viola"},
+    {key:"bass", name:"チェロ・コントラバス", role:"低い音（通奏低音）", cls:"cont", photo:"cello"},
+    {key:"hp",   name:"チェンバロ",       role:"和音（通奏低音）", cls:"cont", photo:"harpsichord"},
+  ];
+  // 席（x, z）。客席から見て左が −x
+  const SEATS = [
+    {grp:"solo", type:"vn", x:-0.7, z:1.7, coat:0xb08a2e},
+    {grp:"vn1", type:"vn", x:-2.5, z:0.7, coat:0x7a2430}, {grp:"vn1", type:"vn", x:-3.3, z:-0.4, coat:0x7a2430}, {grp:"vn1", type:"vn", x:-2.0, z:-0.6, coat:0x7a2430},
+    {grp:"vn2", type:"vn", x:2.5, z:0.7, coat:0x243a6b},  {grp:"vn2", type:"vn", x:3.3, z:-0.4, coat:0x243a6b},  {grp:"vn2", type:"vn", x:2.0, z:-0.6, coat:0x243a6b},
+    {grp:"va", type:"va", x:1.6, z:-1.9, coat:0x2f5a3c},  {grp:"va", type:"va", x:2.8, z:-1.7, coat:0x2f5a3c},
+    {grp:"bass", type:"vc", x:-1.5, z:-2.0, coat:0x5a3a22}, {grp:"bass", type:"vc", x:-2.7, z:-1.8, coat:0x5a3a22},
+    {grp:"bass", type:"cb", x:-1.2, z:-3.3, coat:0x5a3a22},
+    {grp:"hp", type:"hp", x:0.35, z:-3.9, coat:0x2a2a2a},
+  ];
+  const WHO = {
+    theme:  ["合奏（全員）", "春の主題"],
+    birds:  ["独奏＋2人のヴァイオリン", "小鳥のさえずり"],
+    stream: ["合奏（全員）", "細かい音で泉の流れ"],
+    storm:  ["合奏のトレモロ＋独奏の速い音階", "雷と稲妻"],
+    solo:   ["独奏＋通奏低音（チェロ・チェンバロ）", "独奏の見せ場"],
+  };
+  function actOf(p, kind){
+    if (kind === "birds") return p.grp === "solo" || ((p.grp === "vn1" || p.grp === "vn2") && p.chair === 0) ? 1 : 0;
+    if (kind === "solo") return p.grp === "solo" || p.grp === "hp" || (p.grp === "bass" && p.chair === 0) ? 1 : 0;
+    return 1;
+  }
+  function styleOf(p, kind){
+    const cont = p.grp === "bass" || p.grp === "hp";
+    if (kind === "storm") return p.grp === "solo" ? "scale" : "trem";
+    if (kind === "stream") return cont ? "cont" : "murmur";
+    if (kind === "birds") return "trill";
+    if (kind === "solo") return p.grp === "solo" ? "scale" : "cont";
+    return cont ? "cont" : "norm";
+  }
+  const STYLE = { norm:{sp:2.0, a:.30}, trem:{sp:11, a:.05}, murmur:{sp:4.5, a:.10}, trill:{sp:2.6, a:.22}, scale:{sp:4.0, a:.32}, cont:{sp:1.4, a:.30} };
+
+  let loading = null, ready = false, failed = false;
+  let R, scene, cam, ctl, hemi, sun, overlay, curHost = null, hosts = [], view = "front", camGoal = null;
+  let players = [], labels = {}, winMat, ring, flash = 0, lastLight = -1, lastT = performance.now(), whoEl, viewBtns;
+
+  function load(src){ return new Promise((res, rej) => { const s = document.createElement("script"); s.src = src; s.onload = res; s.onerror = rej; document.head.appendChild(s); }); }
+  function ensure(){
+    if (!loading) loading = (window.THREE ? Promise.resolve() : load(THREE_URL))
+      .then(() => THREE.OrbitControls ? 0 : load(ORBIT_URL))
+      .then(() => { build(); ready = true; })
+      .catch(e => { failed = true; hosts.forEach(msg); throw e; });
+    return loading;
+  }
+  function msg(h){ const m = h.querySelector(".e3msg"); if (m) m.textContent = failed ? "3Dの表示にはインターネット接続が必要です（音と他の機能はそのまま使えます）" : "🎻 3Dを読み込み中…"; }
+  function attach(host){
+    host.classList.add("e3host");
+    if (!host.querySelector(".e3msg")) host.insertAdjacentHTML("beforeend", `<div class="e3msg"></div>`);
+    if (!hosts.includes(host)) hosts.push(host); msg(host); ensure().catch(() => {});
+  }
+
+  /* ---------- 部品 ---------- */
+  const V = (x,y,z) => new THREE.Vector3(x,y,z);
+  let M = {};
+  function mat(c, o={}){ return new THREE.MeshStandardMaterial(Object.assign({color:new THREE.Color(c).convertSRGBToLinear(), roughness:.6, metalness:0}, o)); }
+  function mesh(geo, m, par, cast=true){ const x = new THREE.Mesh(geo, m); x.castShadow = cast; x.receiveShadow = true; if (par) par.add(x); return x; }
+  function limb(par, m, r, r2){ return mesh(new THREE.CylinderGeometry(r, r2 || r, 1, 10), m, par); }
+  let _d, _p, _y, _H, _C, _B, _E, _L, _q, _v;
+  function setLimb(m, a, b){ _d.subVectors(b, a); const L = Math.max(1e-4, _d.length()); m.position.copy(a).addScaledVector(_d, .5); m.scale.set(1, L, 1); m.quaternion.setFromUnitVectors(_y, _d.multiplyScalar(1/L)); }
+  const UA = .30, FA = .28;
+  function elbow(out, s, h, side){ _d.subVectors(h, s); const L = _d.length(), Lc = Math.min(L, UA + FA - .002); _d.normalize();
+    const a = (UA*UA - FA*FA + Lc*Lc) / (2*Lc), hgt = Math.sqrt(Math.max(0, UA*UA - a*a));
+    _p.set(side * .7, -1, -.15); _p.addScaledVector(_d, -_p.dot(_d)).normalize();
+    return out.copy(s).addScaledVector(_d, a).addScaledVector(_p, hgt); }
+  function basisQ(dir, up){ const X = dir.clone().normalize(), Z = up.clone().addScaledVector(X, -up.dot(X)).normalize(), Y = new THREE.Vector3().crossVectors(Z, X);
+    return new THREE.Quaternion().setFromRotationMatrix(new THREE.Matrix4().makeBasis(X, Y, Z)); }
+
+  // ヴァイオリン族の形（長さ1、幅は比率）。x＝しっぽ→渦巻き、z＝表板の向き
+  let bodyGeo = {};
+  function violinBody(depth){
+    if (bodyGeo[depth]) return bodyGeo[depth];
+    const top = [[0,0],[.02,.11],[.09,.165],[.19,.165],[.27,.12],[.31,.10],[.36,.115],[.45,.14],[.53,.12],[.585,.06],[.6,0]];
+    const s = new THREE.Shape(); s.moveTo(0, 0);
+    s.splineThru(top.slice(1).map(p => new THREE.Vector2(p[0], p[1])));
+    s.splineThru(top.slice(0, -1).reverse().map(p => new THREE.Vector2(p[0], -p[1])));
+    const g = new THREE.ExtrudeGeometry(s, {depth, bevelEnabled:true, bevelThickness:depth*.35, bevelSize:.012, bevelSegments:3, curveSegments:24});
+    return bodyGeo[depth] = g;
+  }
+  // 楽器（L＝全長m、depth＝厚み比）
+  function stringInst(L, depth, endpin){
+    const g = new THREE.Group(), s = new THREE.Group(); s.scale.setScalar(L); g.add(s);
+    mesh(violinBody(depth), M.wood, s);
+    const zt = depth * 1.35;                                        // 表板の上の高さ
+    const fb = mesh(new THREE.BoxGeometry(.43, .045, .02), M.ebony, s); fb.position.set(.66, 0, zt + .02);
+    const nk = mesh(new THREE.BoxGeometry(.33, .04, .035), M.wood, s); nk.position.set(.76, 0, zt - .01);
+    const pb = mesh(new THREE.BoxGeometry(.08, .035, .04), M.wood, s); pb.position.set(.92, 0, zt);
+    const sc = mesh(new THREE.TorusGeometry(.022, .011, 6, 14), M.wood, s); sc.position.set(.975, 0, zt + .005); sc.rotation.x = Math.PI/2;
+    const tp = mesh(new THREE.BoxGeometry(.16, .05, .012), M.ebony, s); tp.position.set(.11, 0, zt + .005);
+    const br = mesh(new THREE.BoxGeometry(.012, .07, .045), M.bridge, s); br.position.set(.33, 0, zt + .02);
+    const pts = []; for (let k = 0; k < 4; k++){ const y = (k - 1.5) * .009; pts.push(.03, y, zt + .012, .9, y, zt + .03); }
+    const lg = new THREE.BufferGeometry(); lg.setAttribute("position", new THREE.Float32BufferAttribute(pts, 3));
+    s.add(new THREE.LineSegments(lg, M.string));
+    if (endpin){ const ep = mesh(new THREE.CylinderGeometry(.006, .004, endpin, 6), M.metal, s); ep.rotation.z = Math.PI/2; ep.position.set(-endpin/2, 0, depth*.6); }
+    g.userData = {L, zt:zt * L, contact:.37 * L, neck:.64 * L};
+    return g;
+  }
+  function makeBow(len){
+    const g = new THREE.Group();
+    const st = mesh(new THREE.CylinderGeometry(.006, .004, len, 6), M.bowstick, g, false); st.rotation.z = -Math.PI/2; st.position.x = len/2;
+    const hr = mesh(new THREE.BoxGeometry(len*.92, .002, .008), M.hair, g, false); hr.position.set(len*.48, -.018, 0);
+    const fr = mesh(new THREE.BoxGeometry(.04, .03, .015), M.ebony, g, false); fr.position.set(.02, -.012, 0);
+    g.userData.len = len; return g;
+  }
+  function harpsichord(){
+    const g = new THREE.Group();
+    // 平面形（x：横、y：奥行き＝客席方向）。まっすぐな側（spine）は奏者の左（+x）、曲がった側は右（−x）
+    // 形を x−y 平面に描き（y は −奥行き）、x 軸まわりに倒すと奥行きが +z、厚みが上向きになる
+    const s = new THREE.Shape(); s.moveTo(.46, 0); s.lineTo(-.46, 0); s.lineTo(-.46, -.55);
+    s.bezierCurveTo(-.46, -1.1, .0, -1.5, .28, -2.05); s.lineTo(.46, -2.0); s.lineTo(.46, 0);
+    const caseGeo = new THREE.ExtrudeGeometry(s, {depth:.26, bevelEnabled:false, curveSegments:24});
+    const cs = mesh(caseGeo, M.hpcase, g); cs.rotation.x = -Math.PI/2; cs.position.y = .66;
+    const inside = mesh(new THREE.ShapeGeometry(s, 24), M.sound, g, false);
+    inside.rotation.x = -Math.PI/2; inside.scale.set(.93, .95, 1); inside.position.set(.01, .923, .04);
+    // ふた（まっすぐな側の蝶番で開く）
+    const lid = new THREE.Group(); lid.position.set(.46, .92, 0); g.add(lid);
+    const lm = mesh(new THREE.ExtrudeGeometry(s, {depth:.015, bevelEnabled:false, curveSegments:24}), M.lid, lid);
+    lm.rotation.x = -Math.PI/2; lm.position.x = -.46; lid.rotation.z = -.62;
+    // 鍵盤
+    const kb = mesh(new THREE.BoxGeometry(.84, .03, .17), M.keys, g); kb.position.set(0, .8, -.06);
+    for (let k = 0; k < 27; k++) if ([0,1,3,4,5].includes(k % 7)){ const b = mesh(new THREE.BoxGeometry(.014, .02, .09), M.ebony, g, false); b.position.set(-.42 + (k + 1) * .03, .82, -.03); }
+    // 脚
+    [[-.4,.05],[.4,.05],[.4,1.9],[-.3,1.1]].forEach(([x,z]) => { const l = mesh(new THREE.CylinderGeometry(.03, .025, .66, 8), M.hpcase, g); l.position.set(x, .33, z); });
+    return g;
+  }
+  function chair(par, z){ const c = new THREE.Group(); par.add(c); c.position.z = z;
+    const seat = mesh(new THREE.BoxGeometry(.42, .05, .4), M.chair, c); seat.position.y = .44;
+    const back = mesh(new THREE.BoxGeometry(.42, .5, .04), M.chair, c); back.position.set(0, .72, -.2);
+    [[-.18,-.17],[.18,-.17],[-.18,.17],[.18,.17]].forEach(([x,zz]) => { const l = mesh(new THREE.CylinderGeometry(.018, .018, .44, 6), M.chair, c); l.position.set(x, .22, zz); });
+    return c; }
+  function stand(par, seated){ const h = seated ? .95 : 1.18, st = new THREE.Group(); par.add(st); st.position.set(.05, 0, .62);
+    const p = mesh(new THREE.CylinderGeometry(.012, .012, h, 6), M.metal, st); p.position.y = h/2;
+    const b = mesh(new THREE.BoxGeometry(.48, .34, .015), M.stand, st); b.position.set(0, h + .1, -.02); b.rotation.x = -.55;
+    const sh = mesh(new THREE.BoxGeometry(.44, .3, .004), M.paper, st, false); sh.position.set(0, h + .11, -.01); sh.rotation.x = -.55;
+    return st; }
+
+  // 奏者
+  function figure(cfg, idx){
+    const seated = cfg.type === "vc" || cfg.type === "hp";
+    const root = new THREE.Group(); root.position.set(cfg.x, 0, cfg.z);
+    root.rotation.y = Math.atan2(-cfg.x * .35, 6) ;                         // 少し内側（客席の中央）を向く
+    scene.add(root);
+    const coat = mat(cfg.coat, {roughness:.7}), skin = M.skin;
+    const hipY = seated ? .5 : .92, shY = seated ? 1.0 : 1.42, headY = shY + .2;
+    // 脚
+    if (seated){ chair(root, -.05);
+      [-1,1].forEach(sd => { const th = limb(root, M.breech, .075, .07); setLimb(th, V(sd*.1, hipY, 0), V(sd*.12, hipY, .42));
+        const sh = limb(root, M.stock, .055, .045); setLimb(sh, V(sd*.12, hipY, .42), V(sd*.13, .06, .46));
+        const ft = mesh(new THREE.BoxGeometry(.09, .06, .2), M.shoe, root); ft.position.set(sd*.13, .03, .52); });
+    } else {
+      [-1,1].forEach(sd => { const th = limb(root, M.breech, .075, .065); setLimb(th, V(sd*.09, hipY, 0), V(sd*.095, .5, .01));
+        const sh = limb(root, M.stock, .055, .045); setLimb(sh, V(sd*.095, .5, .01), V(sd*.1, .07, 0));
+        const ft = mesh(new THREE.BoxGeometry(.09, .06, .22), M.shoe, root); ft.position.set(sd*.1, .03, .06); });
+    }
+    // 胴（上着・チョッキ・すそ）
+    const torso = mesh(new THREE.CylinderGeometry(.16, .19, shY - hipY + .04, 14), coat, root); torso.position.y = (shY + hipY) / 2;
+    const vest = mesh(new THREE.BoxGeometry(.13, shY - hipY - .05, .05), M.vest, root); vest.position.set(0, (shY + hipY)/2 - .02, .165);
+    if (!seated){ const sk = mesh(new THREE.CylinderGeometry(.19, .27, .42, 14, 1, true), coat, root); sk.position.y = hipY - .17; sk.material.side = THREE.DoubleSide; }
+    else { const sk = mesh(new THREE.CylinderGeometry(.19, .25, .2, 14, 1, true), coat, root); sk.position.y = hipY - .02; }
+    const sh = mesh(new THREE.SphereGeometry(.17, 14, 8, 0, Math.PI*2, 0, Math.PI/2), coat, root); sh.scale.set(1.25, .45, .9); sh.position.y = shY - .02;
+    const crav = mesh(new THREE.BoxGeometry(.08, .08, .04), M.linen, root); crav.position.set(0, shY - .02, .15);
+    // 頭（かつら）
+    const head = new THREE.Group(); head.position.y = headY; root.add(head);
+    const nk = mesh(new THREE.CylinderGeometry(.045, .05, .1, 8), skin, root); nk.position.y = shY + .06;
+    const hd = mesh(new THREE.SphereGeometry(.1, 16, 12), skin, head); hd.scale.set(.95, 1.08, 1);
+    const wig = mesh(new THREE.SphereGeometry(.112, 16, 10, 0, Math.PI*2, 0, Math.PI*.62), M.wig, head); wig.position.set(0, .015, -.012);
+    [-1,1].forEach(sd => { const roll = mesh(new THREE.CylinderGeometry(.03, .03, .09, 10), M.wig, head); roll.rotation.x = Math.PI/2; roll.position.set(sd*.1, -.02, -.01); });
+    const q = mesh(new THREE.ConeGeometry(.03, .14, 8), M.ribbon, head); q.position.set(0, -.08, -.11); q.rotation.x = .5;
+    [-1,1].forEach(sd => { const e = mesh(new THREE.SphereGeometry(.011, 6, 6), M.eye, head, false); e.position.set(sd*.035, .015, .09); });
+    // 腕
+    const arms = {ru:limb(root, coat, .05, .042), rl:limb(root, coat, .042, .036), lu:limb(root, coat, .05, .042), ll:limb(root, coat, .042, .036),
+      rh:mesh(new THREE.SphereGeometry(.04, 10, 8), skin, root), lh:mesh(new THREE.SphereGeometry(.04, 10, 8), skin, root),
+      rc:mesh(new THREE.CylinderGeometry(.048, .055, .05, 10), M.linen, root), lc:mesh(new THREE.CylinderGeometry(.048, .055, .05, 10), M.linen, root)};
+    const P = {cfg, grp:cfg.grp, type:cfg.type, seated, root, head, arms, shR:V(-.19, shY - .03, 0), shL:V(.19, shY - .03, 0), hipY, shY, act:1, phase:Math.random()*6, sway:Math.random()*6, chair:0};
+    // 楽器
+    if (cfg.type === "hp"){
+      const h = harpsichord(); h.position.set(0, 0, .42); root.add(h); P.hp = h;
+    } else {
+      const spec = {vn:[.6, .07, 0, .74], va:[.68, .075, 0, .72], vc:[1.22, .1, .12, .7], cb:[1.78, .11, .1, .66]}[cfg.type];
+      const inst = stringInst(spec[0], spec[1], spec[2]); root.add(inst); P.inst = inst;
+      const bow = makeBow(spec[3]); root.add(bow); P.bow = bow;
+      if (cfg.type === "vn" || cfg.type === "va"){
+        const low = cfg.type === "va" ? -.02 : 0;
+        P.play = {p:V(.07, shY - .06 + low, .1), q:basisQ(V(.55, -.12, .83), V(-.5, 1, 0))};
+        P.rest = {p:V(.24, hipY + .12, .12), q:basisQ(V(.05, -1, .25), V(0, 0, 1))};
+        P.handRest = V(-.24, hipY + .02, .1); P.bowRest = V(.08, -1, .35).normalize();
+      } else if (cfg.type === "vc"){
+        P.play = P.rest = {p:V(.0, .1, .45), q:basisQ(V(.13, .93, -.36), V(0, .35, 1))};
+        P.handRest = V(-.24, hipY + .06, .36); P.bowRest = V(.2, -.75, .6).normalize();
+      } else {
+        P.play = P.rest = {p:V(.05, .03, .4), q:basisQ(V(.18, .95, -.25), V(-.25, .3, 1))};
+        P.handRest = V(-.26, hipY - .05, .12); P.bowRest = V(.1, -1, .2).normalize();
+      }
+    }
+    // 足もとの光（弾いているときに光る）
+    const gc = {solo:0xff7a5c, vn1:0x6fa8ff, vn2:0x6fa8ff, va:0x6fa8ff, bass:0xd9a15c, hp:0xd9a15c}[cfg.grp];
+    P.glow = mesh(new THREE.CircleGeometry(cfg.type === "hp" ? .7 : .42, 32), new THREE.MeshBasicMaterial({color:gc, transparent:true, opacity:0, depthWrite:false}), root, false);
+    P.glow.rotation.x = -Math.PI/2; P.glow.position.set(0, .015, cfg.type === "hp" ? .1 : .12);
+    return P;
+  }
+
+  function hallFloor(){
+    const c = document.createElement("canvas"); c.width = c.height = 512; const x = c.getContext("2d");
+    for (let i = 0; i < 8; i++) for (let j = 0; j < 8; j++){ x.fillStyle = (i + j) % 2 ? "#d9cfc0" : "#8f7d68"; x.fillRect(i*64, j*64, 64, 64);
+      x.globalAlpha = .08; for (let k = 0; k < 6; k++){ x.strokeStyle = "#fff"; x.beginPath(); x.moveTo(i*64 + Math.random()*64, j*64); x.bezierCurveTo(i*64+Math.random()*64, j*64+20, i*64+Math.random()*64, j*64+40, i*64+Math.random()*64, j*64+64); x.stroke(); } x.globalAlpha = 1; }
+    const t = new THREE.CanvasTexture(c); t.wrapS = t.wrapT = THREE.RepeatWrapping; t.repeat.set(4, 3); t.encoding = THREE.sRGBEncoding; return t;
+  }
+
+  function build(){
+    _d = new THREE.Vector3(); _p = new THREE.Vector3(); _y = new THREE.Vector3(0,1,0); _H = new THREE.Vector3(); _C = new THREE.Vector3();
+    _B = new THREE.Vector3(); _E = new THREE.Vector3(); _L = new THREE.Vector3(); _q = new THREE.Quaternion(); _v = new THREE.Vector3();
+    scene = new THREE.Scene();
+    scene.background = new THREE.Color(0xe9dcc8).convertSRGBToLinear();
+    scene.fog = new THREE.Fog(scene.background, 18, 34);
+    cam = new THREE.PerspectiveCamera(38, 2, .1, 80);
+    R = new THREE.WebGLRenderer({antialias:true, alpha:false});
+    R.setPixelRatio(Math.min(2, devicePixelRatio || 1)); R.shadowMap.enabled = true; R.shadowMap.type = THREE.PCFSoftShadowMap;
+    R.outputEncoding = THREE.sRGBEncoding; R.toneMapping = THREE.ACESFilmicToneMapping; R.toneMappingExposure = 1.1;
+    R.domElement.className = "e3canvas";
+    M = {
+      wood:mat(0x8a3f14, {roughness:.32, metalness:.05}), ebony:mat(0x1b1612, {roughness:.4}), bridge:mat(0xd9b98a), metal:mat(0x9a9a9a, {metalness:.8, roughness:.3}),
+      string:new THREE.LineBasicMaterial({color:0xdddddd}), bowstick:mat(0x4a2510, {roughness:.4}), hair:mat(0xf3eee2), skin:mat(0xe8c4a2, {roughness:.75}),
+      wig:mat(0xebe7e0, {roughness:.9}), ribbon:mat(0x151515), eye:mat(0x2a1d14), linen:mat(0xf7f4ee, {roughness:.9}), vest:mat(0xe9dcbc, {roughness:.8}),
+      breech:mat(0x3b2d22), stock:mat(0xf2efe8, {roughness:.9}), shoe:mat(0x161210, {roughness:.35}), chair:mat(0x6b3a1e, {roughness:.5}),
+      hpcase:mat(0x2d4a3e, {roughness:.45}), lid:mat(0x2d4a3e, {roughness:.45, side:THREE.DoubleSide}), sound:mat(0xd8c08c, {roughness:.6, side:THREE.DoubleSide}), keys:mat(0xf1ead8),
+      stand:mat(0x2a1a10), paper:mat(0xf3ecd8, {roughness:.95}),
+    };
+    // 光
+    hemi = new THREE.HemisphereLight(0xfff4e0, 0x6b5440, .75); scene.add(hemi);
+    sun = new THREE.DirectionalLight(0xfff0d8, 1.25); sun.position.set(-4, 9, 6); sun.castShadow = true;
+    sun.shadow.mapSize.set(1024, 1024); Object.assign(sun.shadow.camera, {left:-7, right:7, top:7, bottom:-7, near:1, far:25}); sun.shadow.bias = -.0005; scene.add(sun);
+    // 床と壁（教会の音楽室のような広間）
+    const floor = mesh(new THREE.PlaneGeometry(16, 12), new THREE.MeshStandardMaterial({map:hallFloor(), roughness:.35, metalness:.05}), scene, false); floor.rotation.x = -Math.PI/2; floor.position.z = -.5;
+    const wallM = mat(0xefe3cc, {roughness:.85}), trimM = mat(0xc9b48a, {roughness:.6, metalness:.15});
+    const wall = mesh(new THREE.PlaneGeometry(16, 7), wallM, scene, false); wall.position.set(0, 3.5, -6.2);
+    winMat = new THREE.MeshStandardMaterial({color:0xbfdcf0, emissive:new THREE.Color(0xcfe6ff), emissiveIntensity:.55, roughness:.2});
+    [-4.2, 0, 4.2].forEach(x => {
+      const arch = new THREE.Shape(); arch.moveTo(-.9, 0); arch.lineTo(-.9, 2.2); arch.absarc(0, 2.2, .9, Math.PI, 0, true); arch.lineTo(.9, 0); arch.lineTo(-.9, 0);
+      const w = mesh(new THREE.ShapeGeometry(arch, 20), winMat, scene, false); w.position.set(x, 1.2, -6.18);
+      const fr = mesh(new THREE.BoxGeometry(.08, 3.1, .06), trimM, scene, false); fr.position.set(x, 2.75, -6.15);
+      const fr2 = mesh(new THREE.BoxGeometry(1.8, .06, .06), trimM, scene, false); fr2.position.set(x, 2.4, -6.15);
+    });
+    [-6.3, -2.1, 2.1, 6.3].forEach(x => { const pl = mesh(new THREE.BoxGeometry(.5, 7, .3), trimM, scene); pl.position.set(x, 3.5, -6.05);
+      const cap = mesh(new THREE.BoxGeometry(.7, .2, .4), trimM, scene); cap.position.set(x, 5.2, -6); });
+    const base = mesh(new THREE.BoxGeometry(16, .35, .2), trimM, scene, false); base.position.set(0, .17, -6.1);
+    [-1, 1].forEach(sd => { const sw = mesh(new THREE.PlaneGeometry(12, 7), wallM, scene, false); sw.position.set(sd*8, 3.5, -.5); sw.rotation.y = -sd*Math.PI/2; });
+    // 燭台
+    [-2.1, 2.1].forEach(x => { const c = mesh(new THREE.CylinderGeometry(.03, .03, .25, 8), M.linen, scene, false); c.position.set(x, 3.2, -5.85);
+      const f = mesh(new THREE.SphereGeometry(.035, 8, 6), new THREE.MeshBasicMaterial({color:0xffc56b}), scene, false); f.position.set(x, 3.36, -5.85);
+      const pl = new THREE.PointLight(0xffb060, .35, 6); pl.position.set(x, 3.4, -5.6); scene.add(pl); });
+    // 独奏者の足もとの光
+    ring = mesh(new THREE.CircleGeometry(.75, 40), new THREE.MeshBasicMaterial({color:0xffe08a, transparent:true, opacity:0, depthWrite:false}), scene, false);
+    ring.rotation.x = -Math.PI/2; ring.position.set(SEATS[0].x, .012, SEATS[0].z);
+    // 奏者
+    const cnt = {};
+    players = SEATS.map((s, i) => { const P = figure(s, i); P.chair = cnt[s.grp] = (cnt[s.grp] === undefined ? 0 : cnt[s.grp] + 1); return P; });
+    // カメラ
+    ctl = new THREE.OrbitControls(cam, R.domElement); ctl.enableDamping = true; ctl.dampingFactor = .08; ctl.enablePan = false;
+    ctl.minDistance = 4; ctl.maxDistance = 16; ctl.maxPolarAngle = Math.PI * .49;
+    ctl.addEventListener("start", () => { camGoal = null; });
+    setView("front", true);
+    // 重ねる表示（名札・視点・いま弾いている人）
+    overlay = document.createElement("div"); overlay.className = "e3ov";
+    overlay.innerHTML = `<div class="e3who"></div>
+      <div class="e3views">${[["front","正面"],["top","真上"],["side","横"]].map(([k,n]) => `<button data-v="${k}">${n}</button>`).join("")}</div>
+      <div class="e3legend"><span class="solo">独奏</span><span class="tutti">合奏</span><span class="cont">通奏低音</span></div>
+      ${GROUPS.map(g => `<button class="e3lab ${g.cls}" data-g="${g.key}"><b>${g.name}</b><small>${g.role}</small></button>`).join("")}`;
+    whoEl = overlay.querySelector(".e3who"); viewBtns = overlay.querySelectorAll("[data-v]");
+    viewBtns.forEach(b => b.onclick = () => setView(b.dataset.v));
+    GROUPS.forEach(g => { labels[g.key] = overlay.querySelector(`[data-g="${g.key}"]`); labels[g.key].onclick = () => { if (typeof openLightbox === "function") openLightbox(g.photo, ["violin","viola","cello","contrabass","harpsichord"]); }; });
+  }
+  const VIEWS = { front:{p:[0, 3.1, 7.6], t:[0, 1.05, -1.2]}, top:{p:[0, 12.5, .6], t:[0, 0, -1.0]}, side:{p:[9.2, 3.2, 1.2], t:[-.3, 1.0, -1.0]} };
+  function setView(v, now){ view = v; const V0 = VIEWS[v]; camGoal = {p:new THREE.Vector3(...V0.p), t:new THREE.Vector3(...V0.t)};
+    if (now){ cam.position.copy(camGoal.p); ctl.target.copy(camGoal.t); camGoal = null; }
+    if (viewBtns) viewBtns.forEach(b => b.classList.toggle("on", b.dataset.v === v)); }
+
+  /* ---------- 毎フレーム ---------- */
+    function pose(P, kind, amp, dt, playing){
+    const target = actOf(P, kind); P.act += (target - P.act) * Math.min(1, dt * 4);
+    const st = STYLE[styleOf(P, kind)];
+    if (playing && target) P.phase += dt * st.sp * Math.PI * 2 * (st.sp > 6 ? 1 : (.65 + amp));
+    const a = P.act;
+    // 体のゆれ（独奏者は大きく）
+    P.sway += dt * (playing ? 1.6 : .4);
+    const sw = (P.grp === "solo" ? .06 : .025) * a * (playing ? .4 + amp : .2);
+    P.head.rotation.z = Math.sin(P.sway) * sw * 1.5; P.head.rotation.x = .12 + Math.sin(P.sway * .7) * sw;
+    if (P.hp){
+      const k = playing && target ? 1 : 0, t = P.phase;
+      const hR = V(-.14 + Math.sin(t * .9) * .05, .86 + Math.abs(Math.sin(t * 3)) * .02 * k, .38).lerp(V(-.16, P.hipY + .05, .3), 1 - a);
+      const hL = V(.16 + Math.sin(t * .6 + 1) * .04, .86 + Math.abs(Math.sin(t * 3 + 1.3)) * .02 * k, .38).lerp(V(.16, P.hipY + .05, .3), 1 - a);
+      arm(P, hR, hL); return;
+    }
+    // 楽器：構える ⇔ 下ろす
+    P.inst.position.lerpVectors(P.rest.p, P.play.p, a); P.inst.quaternion.copy(P.rest.q).slerp(P.play.q, a);
+    const u = P.inst.userData;
+    _C.set(u.contact, 0, u.zt + .018).applyQuaternion(P.inst.quaternion).add(P.inst.position);
+    _B.set(0, 1, 0).applyQuaternion(P.inst.quaternion); if (_B.x < 0) _B.negate();       // 弓の向き：弦を横切る（手は奏者の右）
+    const bl = P.bow.userData.len, s = bl * (.48 + st.a * Math.sin(P.phase));
+    _H.copy(_C).addScaledVector(_B, -s);
+    _H.lerp(P.handRest, 1 - a); _B.lerp(P.bowRest, 1 - a).normalize();
+    P.bow.position.copy(_H); _q.setFromUnitVectors(V(1, 0, 0), _B); P.bow.quaternion.copy(_q);
+    // 左手：ネック（さえずり・トリルは指を細かく動かす）
+    const tr = styleOf(P, kind) === "trill" && playing && target ? Math.sin(performance.now() / 35) * .006 : 0;
+    _L.set(u.neck, -.01 + tr, u.zt * .6).applyQuaternion(P.inst.quaternion).add(P.inst.position);
+    arm(P, _H, _L);
+    // 独奏者は動きにあわせて少し体を回す
+    if (P.grp === "solo") P.root.rotation.y = Math.atan2(-P.cfg.x * .35, 6) + Math.sin(P.sway * .8) * .06 * a;
+  }
+  function arm(P, hR, hL){
+    const A = P.arms;
+    elbow(_E, P.shR, hR, -1); setLimb(A.ru, P.shR, _E); setLimb(A.rl, _E, hR); A.rh.position.copy(hR); A.rc.position.lerpVectors(_E, hR, .88); A.rc.quaternion.copy(A.rl.quaternion);
+    elbow(_E, P.shL, hL, 1); setLimb(A.lu, P.shL, _E); setLimb(A.ll, _E, hL); A.lh.position.copy(hL); A.lc.position.lerpVectors(_E, hL, .88); A.lc.quaternion.copy(A.ll.quaternion);
+  }
+
+  function frame(){
+    if (!ready) return;
+    // ページ送りで一時的にはずれている場所もあるので、消さずに残しておく（多くなったら古いものから捨てる）
+    if (hosts.length > 12) hosts = hosts.slice(-12);
+    const host = hosts.find(h => h.isConnected && h.offsetParent && h.clientWidth > 40);
+    if (!host) return;
+    if (curHost !== host){ host.appendChild(R.domElement); host.appendChild(overlay); curHost = host; const m = host.querySelector(".e3msg"); if (m) m.remove(); }
+    const w = host.clientWidth, h = host.clientHeight;
+    if (R.domElement.width !== Math.round(w * R.getPixelRatio()) || R.domElement.height !== Math.round(h * R.getPixelRatio())){ R.setSize(w, h, false); cam.aspect = w / h; cam.updateProjectionMatrix(); }
+    const now = performance.now(), dt = Math.min(.05, (now - lastT) / 1000); lastT = now;
+    const t = au.currentTime, si = secAt(t), sec = SECTIONS[si], kind = sec.kind, playing = !au.paused, amp = playing ? envAt(t) : .2;
+    players.forEach(P => pose(P, kind, amp, dt, playing));
+    // 光：嵐は暗く、稲妻で光る
+    const storm = kind === "storm" ? 1 : 0;
+    if (storm){ const rel = t - sec.t; LIGHTNING_OFFSETS.forEach((o, k) => { if (rel >= o && rel < o + .4 && lastLight !== k){ lastLight = k; flash = 1; } }); } else lastLight = -1;
+    flash = Math.max(0, flash - dt * 2.5);
+    hemi.intensity += ((storm ? .35 : .75) + flash * 1.2 - hemi.intensity) * Math.min(1, dt * 6);
+    sun.intensity += ((storm ? .5 : 1.25) + flash - sun.intensity) * Math.min(1, dt * 6);
+    winMat.emissive.setRGB(...(storm ? [.25 + flash, .27 + flash, .35 + flash] : [.8, .9, 1]));
+    const spot = kind === "birds" || kind === "solo" ? 1 : kind === "storm" ? .5 : 0;
+    ring.material.opacity += (spot * .45 - ring.material.opacity) * Math.min(1, dt * 4);
+    players.forEach(P => { const on = actOf(P, kind) ? (playing ? .32 + amp * .35 : .18) : 0; P.glow.material.opacity += (on - P.glow.material.opacity) * Math.min(1, dt * 5); });
+    // カメラ
+    if (camGoal){ cam.position.lerp(camGoal.p, Math.min(1, dt * 3)); ctl.target.lerp(camGoal.t, Math.min(1, dt * 3)); if (cam.position.distanceTo(camGoal.p) < .02) camGoal = null; }
+    ctl.update();
+    R.render(scene, cam);
+    // 名札
+    const hide = curHost.closest("#teacher") ? tHide : stuHide, wk = WHO[kind] || ["", ""];
+    whoEl.textContent = `いま：${wk[0]}${hide ? "" : "（" + wk[1] + "）"}`;
+    GROUPS.forEach(g => {
+      const ps = players.filter(p => p.grp === g.key); _v.set(0, 0, 0); ps.forEach(p => _v.add(p.root.position)); _v.multiplyScalar(1 / ps.length);
+      _v.y = (ps[0].seated ? 1.55 : 2.0); if (g.key === "hp") _v.z += .3;
+      _v.project(cam); const el = labels[g.key];
+      if (_v.z > 1){ el.style.display = "none"; return; }
+      el.style.display = ""; el._x = (_v.x + 1) / 2 * w; el._y = (1 - _v.y) / 2 * h;
+      el.classList.toggle("rest", !ps.some(p => actOf(p, kind)));
+    });
+    // 名札が重ならないように、上へずらす
+    const vis = GROUPS.map(g => labels[g.key]).filter(el => el.style.display !== "none").sort((a, b) => b._y - a._y);
+    vis.forEach((el, i) => { const wi = el.offsetWidth, hi = el.offsetHeight;
+      for (let k = 0; k < i; k++){ const o = vis[k]; if (Math.abs(o._x - el._x) < (wi + o.offsetWidth) / 2 + 4 && el._y > o._y - hi - 3 && el._y < o._y + hi) el._y = o._y - hi - 3; }
+      el.style.left = el._x + "px"; el.style.top = Math.max(hi + 2, el._y) + "px"; });
+  }
+  return {attach, frame};
+})();
+
+tick.push(() => Ens3D.frame());
+
 /* ================= 画面切りかえ ================= */
 const views = {home:document.getElementById("home"), student:document.getElementById("student"), teacher:document.getElementById("teacher")};
 let mode = "home";
@@ -882,7 +1287,7 @@ const MODULES = [
    act:"主題がもどることに気づき、リトルネロ形式を知る", ask:"「最初のメロディーがもどってきたら手を挙げよう」「なぜ何度ももどってくるのだろう？」", app:"🌸主題さがしゲーム → 提示画面のタイムライン（色の並び）"},
   {id:"concerto", title:"協奏曲ってなに？", mins:15,
    aim:"独奏と合奏の関わりを聴き取り、協奏曲というジャンルを知る", know:["協奏曲","独奏と合奏","楽章","速度","テクスチュア"], tips:["kakeai","atsumi"], think:["chikaku","riyu"], ab:["kiku","haikei"], cs:["イ(ア)","イ(イ)"],
-   act:"協奏曲（独奏と合奏）と楽章構成を知る", ask:"「いまは独奏？ 合奏？」「独奏と合奏が交代すると、どんな感じがする？」", app:"📚知識カード「協奏曲」"},
+   act:"協奏曲（独奏と合奏）と楽章構成を知る", ask:"「いまは独奏？ 合奏？」「独奏と合奏が交代すると、どんな感じがする？」", app:"提示画面の🎻3D合奏（だれが弾いているかが動きでわかる）／📚知識カード「協奏曲」"},
   {id:"instruments", title:"楽器と奏法", mins:15,
    aim:"楽器や弾き方（奏法）による音色のちがいを知り、情景の表し方に気づく", know:["弦楽器","チェンバロ","通奏低音","トリル","トレモロ","音階","音色"], tips:["oto_e"], think:["chikaku","riyu"], ab:["kiku","haikei"], cs:["イ(ア)","イ(イ)"],
    act:"楽器と奏法を知り、音色に注目して聴く", ask:"「小鳥のさえずりや雷は、どんな弾き方で表している？」", app:"📚知識カード「楽器と奏法」の ▶聴く"},
@@ -1228,6 +1633,9 @@ const CONTENT = {
           <div class="ens-row low"><span>チェロ</span><span>コントラバス</span><span>チェンバロ</span></div>
           <div class="tip">下の段は<b>通奏低音</b>：低い音と和音で全体を支えます</div></div></div>
       </div>
+      <h3>3Dで見る：いま、だれが弾いている？</h3>
+      <div class="e3box"></div>
+      <p class="tip" style="margin:0">下の ▶ で再生すると、弾いている人が動き、休んでいる人は楽器を下ろします。名札を押すと楽器の写真が見られます。</p>
       <h3>写真で見る演奏形態</h3>
       ${photoGrid(["concerto","strings","continuo"])}
       <h3>独奏と合奏の「かけ合い」</h3>
@@ -1320,6 +1728,7 @@ function renderContent(id, root, doneId){
   if (C.techs){ const T = C.techs(); root.querySelectorAll("[data-tech]").forEach(b => b.onclick = () => { const [f,l] = T[+b.dataset.tech](); playClip(f, l); }); }
   miniQuiz(root.querySelector(".mqbox"), C.quiz(), doneId);
   fillPhotos(root);
+  root.querySelectorAll(".e3box").forEach(h => Ens3D.attach(h));
 }
 
 /* ================= 生徒モード ================= */
@@ -1713,6 +2122,15 @@ document.getElementById("tHide").onclick = () => { tHide = !tHide; applyTHide();
 document.getElementById("tPoem").onclick = e => { tPoem = !tPoem; e.target.classList.toggle("on", tPoem); tScene.dirty = true; };
 document.getElementById("tPoem").classList.add("on");
 document.getElementById("tFull").onclick = () => togglePresent();
+function setStageView(v){
+  store.set("stageView", v);
+  document.querySelectorAll("[data-sv]").forEach(b => b.classList.toggle("on", b.dataset.sv === v));
+  const st = document.getElementById("tStage"); let L = st.querySelector(".e3layer");
+  if (v === "e3d" && !L){ L = document.createElement("div"); L.className = "e3layer"; st.querySelector("canvas").after(L); Ens3D.attach(L); }
+  if (L) L.classList.toggle("hidden", v !== "e3d");
+}
+document.querySelectorAll("[data-sv]").forEach(b => b.onclick = () => setStageView(b.dataset.sv));
+if (store.get("stageView", "scene") === "e3d") setStageView("e3d");
 function togglePresent(force){
   const on = force != null ? force : !document.body.classList.contains("present");
   document.body.classList.toggle("present", on);
