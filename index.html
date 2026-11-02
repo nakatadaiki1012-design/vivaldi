@@ -322,7 +322,13 @@ body.present .tch{max-width:none}
 .scv-staff{position:relative;min-height:40px}
 .scv-staff svg{display:block}
 .scv-msg{padding:10px;color:#6d635b;font-size:13px;text-align:center}
-.scv-cur{position:absolute;top:0;width:3px;margin-left:-1px;background:rgba(226,85,122,.55);border-radius:2px;pointer-events:none;transition:left .06s linear}
+.scv-staff{overflow:hidden}
+.scv-track{position:relative;height:120px;transition:height .25s}
+.scv-track.busy::after{content:"🎼 楽譜を準備中…";position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:#6d635b;font-size:13px;background:rgba(255,253,247,.85);z-index:3}
+.scv-strip{position:absolute;left:0;top:0;will-change:transform}
+.scv-fix{position:absolute;left:0;top:0;background:linear-gradient(90deg,#fffdf7 85%,rgba(255,253,247,0));z-index:1;will-change:transform}
+.scv-play{position:absolute;top:0;bottom:0;width:3px;margin-left:-1px;background:rgba(226,85,122,.6);border-radius:2px;pointer-events:none;z-index:2}
+.scv-staff > .scv-msg{position:absolute;inset:0;display:flex;align-items:center;justify-content:center}
 .scv-on path,.scv-on rect{fill:#e2557a!important;stroke:#e2557a!important}
 @media (max-width:600px){ .scv-info{margin-left:0;font-size:11px} }
 
@@ -1597,7 +1603,7 @@ const ScoreView = (() => {
         <div class="scv-parts">${PARTS.filter(p => p.key !== "all" || opts.who === "tch").map(p => `<button data-p="${p.key}">${p.name}</button>`).join("")}</div>
         <span class="scv-info"></span>
       </div>
-      <div class="scv-staff"><div class="scv-msg">🎼 楽譜を読み込み中…</div></div>`;
+      <div class="scv-staff"><div class="scv-track"></div><div class="scv-play"></div><div class="scv-msg">🎼 楽譜を読み込み中…</div></div>`;
     hosts.push(host);
     host.querySelector(".scv-tog").onclick = () => { setOpen(host, !isOpen(host)); };
     host.querySelectorAll("[data-p]").forEach(b => b.onclick = () => setPart(b.dataset.p));
@@ -1655,77 +1661,97 @@ const ScoreView = (() => {
     return out;
   }
   function clefOf(pk){ return (PARTS.find(p => p.key === pk) || {}).clef || "treble"; }
-  function drawStaff(VF, ctx, pk, ms, x0, y, width, first, label){
-    const res = [], texts = textMap(pk);
-    // 小節の幅は音の数に合わせて配分（先頭の小節には音部記号と調号の分を足す）
-    const pre = ms.map(m => buildMeasureNotes(VF, pk, m, texts));
-    const head = first ? 78 : 0, wt = pre.map(it => 6 + it.length), sum = wt.reduce((a, b) => a + b, 0);
-    let x = x0;
-    ms.forEach((m, i) => {
-      const w = (width - head) * wt[i] / sum + (i === 0 ? head : 0);
-      const st = new VF.Stave(x, y, w);
-      if (i === 0){ st.addClef(clefOf(pk)).addKeySignature("E"); if (m <= 1) st.addTimeSignature("C"); }
-      st.setMeasure(m).setContext(ctx).draw();
-      if (label && i === 0){ ctx.save(); ctx.setFont("sans-serif", 13, "bold"); ctx.fillText(label, 2, y + 48); ctx.restore(); }
-      const items = pre[i];
-      if (!items.length){ x += w; return; }
-      const notes = items.map(it => it.sn);
-      const voice = new VF.Voice({num_beats:4, beat_value:4}).setMode(VF.Voice.Mode.SOFT).addTickables(notes);
-      try{ VF.Accidental.applyAccidentals([voice], "E"); }catch(e){}
-      // 「必ず書く」臨時記号（楽譜の ! ）
-      items.forEach(it => { if ((it.fl & 16384) && !it.sn.getModifiersByType("Accidental").length) it.sn.addModifier(new VF.Accidental(ACC[it.name.slice(1)] || "n"), 0); });
-      // 三連符（24分割で4または8の長さ）を3つずつまとめる
-      const tup = []; let run = [];
-      items.forEach(it => { if (!it.rest && (it.d === 4 || it.d === 8)){ run.push(it.sn); if (run.length === 3){ tup.push(new VF.Tuplet(run, {num_notes:3, notes_occupied:2, bracketed:false, ratioed:false})); run = []; } } else run = []; });
-      // 連桁：楽譜で [ ] と書かれたまとまりはそのまま、それ以外は1拍ごと
-      const beams = [], beamable = it => !it.rest && it.d < 24;
-      let grp = null, free = [];
-      const flushFree = () => { if (free.length > 1){ try{ beams.push(...VF.Beam.generateBeams(free, {groups:[new VF.Fraction(1, 4)]})); }catch(e){} } free = []; };
-      items.forEach(it => {
-        if (grp){ grp.push(it.sn); if (it.fl & 8192){ if (grp.length > 1) beams.push(new VF.Beam(grp)); grp = null; } return; }
-        if ((it.fl & 4096) && beamable(it)){ flushFree(); grp = [it.sn]; if (it.fl & 8192) grp = null; return; }
-        if (beamable(it)) free.push(it.sn); else flushFree();
-      });
-      if (grp && grp.length > 1) beams.push(new VF.Beam(grp));
-      flushFree();
-      new VF.Formatter().joinVoices([voice]).format([voice], w - (st.getNoteStartX() - x) - 10);
-      voice.draw(ctx, st); beams.forEach(b => b.setContext(ctx).draw()); tup.forEach(t => t.setContext(ctx).draw());
-      items.forEach(it => res.push({t0:it.t0, t1:it.t1, sn:it.sn, x:it.sn.getAbsoluteX(), rest:!!it.rest, fl:it.fl, midi:it.sn.keys, start:it.start}));
-      x += w;
+  const ALL = ["solo","vn1","vn2","va","bass"];
+  // 小節の幅：全パートで共通にして、縦（総譜）とパートの切りかえで位置がそろうようにする
+  let layout = null;
+  function getLayout(){
+    if (layout) return layout;
+    const mw = [], mx = []; let x = 0;
+    for (let m = 0; m <= MEAS; m++){
+      const s = mStart(m), e = mEnd(m); let c = 0;
+      ALL.forEach(pk => { let k = 0; for (const n of SCORE.parts[pk]) if (n[0] < e && n[0] + n[1] > s) k++; c = Math.max(c, k); });
+      const w = Math.max(m === 0 ? 60 : 150, 44 + c * 20) + (m === 0 ? 92 : 0);
+      mx.push(x); mw.push(w); x += w;
+    }
+    return layout = {mx, mw, total:x};
+  }
+  // 1小節を描く
+  function drawMeasure(VF, ctx, pk, m, x, y, w, texts){
+    const st = new VF.Stave(x, y, w);
+    if (m === 0) st.addClef(clefOf(pk)).addKeySignature("E").addTimeSignature("C");
+    st.setMeasure(m).setContext(ctx).draw();
+    const items = buildMeasureNotes(VF, pk, m, texts), res = [];
+    if (!items.length) return res;
+    const notes = items.map(it => it.sn);
+    const voice = new VF.Voice({num_beats:4, beat_value:4}).setMode(VF.Voice.Mode.SOFT).addTickables(notes);
+    try{ VF.Accidental.applyAccidentals([voice], "E"); }catch(e){}
+    items.forEach(it => { if ((it.fl & 16384) && !it.sn.getModifiersByType("Accidental").length) it.sn.addModifier(new VF.Accidental(ACC[it.name.slice(1)] || "n"), 0); });
+    const tup = []; let run = [];
+    items.forEach(it => { if (!it.rest && (it.d === 4 || it.d === 8)){ run.push(it.sn); if (run.length === 3){ tup.push(new VF.Tuplet(run, {num_notes:3, notes_occupied:2, bracketed:false, ratioed:false})); run = []; } } else run = []; });
+    const beams = [], beamable = it => !it.rest && it.d < 24;
+    let grp = null, free = [];
+    const flushFree = () => { if (free.length > 1){ try{ beams.push(...VF.Beam.generateBeams(free, {groups:[new VF.Fraction(1, 4)]})); }catch(e){} } free = []; };
+    items.forEach(it => {
+      if (grp){ grp.push(it.sn); if (it.fl & 8192){ if (grp.length > 1) beams.push(new VF.Beam(grp)); grp = null; } return; }
+      if ((it.fl & 4096) && beamable(it)){ flushFree(); grp = [it.sn]; if (it.fl & 8192) grp = null; return; }
+      if (beamable(it)) free.push(it.sn); else flushFree();
     });
-    // スラー・フレーズのスラー・タイ（2小節をまたいでもつなぐ。表示の外へ続くものは端まで）
+    if (grp && grp.length > 1) beams.push(new VF.Beam(grp));
+    flushFree();
+    new VF.Formatter().joinVoices([voice]).format([voice], w - (st.getNoteStartX() - x) - 12);
+    voice.draw(ctx, st); beams.forEach(b => b.setContext(ctx).draw()); tup.forEach(t => t.setContext(ctx).draw());
+    items.forEach(it => res.push({t0:it.t0, t1:it.t1, sn:it.sn, x:it.sn.getAbsoluteX(), rest:!!it.rest, fl:it.fl}));
+    return res;
+  }
+  // スラー・フレーズのスラー・タイ（パート全体で対応をとる）
+  function drawCurves(VF, ctx, res){
     const notes = res.filter(r => !r.rest), curves = [];
     [[16, 32, {thickness:2, y_shift:8}], [64, 128, {thickness:1.5, y_shift:20, cps:[{x:0, y:22}, {x:0, y:22}]}]].forEach(([S0, E0, opt]) => {
       const stack = [];
-      notes.forEach(n => {
-        if ((n.fl & E0) && !(n.fl & S0)){ const a = stack.pop(); curves.push(new VF.Curve(a ? a.sn : null, n.sn, opt)); }
-        if (n.fl & S0) stack.push(n);
-        if ((n.fl & E0) && (n.fl & S0)) {}
-      });
-      stack.forEach(a => curves.push(new VF.Curve(a.sn, null, opt)));
+      notes.forEach(n => { if ((n.fl & E0) && !(n.fl & S0)){ const a = stack.pop(); if (a) curves.push(new VF.Curve(a.sn, n.sn, opt)); } if (n.fl & S0) stack.push(n); });
     });
-    notes.forEach((n, i) => { if (n.fl & 1){ const nx = notes[i + 1]; curves.push(new VF.StaveTie({first_note:n.sn, last_note:nx ? nx.sn : null, first_indices:[0], last_indices:[0]})); } });
+    notes.forEach((n, i) => { if (n.fl & 1){ const nx = notes[i + 1]; if (nx) curves.push(new VF.StaveTie({first_note:n.sn, last_note:nx.sn, first_indices:[0], last_indices:[0]})); } });
     curves.forEach(c => { try{ c.setContext(ctx).draw(); }catch(e){} });
-    return res;
   }
-  function render(host, pk, m0){
-    const VF = Vex.Flow, box = host.querySelector(".scv-staff");
-    box.innerHTML = "";
-    const W = Math.max(320, box.clientWidth), ms = [m0, Math.min(MEAS, m0 + 1)].filter((v, i, a) => a.indexOf(v) === i);
-    const keys = pk === "all" ? ["solo","vn1","vn2","va","bass"] : [pk];
-    const sc = pk === "all" ? .72 : (W < 520 ? .8 : 1), rowH = pk === "all" ? 82 : 110, top = pk === "all" ? 10 : 26, lx = pk === "all" ? 62 : 6;
-    const H = Math.round((keys.length * rowH + 14 + top) * sc);
-    const r = new VF.Renderer(box, VF.Renderer.Backends.SVG); r.resize(W, H);
-    const ctx = r.getContext(); ctx.scale(sc, sc);
-    const all = [];
-    keys.forEach((k, i) => { const res = drawStaff(VF, ctx, k, ms, lx, top + i * rowH, W / sc - lx - 8, true, pk === "all" ? PARTS.find(p => p.key === k).name : ""); if (k === keys[0]) all.push(...res); });
-    const cur = document.createElement("div"); cur.className = "scv-cur"; box.appendChild(cur);
-    drawn = {notes:all, sc, cur, H};
+  function dims(pk, W){
+    const keys = pk === "all" ? ALL : [pk], sc = pk === "all" ? .7 : (W < 520 ? .8 : 1);
+    const rowH = pk === "all" ? 84 : 112, top = pk === "all" ? 12 : 28;
+    return {keys, sc, rowH, top, H:Math.round((keys.length * rowH + top + 8) * sc)};
+  }
+  // パート全体を1本の横長の楽譜にする（一度描いたら取っておく）
+  function buildStrip(host, pk){
+    const VF = Vex.Flow, L = getLayout(), track = host.querySelector(".scv-track"), D = dims(pk, track.clientWidth);
+    const el = document.createElement("div"); el.className = "scv-strip"; track.appendChild(el);
+    const r = new VF.Renderer(el, VF.Renderer.Backends.SVG); r.resize(Math.ceil((L.total + 20) * D.sc), D.H);
+    const ctx = r.getContext(); ctx.scale(D.sc, D.sc);
+    const rows = [];
+    D.keys.forEach((k, i) => {
+      const texts = textMap(k), res = [];
+      for (let m = 0; m <= MEAS; m++) res.push(...drawMeasure(VF, ctx, k, m, L.mx[m] + 6, D.top + i * D.rowH, L.mw[m], texts));
+      drawCurves(VF, ctx, res); rows.push(res);
+    });
+    // 時刻 → 横位置の対応（すべての段の音の頭）
+    const pts = {}; rows.flat().forEach(n => { if (pts[n.t0] === undefined || n.x < pts[n.t0]) pts[n.t0] = n.x; });
+    const T = Object.keys(pts).map(Number).sort((a, b) => a - b), X = T.map(t => pts[t]);
+    // 左に固定する音部記号と調号
+    const fix = document.createElement("div"); fix.className = "scv-fix";
+    const fr = new VF.Renderer(fix, VF.Renderer.Backends.SVG); fr.resize(Math.ceil((pk === "all" ? 150 : 100) * D.sc), D.H);
+    const fc = fr.getContext(); fc.scale(D.sc, D.sc);
+    D.keys.forEach((k, i) => { new VF.Stave(pk === "all" ? 52 : 4, D.top + i * D.rowH, 92).addClef(clefOf(k)).addKeySignature("E").setContext(fc).draw();
+      if (pk === "all"){ fc.save(); fc.setFont("sans-serif", 13, "bold"); fc.fillText(PARTS.find(p => p.key === k).name, 2, D.top + i * D.rowH + 48); fc.restore(); } });
+    el.appendChild(fix);
+    return {el, fix, rows, T, X, sc:D.sc, H:D.H, on:[]};
   }
   function textAt(pk, q24){
     const k = pk === "all" ? "solo" : pk, T = SCORE.texts[k] || [];
     let best = null; for (const [t, tx] of T){ if (t <= q24 && /Canto|Scorrono|Tuoni|Solo|Tutti/.test(tx)) best = tx; }
     return best;
+  }
+  function xAt(S, q){
+    const T = S.T, X = S.X; if (q <= T[0]) return X[0];
+    let lo = 0, hi = T.length - 1; if (q >= T[hi]) return X[hi];
+    while (hi - lo > 1){ const m = (lo + hi) >> 1; if (T[m] <= q) lo = m; else hi = m; }
+    return X[lo] + (X[hi] - X[lo]) * (q - T[lo]) / (T[hi] - T[lo]);
   }
 
   function frame(){
@@ -1737,19 +1763,36 @@ const ScoreView = (() => {
     const t = au.currentTime, q = qAt(t), m = measureOf(q), kind = SECTIONS[secAt(t)].kind;
     const pk = part === "auto" ? autoPart(kind) : part;
     const tx = textAt(pk, q);
-    const info = `${m === 0 ? "弱起" : "第" + m + "小節"}・${pk === "all" ? "総譜" : PNAME[pk]}${tx ? `　<b>「${tx.replace(/^(Solo|Tutti|Piano|Forte)\s+/, "")}」</b>（${jp(tx)}）` : ""}`;
+    const info = `${m === 0 ? "弱起" : "第" + m + "小節"}・${pk === "all" ? "総譜" : PNAME[pk]}${part === "auto" ? "（自動）" : ""}${tx ? `　<b>「${tx.replace(/^(Solo|Tutti|Piano|Forte)\s+/, "")}」</b>（${jp(tx)}）` : ""}`;
     if (vis._info !== info){ vis.querySelector(".scv-info").innerHTML = info; vis._info = info; }
     if (!host || !ready) return;
-    const key = pk + ":" + m + ":" + host.clientWidth;
-    if (key !== lastKey || host !== lastHost){ lastKey = key; lastHost = host; try{ render(host, pk, m); }catch(e){ console.error(e); host.querySelector(".scv-staff").innerHTML = `<div class="scv-msg">この小節は表示できませんでした</div>`; drawn = null; } }
-    if (!drawn) return;
-    // いまの音を光らせ、カーソルを動かす
-    const N = drawn.notes; let i = N.findIndex(n => q >= n.t0 && q < n.t1); if (i < 0) i = N.length - 1;
-    N.forEach((n, k) => { const el = n.sn.getSVGElement && n.sn.getSVGElement(); if (el) el.classList.toggle("scv-on", k === i && !n.rest); });
-    const a = N[i], b = N[i + 1];
-    let x = a ? a.x + 4 : 0;
-    if (a && b && b.x > a.x) x = a.x + 4 + (b.x - a.x) * Math.min(1, (q - a.t0) / (a.t1 - a.t0));
-    drawn.cur.style.left = (x * drawn.sc) + "px"; drawn.cur.style.height = drawn.H + "px";
+    const track = host.querySelector(".scv-track"); if (!track) return;
+    host._strips = host._strips || {};
+    // 横幅が変わったら描き直す
+    if (host._w !== track.clientWidth){ host._w = track.clientWidth; Object.values(host._strips).forEach(S => S.el.remove()); host._strips = {}; }
+    let S = host._strips[pk];
+    if (!S){
+      if (host._building) return;
+      host._building = true; track.classList.add("busy");
+      setTimeout(() => { try{ host._strips[pk] = buildStrip(host, pk); }catch(e){ console.error(e); } host._building = false; track.classList.remove("busy");
+        // 自動で切りかわる相手も先に作っておく
+        if (part === "auto") ["vn1","solo"].forEach(k => { if (!host._strips[k]) setTimeout(() => { if (!host._strips[k] && !host._building){ try{ host._strips[k] = buildStrip(host, k); host._strips[k].el.style.display = "none"; }catch(e){} } }, 300); });
+      }, 20);
+      return;
+    }
+    const msgEl = host.querySelector(".scv-msg"); if (msgEl) msgEl.remove();
+    if (host._cur !== pk){ Object.entries(host._strips).forEach(([k, s]) => s.el.style.display = k === pk ? "" : "none"); host._cur = pk; track.style.height = S.H + "px"; }
+    // 楽譜を横に流す：いまの位置が再生線（左から3割）にくる
+    const playX = Math.max(S.fix.offsetWidth + 30, track.clientWidth * .32);
+    const x = xAt(S, q) * S.sc;
+    S.el.style.transform = `translateX(${(playX - x - 6 * S.sc).toFixed(1)}px)`;
+    S.fix.style.transform = `translateX(${(-(playX - x - 6 * S.sc)).toFixed(1)}px)`;
+    host.querySelector(".scv-play").style.left = playX + "px";
+    // いまの音を光らせる（各段で1つ）
+    S.on.forEach(el => el.classList.remove("scv-on")); S.on = [];
+    S.rows.forEach(row => { let lo = 0, hi = row.length - 1, k = -1;
+      while (lo <= hi){ const mid = (lo + hi) >> 1; if (row[mid].t0 <= q){ k = mid; lo = mid + 1; } else hi = mid - 1; }
+      const n = row[k]; if (n && !n.rest && q < n.t1){ const el = n.sn.getSVGElement && n.sn.getSVGElement(); if (el){ el.classList.add("scv-on"); S.on.push(el); } } });
   }
   return {attach, frame, setPart};
 })();
