@@ -326,6 +326,33 @@ body.present .tch{max-width:none}
 .e3lab.cont,.e3legend .cont{border-left:4px solid #8a5a2b}
 .e3lab.solo small{color:#c0392b}.e3lab.tutti small{color:#2b6cb0}.e3lab.cont small{color:#8a5a2b}
 .e3lab.rest{opacity:.38}
+#e3sheet{position:fixed;inset:0;z-index:90;background:rgba(20,15,10,.55);display:flex;align-items:center;justify-content:center;padding:16px}
+#e3sheet.hidden{display:none}
+.e3s-card{position:relative;background:var(--panel);color:var(--ink);border-radius:18px;max-width:1100px;width:100%;max-height:calc(100dvh - 32px);overflow:auto;padding:16px 20px;box-shadow:0 10px 40px rgba(0,0,0,.35)}
+.e3s-close{position:absolute;top:10px;right:10px;width:38px;height:38px;border-radius:50%;border:1px solid var(--line);background:var(--bg);font-size:18px}
+.e3s-head{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding-right:44px;margin-bottom:10px}
+.e3s-head h2{margin:0;font-size:24px}
+.e3s-badge{color:#fff;border-radius:8px;padding:2px 10px;font-size:13px;font-weight:700}
+.e3s-badge.solo{background:#c0392b}.e3s-badge.tutti{background:#2b6cb0}.e3s-badge.cont{background:#8a5a2b}
+.e3s-role{font-size:14px;color:var(--sub);border:1px solid var(--line);border-radius:999px;padding:1px 10px}
+.e3s-body{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.15fr);gap:18px}
+.e3s-photos{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:8px}
+.e3s-photos .phimg{aspect-ratio:16/10}
+.e3s-3d{margin-top:8px;border:1px solid var(--line);border-radius:14px;background:radial-gradient(circle at 50% 40%,#fffaf0,#e6d8c0);overflow:hidden}
+.e3s-3dtabs{display:flex;gap:6px;align-items:center;padding:6px 8px 0;font-size:12px;color:#6d635b}
+.e3s-3dtabs span{margin-left:auto}
+.e3s-3dtabs button{border:1px solid rgba(0,0,0,.15);background:#fff;color:#2b2622;border-radius:999px;padding:1px 10px;font-size:12px}
+.e3s-3dtabs button.on{background:#2b2622;color:#fff}
+.e3s-zoom{position:relative;height:210px}
+.e3s-right section{margin-bottom:10px}
+.e3s-right h3{font-size:16px;margin:0 0 4px}
+.e3s-right p{margin:0;font-size:15px}
+.e3s-q{border-left:5px solid var(--theme);background:var(--bg);border-radius:8px;padding:6px 10px;margin:6px 0;display:grid;grid-template-columns:1fr auto;gap:2px 10px;align-items:center}
+.e3s-w{font-weight:700;font-size:15px}
+.e3s-how{font-size:14px;grid-column:1}
+.e3s-q .smallbtn{grid-row:1 / span 2;grid-column:2}
+.e3legend .hint{border-left-color:#999!important}
+@media (max-width:760px){ .e3s-body{grid-template-columns:1fr} .e3s-zoom{height:170px} .e3s-head h2{font-size:20px} }
 @media (max-width:600px){ .e3lab b{font-size:11px} .e3lab small{display:none} .e3legend{display:none} .stage .e3who{display:none} .e3who{font-size:11px} .e3box{aspect-ratio:4/3} .e3views button{padding:2px 8px} }
 
 /* ---------- photos ---------- */
@@ -871,15 +898,60 @@ const tick = [];
 const Ens3D = (() => {
   const THREE_URL = "https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js";
   const ORBIT_URL = "https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js";
-  // 名札（グループ）。photo は写真の id
+  // 名札（グループ）
   const GROUPS = [
-    {key:"solo", name:"独奏ヴァイオリン", role:"主役",         cls:"solo", photo:"violin"},
-    {key:"vn1",  name:"第1ヴァイオリン",  role:"旋律",         cls:"tutti", photo:"violin"},
-    {key:"vn2",  name:"第2ヴァイオリン",  role:"旋律を支える", cls:"tutti", photo:"violin"},
-    {key:"va",   name:"ヴィオラ",         role:"中の音",       cls:"tutti", photo:"viola"},
-    {key:"bass", name:"チェロ・コントラバス", role:"低い音（通奏低音）", cls:"cont", photo:"cello"},
-    {key:"hp",   name:"チェンバロ",       role:"和音（通奏低音）", cls:"cont", photo:"harpsichord"},
+    {key:"solo", name:"独奏ヴァイオリン", role:"主役",         cls:"solo",  badge:"独奏"},
+    {key:"vn1",  name:"第1ヴァイオリン",  role:"旋律",         cls:"tutti", badge:"合奏"},
+    {key:"vn2",  name:"第2ヴァイオリン",  role:"旋律を支える", cls:"tutti", badge:"合奏"},
+    {key:"va",   name:"ヴィオラ",         role:"中の音",       cls:"tutti", badge:"合奏"},
+    {key:"bass", name:"チェロ・コントラバス", role:"低い音（通奏低音）", cls:"cont", badge:"通奏低音"},
+    {key:"hp",   name:"チェンバロ",       role:"和音（通奏低音）", cls:"cont", badge:"通奏低音"},
   ];
+  // 楽器を押したときの解説。clip は [開始秒, 長さ]
+  const INFO = {
+    solo:{inst:["violin"], model:"vn",
+      about:"ヴァイオリン族でいちばん小さく、いちばん高い音の楽器。4本の弦（低いほうから ソ・レ・ラ・ミ）を、馬のしっぽの毛を張った弓でこすって音を出します。作曲したヴィヴァルディ自身も、ヴァイオリンの名人でした。",
+      role:"協奏曲の<b>主役</b>。合奏が「春の主題」を弾くあいだは一緒に弾き、場面（エピソード）になると<b>ひとりで目立つ旋律</b>を弾きます。合奏との<b>かけ合い</b>が聴きどころ。",
+      sonnet:[
+        {w:"小鳥たちは楽しい歌で春にあいさつする", how:"高い音の<b>トリル</b>（音をすばやくふるわせる）と、短いさえずりの形", clip:() => [secT("birds",0) + 2, 8]},
+        {w:"稲妻", how:"一気に<b>かけ上がる速い音階</b>が、ピカッと光る稲妻", clip:() => [secT("storm",0) + LIGHTNING_OFFSETS[0] - 1.5, 5]},
+        {w:"小鳥たちはふたたび美しい歌を歌い始める", how:"長くのばす音のトリル。嵐のあとの静けさの中で歌う", clip:() => [secT("birds",1) + 1, 8]}]},
+    vn1:{inst:["violin"], model:"vn",
+      about:"独奏と同じヴァイオリン。合奏では3人ほどで同じ旋律を弾き、音に厚みと力強さが生まれます。",
+      role:"合奏で<b>主旋律</b>（春の主題）を弾くグループ。いちばん前の首席奏者は、小鳥の場面で独奏と一緒に<b>2羽目の小鳥</b>になります。",
+      sonnet:[
+        {w:"春がやってきた", how:"明るい長調の主題を全員で元気よく。同じフレーズを強く→弱くとくり返す<b>こだま</b>も", clip:() => [secT("theme",0) + .3, 9]},
+        {w:"泉はそよ風にふかれ、やさしくささやきながら流れ出す", how:"<b>細かい音のくり返し</b>を、弱い音でなめらかに。さらさら流れる水", clip:() => [secT("stream",0) + 2, 8]},
+        {w:"小鳥たちは楽しい歌で…", how:"首席が独奏とさえずりを交わす", clip:() => [secT("birds",0) + 9, 8]}]},
+    vn2:{inst:["violin"], model:"vn",
+      about:"第1ヴァイオリンと同じ楽器ですが、受けもつ音が少し低めです。",
+      role:"第1ヴァイオリンの下で<b>旋律を支え</b>、ハーモニーを作ります。首席は小鳥の場面で<b>3羽目の小鳥</b>。",
+      sonnet:[
+        {w:"春がやってきた", how:"第1ヴァイオリンと重なって、主題に厚みを出す", clip:() => [secT("theme",0) + .3, 7]},
+        {w:"やがて空は黒い雲におおわれ…雷鳴が", how:"同じ音をとても速くきざむ<b>トレモロ</b>で、ゴロゴロという雷", clip:() => [secT("storm",0), 6]},
+        {w:"小鳥たちは楽しい歌で…", how:"首席が3羽目の小鳥として加わる", clip:() => [secT("birds",0) + 14, 8]}]},
+    va:{inst:["viola"], model:"va",
+      about:"ヴァイオリンより少し大きく、5度低い音（ド・ソ・レ・ラ）。落ち着いた、やわらかい音色です。",
+      role:"高い旋律と低い音のあいだの<b>中の音</b>をうめて、合奏の響きを<b>厚く</b>します。",
+      sonnet:[
+        {w:"泉…ささやきながら流れ出す", how:"ヴァイオリンと一緒に細かい音を重ね、水の流れに奥行きを出す", clip:() => [secT("stream",0) + 5, 8]},
+        {w:"雷鳴", how:"<b>トレモロ</b>で、雷のゴロゴロを厚くする", clip:() => [secT("storm",0), 6]}],
+      extra:"第2楽章では、ヴィオラが「ワン、ワン」とほえる番犬を表します（ソネット「忠実な犬がほえる」）。"},
+    bass:{inst:["cello","contrabass"], model:"vc", model2:"cb",
+      about:"<b>チェロ</b>：いすに座り、楽器を両足ではさんで弾く低い音の楽器。バロック時代は、床に立てる棒（エンドピン）がまだありませんでした。<br><b>コントラバス</b>：いちばん大きく、チェロのさらに1オクターブ下の音を重ねます。",
+      role:"<b>通奏低音</b>：曲のいちばん下の音（バス）を弾き続け、全体を支える<b>土台</b>。チェンバロと組になります。",
+      sonnet:[
+        {w:"雷鳴", how:"低い音のトレモロで、お腹にひびくゴロゴロ", clip:() => [secT("storm",0) + 2, 6]},
+        {w:"春がやってきた", how:"主題のいちばん下で、明るい響きを支える", clip:() => [secT("theme",0) + .3, 7]},
+        {w:"小鳥たちは楽しい歌で…", how:"<b>あえてお休み</b>。低い音が消えることで、空を飛ぶ小鳥の軽さが出る", clip:() => [secT("birds",0) + 2, 7]}]},
+    hp:{inst:["harpsichord"], model:"hp",
+      about:"鍵盤をおすと、中のつめが弦をはじいて音が出る鍵盤楽器。強弱をつけにくく、「チャラン」と明るい音がします。ピアノが広まる前の時代の主役でした。",
+      role:"<b>通奏低音</b>：楽譜にはバスの音と数字だけが書かれていて、奏者がその場で<b>和音</b>をつけて弾きます。チェロ・コントラバスと一緒に全体を支えます。",
+      sonnet:[
+        {w:"春がやってきた", how:"主題の和音をきざんで、明るい響きを支える", clip:() => [secT("theme",0) + .3, 7]},
+        {w:"（独奏の見せ場）", how:"独奏ヴァイオリンを和音でそっと支える", clip:() => [secT("solo",0), 8]}],
+      extra:"この録音（1947年）では、チェンバロの音はほとんど聞こえません。"},
+  };
   // 席（x, z）。客席から見て左が −x
   const SEATS = [
     {grp:"solo", type:"vn", x:-0.7, z:1.7, coat:0xb08a2e},
@@ -913,8 +985,10 @@ const Ens3D = (() => {
   const STYLE = { norm:{sp:2.0, a:.30}, trem:{sp:11, a:.05}, murmur:{sp:4.5, a:.10}, trill:{sp:2.6, a:.22}, scale:{sp:4.0, a:.32}, cont:{sp:1.4, a:.30} };
 
   let loading = null, ready = false, failed = false;
-  let R, scene, cam, ctl, hemi, sun, overlay, curHost = null, hosts = [], view = "front", camGoal = null;
-  let players = [], labels = {}, winMat, ring, flash = 0, lastLight = -1, lastT = performance.now(), whoEl, viewBtns;
+  let R, scene, cam, ctl, hemi, sun, overlay, curHost = null, hosts = [], camGoal = null;
+  let players = [], labels = {}, winMat, ring, flash = 0, lastLight = -1, lastT = performance.now(), whoEl, viewBtns, hoverP = null;
+  let _d, _p, _y, _H, _C, _B, _E, _L, _q, _v, _W;
+  let M = {};
 
   function load(src){ return new Promise((res, rej) => { const s = document.createElement("script"); s.src = src; s.onload = res; s.onerror = rej; document.head.appendChild(s); }); }
   function ensure(){
@@ -931,13 +1005,11 @@ const Ens3D = (() => {
     if (!hosts.includes(host)) hosts.push(host); msg(host); ensure().catch(() => {});
   }
 
-  /* ---------- 部品 ---------- */
+  /* ---------- 小さな道具 ---------- */
   const V = (x,y,z) => new THREE.Vector3(x,y,z);
-  let M = {};
   function mat(c, o={}){ return new THREE.MeshStandardMaterial(Object.assign({color:new THREE.Color(c).convertSRGBToLinear(), roughness:.6, metalness:0}, o)); }
   function mesh(geo, m, par, cast=true){ const x = new THREE.Mesh(geo, m); x.castShadow = cast; x.receiveShadow = true; if (par) par.add(x); return x; }
-  function limb(par, m, r, r2){ return mesh(new THREE.CylinderGeometry(r, r2 || r, 1, 10), m, par); }
-  let _d, _p, _y, _H, _C, _B, _E, _L, _q, _v;
+  function limb(par, m, r, r2){ return mesh(new THREE.CylinderGeometry(r, r2 || r, 1, 12), m, par); }
   function setLimb(m, a, b){ _d.subVectors(b, a); const L = Math.max(1e-4, _d.length()); m.position.copy(a).addScaledVector(_d, .5); m.scale.set(1, L, 1); m.quaternion.setFromUnitVectors(_y, _d.multiplyScalar(1/L)); }
   const UA = .30, FA = .28;
   function elbow(out, s, h, side){ _d.subVectors(h, s); const L = _d.length(), Lc = Math.min(L, UA + FA - .002); _d.normalize();
@@ -946,130 +1018,203 @@ const Ens3D = (() => {
     return out.copy(s).addScaledVector(_d, a).addScaledVector(_p, hgt); }
   function basisQ(dir, up){ const X = dir.clone().normalize(), Z = up.clone().addScaledVector(X, -up.dot(X)).normalize(), Y = new THREE.Vector3().crossVectors(Z, X);
     return new THREE.Quaternion().setFromRotationMatrix(new THREE.Matrix4().makeBasis(X, Y, Z)); }
+  function canvasTex(w, h, draw){ const c = document.createElement("canvas"); c.width = w; c.height = h; draw(c.getContext("2d"), w, h); const t = new THREE.CanvasTexture(c); t.encoding = THREE.sRGBEncoding; t.anisotropy = 4; return t; }
 
-  // ヴァイオリン族の形（長さ1、幅は比率）。x＝しっぽ→渦巻き、z＝表板の向き
-  let bodyGeo = {};
-  function violinBody(depth){
-    if (bodyGeo[depth]) return bodyGeo[depth];
-    const top = [[0,0],[.02,.11],[.09,.165],[.19,.165],[.27,.12],[.31,.10],[.36,.115],[.45,.14],[.53,.12],[.585,.06],[.6,0]];
-    const s = new THREE.Shape(); s.moveTo(0, 0);
-    s.splineThru(top.slice(1).map(p => new THREE.Vector2(p[0], p[1])));
-    s.splineThru(top.slice(0, -1).reverse().map(p => new THREE.Vector2(p[0], -p[1])));
-    const g = new THREE.ExtrudeGeometry(s, {depth, bevelEnabled:true, bevelThickness:depth*.35, bevelSize:.012, bevelSegments:3, curveSegments:24});
-    return bodyGeo[depth] = g;
+  /* ---------- ヴァイオリン族 ---------- */
+  // 輪郭（長さ1あたり）。cb はコントラバス（なで肩・ヴィオローネ型）
+  const OUTLINE = {
+    vn:[[0,0],[.012,.085],[.05,.145],[.12,.17],[.2,.16],[.245,.13],[.27,.105],[.31,.095],[.35,.105],[.375,.125],[.42,.137],[.5,.127],[.565,.085],[.598,.02],[.6,0]],
+    cb:[[0,0],[.012,.09],[.05,.15],[.12,.175],[.2,.165],[.25,.135],[.285,.112],[.325,.11],[.36,.125],[.42,.128],[.5,.098],[.57,.055],[.615,.022],[.62,0]],
+  };
+  const bodyCache = {};
+  function outlineShape(kind, scale=1){
+    const top = OUTLINE[kind], s = new THREE.Shape(), cx = top[top.length - 1][0] / 2;
+    const P = (x, y) => new THREE.Vector2(cx + (x - cx) * scale, y * scale);
+    s.moveTo(P(0,0).x, 0);
+    s.splineThru(top.slice(1).map(p => P(p[0], p[1])));
+    s.splineThru(top.slice(0, -1).reverse().map(p => P(p[0], -p[1])));
+    return s;
   }
-  // 楽器（L＝全長m、depth＝厚み比）
-  function stringInst(L, depth, endpin){
+  function fHoleShape(){ // f字孔（小さな S 字の帯）
+    const s = new THREE.Shape(); s.moveTo(0, 0);
+    s.bezierCurveTo(.02, .006, .035, -.012, .06, -.006); s.lineTo(.062, -.0015);
+    s.bezierCurveTo(.036, -.008, .022, .01, .001, .004); s.lineTo(0, 0); return s;
+  }
+  // 楽器（L＝全長m、depth＝厚み比、kind＝輪郭）
+  function stringInst(L, depth, kind){
     const g = new THREE.Group(), s = new THREE.Group(); s.scale.setScalar(L); g.add(s);
-    mesh(violinBody(depth), M.wood, s);
-    const zt = depth * 1.35;                                        // 表板の上の高さ
-    const fb = mesh(new THREE.BoxGeometry(.43, .045, .02), M.ebony, s); fb.position.set(.66, 0, zt + .02);
-    const nk = mesh(new THREE.BoxGeometry(.33, .04, .035), M.wood, s); nk.position.set(.76, 0, zt - .01);
-    const pb = mesh(new THREE.BoxGeometry(.08, .035, .04), M.wood, s); pb.position.set(.92, 0, zt);
-    const sc = mesh(new THREE.TorusGeometry(.022, .011, 6, 14), M.wood, s); sc.position.set(.975, 0, zt + .005); sc.rotation.x = Math.PI/2;
-    const tp = mesh(new THREE.BoxGeometry(.16, .05, .012), M.ebony, s); tp.position.set(.11, 0, zt + .005);
-    const br = mesh(new THREE.BoxGeometry(.012, .07, .045), M.bridge, s); br.position.set(.33, 0, zt + .02);
-    const pts = []; for (let k = 0; k < 4; k++){ const y = (k - 1.5) * .009; pts.push(.03, y, zt + .012, .9, y, zt + .03); }
+    const key = kind + depth;
+    if (!bodyCache[key]) bodyCache[key] = {
+      body:new THREE.ExtrudeGeometry(outlineShape(kind), {depth, bevelEnabled:true, bevelThickness:depth*.35, bevelSize:.011, bevelSegments:4, curveSegments:28}),
+      purf:new THREE.BufferGeometry().setFromPoints(outlineShape(kind, .93).getPoints(40).map(p => new THREE.Vector3(p.x, p.y, 0))),
+      fh:new THREE.ShapeGeometry(fHoleShape(), 8),
+    };
+    const C = bodyCache[key], bodyLen = OUTLINE[kind][OUTLINE[kind].length - 1][0];
+    mesh(C.body, M.wood, s);
+    const zt = depth * 1.35;                                          // 表板の上の高さ
+    const pf = new THREE.LineLoop(C.purf, M.purfling); pf.position.z = zt + .0015; s.add(pf);
+    [-1, 1].forEach(sd => { const f = mesh(C.fh, M.hole, s, false); f.position.set(bodyLen * .5 - .03, sd * .062, zt + .002); f.rotation.z = sd * -1.35; f.scale.y = sd; });
+    // 指板（先が広い台形）・ネック・糸巻き箱・渦巻き
+    const fbS = new THREE.Shape(); fbS.moveTo(bodyLen + .03, -.022); fbS.lineTo(bodyLen - .18, -.032); fbS.lineTo(bodyLen - .18, .032); fbS.lineTo(bodyLen + .03, .022); fbS.lineTo(bodyLen + .03, -.022);
+    const fb = mesh(new THREE.ExtrudeGeometry(fbS, {depth:.012, bevelEnabled:false}), M.ebony, s); fb.position.z = zt + .018;
+    const nk = mesh(new THREE.BoxGeometry(.3, .038, .032), M.wood, s); nk.position.set(bodyLen + .15, 0, zt - .008);
+    const heel = mesh(new THREE.SphereGeometry(.024, 10, 8), M.wood, s); heel.position.set(bodyLen + .005, 0, zt - .02); heel.scale.set(1.2, .8, 1.3);
+    const pb = mesh(new THREE.BoxGeometry(.085, .032, .045), M.wood, s); pb.position.set(bodyLen + .335, 0, zt - .005);
+    const pbIn = mesh(new THREE.BoxGeometry(.07, .02, .01), M.hole, s, false); pbIn.position.set(bodyLen + .335, 0, zt + .018);
+    [-1, 1].forEach(sd => { const sc = mesh(new THREE.TorusGeometry(.019, .009, 8, 16, Math.PI * 1.7), M.wood, s); sc.position.set(bodyLen + .392, sd * .012, zt + .004); sc.rotation.x = Math.PI/2; });
+    const eye = mesh(new THREE.CylinderGeometry(.008, .008, .03, 8), M.wood, s); eye.position.set(bodyLen + .392, 0, zt + .004);
+    for (let k = 0; k < 4; k++){ const sd = k % 2 ? 1 : -1, pg = mesh(new THREE.CylinderGeometry(.005, .007, .05, 6), M.ebony, s); pg.position.set(bodyLen + .31 + (k >> 1) * .035, sd * .03, zt - .004); }
+    // 緒止め板・駒・弦
+    const tpS = new THREE.Shape(); tpS.moveTo(.02, -.012); tpS.lineTo(.17, -.026); tpS.quadraticCurveTo(.185, 0, .17, .026); tpS.lineTo(.02, .012); tpS.lineTo(.02, -.012);
+    const tp = mesh(new THREE.ExtrudeGeometry(tpS, {depth:.008, bevelEnabled:false}), M.ebony, s); tp.position.z = zt + .006;
+    const bx = bodyLen * .55;
+    const brS = new THREE.Shape(); brS.moveTo(-.035, 0); brS.lineTo(-.03, .006); brS.quadraticCurveTo(-.012, .03, 0, .042); brS.quadraticCurveTo(.012, .03, .03, .006); brS.lineTo(.035, 0); brS.lineTo(-.035, 0);
+    const br = mesh(new THREE.ExtrudeGeometry(brS, {depth:.005, bevelEnabled:false}), M.bridge, s); br.rotation.x = Math.PI/2; br.rotation.z = Math.PI/2; br.position.set(bx, 0, zt);
+    const pts = [];
+    for (let k = 0; k < 4; k++){ const y = (k - 1.5) * .011, yn = (k - 1.5) * .0065, hb = zt + .036 + (k === 0 || k === 3 ? 0 : .004);
+      pts.push(.17, y * .9, zt + .014, bx, y, hb, bx, y, hb, bodyLen + .03, yn, zt + .032, bodyLen + .03, yn, zt + .032, bodyLen + .3, yn, zt + .01); }
     const lg = new THREE.BufferGeometry(); lg.setAttribute("position", new THREE.Float32BufferAttribute(pts, 3));
     s.add(new THREE.LineSegments(lg, M.string));
-    if (endpin){ const ep = mesh(new THREE.CylinderGeometry(.006, .004, endpin, 6), M.metal, s); ep.rotation.z = Math.PI/2; ep.position.set(-endpin/2, 0, depth*.6); }
-    g.userData = {L, zt:zt * L, contact:.37 * L, neck:.64 * L};
+    g.userData = {L, zt:zt * L, contact:(bx + .045) * L, neck:(bodyLen + .07) * L};
     return g;
   }
+  // バロックの弓（ゆるく外にそった棒）
   function makeBow(len){
     const g = new THREE.Group();
-    const st = mesh(new THREE.CylinderGeometry(.006, .004, len, 6), M.bowstick, g, false); st.rotation.z = -Math.PI/2; st.position.x = len/2;
-    const hr = mesh(new THREE.BoxGeometry(len*.92, .002, .008), M.hair, g, false); hr.position.set(len*.48, -.018, 0);
-    const fr = mesh(new THREE.BoxGeometry(.04, .03, .015), M.ebony, g, false); fr.position.set(.02, -.012, 0);
+    const curve = new THREE.CatmullRomCurve3([V(0, .018, 0), V(len * .35, .028, 0), V(len * .7, .024, 0), V(len, .012, 0)]);
+    mesh(new THREE.TubeGeometry(curve, 24, .0045, 6, false), M.bowstick, g, false);
+    const hr = mesh(new THREE.BoxGeometry(len * .95, .0015, .007), M.hair, g, false); hr.position.set(len * .5, -.004, 0);
+    const fr = mesh(new THREE.BoxGeometry(.045, .03, .014), M.ebony, g, false); fr.position.set(.03, .004, 0);
+    const hd = mesh(new THREE.BoxGeometry(.02, .02, .008), M.bowstick, g, false); hd.position.set(len - .005, .004, 0);
     g.userData.len = len; return g;
   }
+  /* ---------- チェンバロ ---------- */
+  let lidTex, roseTex;
   function harpsichord(){
     const g = new THREE.Group();
-    // 平面形（x：横、y：奥行き＝客席方向）。まっすぐな側（spine）は奏者の左（+x）、曲がった側は右（−x）
     // 形を x−y 平面に描き（y は −奥行き）、x 軸まわりに倒すと奥行きが +z、厚みが上向きになる
     const s = new THREE.Shape(); s.moveTo(.46, 0); s.lineTo(-.46, 0); s.lineTo(-.46, -.55);
     s.bezierCurveTo(-.46, -1.1, .0, -1.5, .28, -2.05); s.lineTo(.46, -2.0); s.lineTo(.46, 0);
-    const caseGeo = new THREE.ExtrudeGeometry(s, {depth:.26, bevelEnabled:false, curveSegments:24});
-    const cs = mesh(caseGeo, M.hpcase, g); cs.rotation.x = -Math.PI/2; cs.position.y = .66;
-    const inside = mesh(new THREE.ShapeGeometry(s, 24), M.sound, g, false);
-    inside.rotation.x = -Math.PI/2; inside.scale.set(.93, .95, 1); inside.position.set(.01, .923, .04);
-    // ふた（まっすぐな側の蝶番で開く）
-    const lid = new THREE.Group(); lid.position.set(.46, .92, 0); g.add(lid);
-    const lm = mesh(new THREE.ExtrudeGeometry(s, {depth:.015, bevelEnabled:false, curveSegments:24}), M.lid, lid);
-    lm.rotation.x = -Math.PI/2; lm.position.x = -.46; lid.rotation.z = -.62;
-    // 鍵盤
-    const kb = mesh(new THREE.BoxGeometry(.84, .03, .17), M.keys, g); kb.position.set(0, .8, -.06);
-    for (let k = 0; k < 27; k++) if ([0,1,3,4,5].includes(k % 7)){ const b = mesh(new THREE.BoxGeometry(.014, .02, .09), M.ebony, g, false); b.position.set(-.42 + (k + 1) * .03, .82, -.03); }
-    // 脚
-    [[-.4,.05],[.4,.05],[.4,1.9],[-.3,1.1]].forEach(([x,z]) => { const l = mesh(new THREE.CylinderGeometry(.03, .025, .66, 8), M.hpcase, g); l.position.set(x, .33, z); });
+    const cs = mesh(new THREE.ExtrudeGeometry(s, {depth:.26, bevelEnabled:false, curveSegments:28}), M.hpcase, g); cs.rotation.x = -Math.PI/2; cs.position.y = .66;
+    // 上のふちの金の線
+    const rim = new THREE.LineLoop(new THREE.BufferGeometry().setFromPoints(s.getPoints(40).map(p => V(p.x, 0, -p.y))), M.goldLine); rim.position.y = .925; g.add(rim);
+    const rim2 = rim.clone(); rim2.position.y = .7; g.add(rim2);
+    // 響板（花の絵とローズ）
+    const sb = mesh(new THREE.ShapeGeometry(s, 28), M.sound, g, false); sb.rotation.x = -Math.PI/2; sb.scale.set(.93, .95, 1); sb.position.set(.01, .923, .04);
+    const rose = mesh(new THREE.CircleGeometry(.07, 24), new THREE.MeshStandardMaterial({map:roseTex, transparent:true, roughness:.7}), g, false); rose.rotation.x = -Math.PI/2; rose.position.set(-.05, .925, .95);
+    const jr = mesh(new THREE.BoxGeometry(.9, .03, .05), M.ebony, g); jr.position.set(0, .94, .26);
+    // ふた（まっすぐな側の蝶番で開く）。内側に風景画
+    const lid = new THREE.Group(); lid.position.set(.46, .925, 0); g.add(lid);
+    const lm = mesh(new THREE.ExtrudeGeometry(s, {depth:.015, bevelEnabled:false, curveSegments:28}), M.lid, lid); lm.rotation.x = -Math.PI/2; lm.position.x = -.46;
+    const lp = mesh(new THREE.ShapeGeometry(s, 28), new THREE.MeshStandardMaterial({map:lidTex, roughness:.75, side:THREE.DoubleSide}), lid, false);
+    lp.rotation.x = -Math.PI/2; lp.position.set(-.46, -.002, 0); lp.scale.set(.96, .97, 1);
+    { const uv = lp.geometry.attributes.uv, pos = lp.geometry.attributes.position; for (let i = 0; i < uv.count; i++) uv.setXY(i, (pos.getX(i) + .46) / .92, -pos.getY(i) / 2.05); uv.needsUpdate = true; }
+    lid.rotation.z = -.68;
+    const prop = mesh(new THREE.CylinderGeometry(.01, .01, .5, 6), M.hpcase, g); prop.position.set(-.3, 1.12, 1.0); prop.rotation.z = .5;
+    // 鍵盤（フランス式：白鍵が黒、黒鍵が白）と譜面台
+    const kbBed = mesh(new THREE.BoxGeometry(.9, .06, .2), M.hpcase, g); kbBed.position.set(0, .77, -.07);
+    for (let k = 0; k < 28; k++){ const w = mesh(new THREE.BoxGeometry(.028, .018, .16), M.ebony, g, false); w.position.set(-.405 + k * .03, .805, -.08); }
+    for (let k = 0; k < 27; k++) if ([0,1,3,4,5].includes(k % 7)){ const b = mesh(new THREE.BoxGeometry(.014, .022, .09), M.keys, g, false); b.position.set(-.42 + (k + 1) * .03, .82, -.045); }
+    const desk = mesh(new THREE.BoxGeometry(.5, .28, .015), M.hpcase, g); desk.position.set(0, 1.08, .14); desk.rotation.x = -.35;
+    const paper = mesh(new THREE.BoxGeometry(.42, .24, .004), M.paper, g, false); paper.position.set(0, 1.085, .128); paper.rotation.x = -.35;
+    // ろくろで削った脚
+    const legG = new THREE.LatheGeometry([[.0,0],[.03,0],[.035,.05],[.02,.12],[.04,.25],[.03,.4],[.022,.5],[.035,.62],[.04,.66],[0,.66]].map(p => new THREE.Vector2(p[0], p[1])), 12);
+    [[-.4,.06],[.4,.06],[.4,1.9],[-.3,1.15],[.05,1.7]].forEach(([x,z]) => { const l = mesh(legG, M.hpcase, g); l.position.set(x, 0, z); });
     return g;
   }
-  function chair(par, z){ const c = new THREE.Group(); par.add(c); c.position.z = z;
-    const seat = mesh(new THREE.BoxGeometry(.42, .05, .4), M.chair, c); seat.position.y = .44;
-    const back = mesh(new THREE.BoxGeometry(.42, .5, .04), M.chair, c); back.position.set(0, .72, -.2);
-    [[-.18,-.17],[.18,-.17],[-.18,.17],[.18,.17]].forEach(([x,zz]) => { const l = mesh(new THREE.CylinderGeometry(.018, .018, .44, 6), M.chair, c); l.position.set(x, .22, zz); });
+  function chair(par, z, w=.42){ const c = new THREE.Group(); par.add(c); c.position.z = z;
+    const seat = mesh(new THREE.BoxGeometry(w, .05, .4), M.chair, c); seat.position.y = .44;
+    const cush = mesh(new THREE.BoxGeometry(w - .04, .04, .36), M.cushion, c); cush.position.y = .485;
+    const back = mesh(new THREE.BoxGeometry(w, .48, .035), M.chair, c); back.position.set(0, .74, -.2);
+    const bp = mesh(new THREE.BoxGeometry(w - .1, .34, .02), M.cushion, c); bp.position.set(0, .74, -.18);
+    [[-1,-1],[1,-1],[-1,1],[1,1]].forEach(([x,zz]) => { const l = mesh(new THREE.CylinderGeometry(.018, .014, .44, 8), M.chair, c); l.position.set(x * (w/2 - .03), .22, zz * .17); });
     return c; }
-  function stand(par, seated){ const h = seated ? .95 : 1.18, st = new THREE.Group(); par.add(st); st.position.set(.05, 0, .62);
-    const p = mesh(new THREE.CylinderGeometry(.012, .012, h, 6), M.metal, st); p.position.y = h/2;
-    const b = mesh(new THREE.BoxGeometry(.48, .34, .015), M.stand, st); b.position.set(0, h + .1, -.02); b.rotation.x = -.55;
-    const sh = mesh(new THREE.BoxGeometry(.44, .3, .004), M.paper, st, false); sh.position.set(0, h + .11, -.01); sh.rotation.x = -.55;
-    return st; }
 
-  // 奏者
-  function figure(cfg, idx){
+  /* ---------- 奏者 ---------- */
+  function makeHand(par, skin){
+    const h = new THREE.Group(); par.add(h);
+    const palm = mesh(new THREE.BoxGeometry(.068, .075, .026), skin, h); palm.position.y = .035;
+    for (let k = 0; k < 4; k++){ const f = mesh(new THREE.CylinderGeometry(.0085, .007, .06 - Math.abs(k - 1.5) * .008, 6), skin, h); f.position.set(-.025 + k * .017, .1 - Math.abs(k - 1.5) * .004, .006); f.rotation.x = .35; }
+    const th = mesh(new THREE.CylinderGeometry(.01, .008, .05, 6), skin, h); th.position.set(.042, .04, .014); th.rotation.z = -.7;
+    return h;
+  }
+  function figure(cfg){
     const seated = cfg.type === "vc" || cfg.type === "hp";
     const root = new THREE.Group(); root.position.set(cfg.x, 0, cfg.z);
-    root.rotation.y = Math.atan2(-cfg.x * .35, 6) ;                         // 少し内側（客席の中央）を向く
+    root.rotation.y = Math.atan2(-cfg.x * .35, 6);                   // 少し内側（客席の中央）を向く
     scene.add(root);
-    const coat = mat(cfg.coat, {roughness:.7}), skin = M.skin;
+    const coat = mat(cfg.coat, {roughness:.62}), trim = mat(new THREE.Color(cfg.coat).lerp(new THREE.Color(0xffffff), .25).getHex(), {roughness:.55}), skin = M.skin;
     const hipY = seated ? .5 : .92, shY = seated ? 1.0 : 1.42, headY = shY + .2;
-    // 脚
-    if (seated){ chair(root, -.05);
-      [-1,1].forEach(sd => { const th = limb(root, M.breech, .075, .07); setLimb(th, V(sd*.1, hipY, 0), V(sd*.12, hipY, .42));
-        const sh = limb(root, M.stock, .055, .045); setLimb(sh, V(sd*.12, hipY, .42), V(sd*.13, .06, .46));
-        const ft = mesh(new THREE.BoxGeometry(.09, .06, .2), M.shoe, root); ft.position.set(sd*.13, .03, .52); });
-    } else {
-      [-1,1].forEach(sd => { const th = limb(root, M.breech, .075, .065); setLimb(th, V(sd*.09, hipY, 0), V(sd*.095, .5, .01));
-        const sh = limb(root, M.stock, .055, .045); setLimb(sh, V(sd*.095, .5, .01), V(sd*.1, .07, 0));
-        const ft = mesh(new THREE.BoxGeometry(.09, .06, .22), M.shoe, root); ft.position.set(sd*.1, .03, .06); });
-    }
-    // 胴（上着・チョッキ・すそ）
-    const torso = mesh(new THREE.CylinderGeometry(.16, .19, shY - hipY + .04, 14), coat, root); torso.position.y = (shY + hipY) / 2;
-    const vest = mesh(new THREE.BoxGeometry(.13, shY - hipY - .05, .05), M.vest, root); vest.position.set(0, (shY + hipY)/2 - .02, .165);
-    if (!seated){ const sk = mesh(new THREE.CylinderGeometry(.19, .27, .42, 14, 1, true), coat, root); sk.position.y = hipY - .17; sk.material.side = THREE.DoubleSide; }
-    else { const sk = mesh(new THREE.CylinderGeometry(.19, .25, .2, 14, 1, true), coat, root); sk.position.y = hipY - .02; }
-    const sh = mesh(new THREE.SphereGeometry(.17, 14, 8, 0, Math.PI*2, 0, Math.PI/2), coat, root); sh.scale.set(1.25, .45, .9); sh.position.y = shY - .02;
-    const crav = mesh(new THREE.BoxGeometry(.08, .08, .04), M.linen, root); crav.position.set(0, shY - .02, .15);
-    // 頭（かつら）
+    // 脚（半ズボン・白い靴下・バックルの靴）
+    const leg = (a, b, sd) => { const kn = seated ? V(sd*.12, hipY, .42) : V(sd*.095, .5, .02);
+      const th = limb(root, M.breech, .078, .066); setLimb(th, a, kn);
+      const knee = mesh(new THREE.SphereGeometry(.066, 10, 8), M.breech, root); knee.position.copy(kn);
+      const garter = mesh(new THREE.CylinderGeometry(.06, .06, .02, 10), M.goldm, root); garter.position.copy(kn).add(V(0, -.05, 0));
+      const sh = limb(root, M.stock, .056, .042); setLimb(sh, kn, b);
+      const ft = mesh(new THREE.BoxGeometry(.09, .055, .22), M.shoe, root); ft.position.set(b.x, .028, b.z + .06);
+      const hl = mesh(new THREE.BoxGeometry(.07, .04, .05), M.shoe, root); hl.position.set(b.x, .02, b.z - .04);
+      const bk = mesh(new THREE.BoxGeometry(.05, .012, .03), M.goldm, root, false); bk.position.set(b.x, .058, b.z + .08); };
+    if (seated){ chair(root, -.05, cfg.type === "hp" ? .6 : .42); [-1,1].forEach(sd => leg(V(sd*.1, hipY, 0), V(sd*.14, .07, .48), sd)); }
+    else [-1,1].forEach(sd => leg(V(sd*.09, hipY, 0), V(sd*.1, .07, .0), sd));
+    // 上着（ろくろで回した形：細い腰、広がるすそ）
+    const prof = seated
+      ? [[.27,.46],[.21,.56],[.165,.64],[.17,.78],[.19,.9],[.17,.99],[.07,1.05]]
+      : [[.29,.46],[.23,.68],[.165,.93],[.17,1.1],[.195,1.3],[.17,1.41],[.07,1.48]];
+    const lath = new THREE.LatheGeometry(prof.map(p => new THREE.Vector2(p[0], p[1])), 22);
+    const body = mesh(lath, coat, root); body.scale.z = .78; body.material.side = THREE.DoubleSide;
+    const vest = mesh(new THREE.BoxGeometry(.13, shY - hipY - .02, .03), M.vest, root); vest.position.set(0, (shY + hipY)/2 - .03, .148);
+    for (let k = 0; k < 6; k++){ const bt = mesh(new THREE.SphereGeometry(.009, 6, 6), M.goldm, root, false); bt.position.set(.075, hipY + .04 + k * (shY - hipY - .12) / 5, .145); }
+    for (let k = 0; k < 5; k++){ const bt = mesh(new THREE.SphereGeometry(.006, 6, 6), M.goldm, root, false); bt.position.set(0, hipY + .06 + k * (shY - hipY - .14) / 4, .165); }
+    [-1,1].forEach(sd => { const pk = mesh(new THREE.BoxGeometry(.11, .04, .015), trim, root); pk.position.set(sd*.13, hipY - .02, .15); pk.rotation.y = sd * .5; });
+    // えり元のレース（ジャボ）
+    const jab = mesh(new THREE.ConeGeometry(.034, .08, 10), M.linen, root); jab.position.set(0, shY - .06, .16); jab.rotation.x = Math.PI; jab.scale.z = .45;
+    const stock = mesh(new THREE.CylinderGeometry(.052, .056, .05, 12), M.linen, root); stock.position.y = shY + .03;
+    // 頭（顔・かつら）
     const head = new THREE.Group(); head.position.y = headY; root.add(head);
-    const nk = mesh(new THREE.CylinderGeometry(.045, .05, .1, 8), skin, root); nk.position.y = shY + .06;
-    const hd = mesh(new THREE.SphereGeometry(.1, 16, 12), skin, head); hd.scale.set(.95, 1.08, 1);
-    const wig = mesh(new THREE.SphereGeometry(.112, 16, 10, 0, Math.PI*2, 0, Math.PI*.62), M.wig, head); wig.position.set(0, .015, -.012);
-    [-1,1].forEach(sd => { const roll = mesh(new THREE.CylinderGeometry(.03, .03, .09, 10), M.wig, head); roll.rotation.x = Math.PI/2; roll.position.set(sd*.1, -.02, -.01); });
-    const q = mesh(new THREE.ConeGeometry(.03, .14, 8), M.ribbon, head); q.position.set(0, -.08, -.11); q.rotation.x = .5;
-    [-1,1].forEach(sd => { const e = mesh(new THREE.SphereGeometry(.011, 6, 6), M.eye, head, false); e.position.set(sd*.035, .015, .09); });
-    // 腕
-    const arms = {ru:limb(root, coat, .05, .042), rl:limb(root, coat, .042, .036), lu:limb(root, coat, .05, .042), ll:limb(root, coat, .042, .036),
-      rh:mesh(new THREE.SphereGeometry(.04, 10, 8), skin, root), lh:mesh(new THREE.SphereGeometry(.04, 10, 8), skin, root),
-      rc:mesh(new THREE.CylinderGeometry(.048, .055, .05, 10), M.linen, root), lc:mesh(new THREE.CylinderGeometry(.048, .055, .05, 10), M.linen, root)};
-    const P = {cfg, grp:cfg.grp, type:cfg.type, seated, root, head, arms, shR:V(-.19, shY - .03, 0), shL:V(.19, shY - .03, 0), hipY, shY, act:1, phase:Math.random()*6, sway:Math.random()*6, chair:0};
+    const nk = mesh(new THREE.CylinderGeometry(.043, .05, .1, 10), skin, root); nk.position.y = shY + .05;
+    const hd = mesh(new THREE.SphereGeometry(.1, 20, 16), skin, head); hd.scale.set(.92, 1.08, .98);
+    const jaw = mesh(new THREE.SphereGeometry(.075, 14, 10), skin, head); jaw.position.set(0, -.05, .025); jaw.scale.set(1, .8, .9);
+    const nose = mesh(new THREE.ConeGeometry(.013, .04, 8), skin, head, false); nose.position.set(0, -.005, .105); nose.rotation.x = Math.PI/2 + .3;
+    [-1,1].forEach(sd => {
+      const ew = mesh(new THREE.SphereGeometry(.014, 10, 8), M.eyeW, head, false); ew.position.set(sd*.034, .022, .087); ew.scale.z = .5;
+      const ey = mesh(new THREE.SphereGeometry(.008, 8, 6), M.eye, head, false); ey.position.set(sd*.034, .022, .093);
+      const br = mesh(new THREE.BoxGeometry(.028, .006, .006), M.brow, head, false); br.position.set(sd*.035, .045, .092); br.rotation.z = sd * -.15;
+      const ear = mesh(new THREE.SphereGeometry(.018, 8, 6), skin, head); ear.position.set(sd*.092, 0, 0); ear.scale.set(.5, 1, .8);
+      const ck = mesh(new THREE.SphereGeometry(.018, 8, 6), M.cheek, head, false); ck.position.set(sd*.05, -.02, .082); ck.scale.z = .4; });
+    const mouth = mesh(new THREE.BoxGeometry(.03, .005, .005), M.lip, head, false); mouth.position.set(0, -.052, .095);
+    const wig = mesh(new THREE.SphereGeometry(.113, 20, 12, 0, Math.PI*2, 0, Math.PI*.58), M.wig, head); wig.position.set(0, .018, -.014); wig.scale.set(1, 1, 1.05);
+    [-1,1].forEach(sd => { for (let r = 0; r < 2; r++){ const roll = mesh(new THREE.TorusGeometry(.02, .014, 8, 14), M.wig, head); roll.position.set(sd*.098, -.005 - r * .04, -.015); roll.rotation.y = Math.PI/2; } });
+    const q = mesh(new THREE.CylinderGeometry(.018, .012, .14, 8), M.wig, head); q.position.set(0, -.1, -.12); q.rotation.x = .35;
+    [-1,1].forEach(sd => { const bow = mesh(new THREE.ConeGeometry(.025, .05, 6), M.ribbon, head); bow.position.set(sd*.022, -.045, -.12); bow.rotation.z = sd * Math.PI/2; });
+    // 腕（肩・ひじの球でつなぐ）と、大きく折り返した袖口
+    const arms = {ru:limb(root, coat, .05, .043), rl:limb(root, coat, .043, .038), lu:limb(root, coat, .05, .043), ll:limb(root, coat, .043, .038),
+      rs:mesh(new THREE.SphereGeometry(.058, 10, 8), coat, root), ls:mesh(new THREE.SphereGeometry(.058, 10, 8), coat, root),
+      re:mesh(new THREE.SphereGeometry(.045, 10, 8), coat, root), le:mesh(new THREE.SphereGeometry(.045, 10, 8), coat, root),
+      rc:mesh(new THREE.CylinderGeometry(.05, .058, .07, 12), trim, root), lc:mesh(new THREE.CylinderGeometry(.05, .058, .07, 12), trim, root),
+      rl2:mesh(new THREE.ConeGeometry(.05, .05, 10, 1, true), M.linen, root), ll2:mesh(new THREE.ConeGeometry(.05, .05, 10, 1, true), M.linen, root),
+      rh:makeHand(root, skin), lh:makeHand(root, skin)};
+    const P = {cfg, grp:cfg.grp, type:cfg.type, seated, root, head, arms, shR:V(-.19, shY - .04, 0), shL:V(.19, shY - .04, 0), hipY, shY, act:1, phase:Math.random()*6, sway:Math.random()*6, chair:0, breathe:Math.random()*6};
+    arms.rs.position.copy(P.shR); arms.ls.position.copy(P.shL);
+    root.userData.player = P;
     // 楽器
     if (cfg.type === "hp"){
       const h = harpsichord(); h.position.set(0, 0, .42); root.add(h); P.hp = h;
     } else {
-      const spec = {vn:[.6, .07, 0, .74], va:[.68, .075, 0, .72], vc:[1.22, .1, .12, .7], cb:[1.78, .11, .1, .66]}[cfg.type];
+      const spec = {vn:[.6, .07, "vn", .72], va:[.68, .075, "vn", .7], vc:[1.22, .1, "vn", .7], cb:[1.8, .11, "cb", .66]}[cfg.type];
       const inst = stringInst(spec[0], spec[1], spec[2]); root.add(inst); P.inst = inst;
       const bow = makeBow(spec[3]); root.add(bow); P.bow = bow;
       if (cfg.type === "vn" || cfg.type === "va"){
         const low = cfg.type === "va" ? -.02 : 0;
-        P.play = {p:V(.07, shY - .06 + low, .1), q:basisQ(V(.55, -.12, .83), V(-.5, 1, 0))};
+        // 左の鎖骨にのせ、あごではさむ。渦巻きは左前へ
+        P.play = {p:V(.13, shY - .02 + low, .05), q:basisQ(V(.8, -.1, .6), V(-.45, 1, .15))};
         P.rest = {p:V(.24, hipY + .12, .12), q:basisQ(V(.05, -1, .25), V(0, 0, 1))};
         P.handRest = V(-.24, hipY + .02, .1); P.bowRest = V(.08, -1, .35).normalize();
       } else if (cfg.type === "vc"){
-        P.play = P.rest = {p:V(.0, .1, .45), q:basisQ(V(.13, .93, -.36), V(0, .35, 1))};
+        // バロックのチェロはエンドピンなし：ふくらはぎではさむ
+        P.play = P.rest = {p:V(.0, .14, .45), q:basisQ(V(.13, .93, -.36), V(0, .35, 1))};
         P.handRest = V(-.24, hipY + .06, .36); P.bowRest = V(.2, -.75, .6).normalize();
       } else {
-        P.play = P.rest = {p:V(.05, .03, .4), q:basisQ(V(.18, .95, -.25), V(-.25, .3, 1))};
+        P.play = P.rest = {p:V(.05, .02, .4), q:basisQ(V(.18, .95, -.25), V(-.25, .3, 1))};
         P.handRest = V(-.26, hipY - .05, .12); P.bowRest = V(.1, -1, .2).normalize();
       }
     }
@@ -1080,16 +1225,22 @@ const Ens3D = (() => {
     return P;
   }
 
+  /* ---------- 部屋 ---------- */
   function hallFloor(){
-    const c = document.createElement("canvas"); c.width = c.height = 512; const x = c.getContext("2d");
-    for (let i = 0; i < 8; i++) for (let j = 0; j < 8; j++){ x.fillStyle = (i + j) % 2 ? "#d9cfc0" : "#8f7d68"; x.fillRect(i*64, j*64, 64, 64);
-      x.globalAlpha = .08; for (let k = 0; k < 6; k++){ x.strokeStyle = "#fff"; x.beginPath(); x.moveTo(i*64 + Math.random()*64, j*64); x.bezierCurveTo(i*64+Math.random()*64, j*64+20, i*64+Math.random()*64, j*64+40, i*64+Math.random()*64, j*64+64); x.stroke(); } x.globalAlpha = 1; }
-    const t = new THREE.CanvasTexture(c); t.wrapS = t.wrapT = THREE.RepeatWrapping; t.repeat.set(4, 3); t.encoding = THREE.sRGBEncoding; return t;
+    return canvasTex(512, 512, (x) => {
+      for (let i = 0; i < 8; i++) for (let j = 0; j < 8; j++){ x.fillStyle = (i + j) % 2 ? "#ddd3c4" : "#8a7660"; x.fillRect(i*64, j*64, 64, 64);
+        x.globalAlpha = .1; for (let k = 0; k < 6; k++){ x.strokeStyle = (i + j) % 2 ? "#a99" : "#fff"; x.beginPath(); x.moveTo(i*64 + Math.random()*64, j*64); x.bezierCurveTo(i*64+Math.random()*64, j*64+20, i*64+Math.random()*64, j*64+40, i*64+Math.random()*64, j*64+64); x.stroke(); } x.globalAlpha = 1; }
+      x.strokeStyle = "rgba(60,40,20,.35)"; x.lineWidth = 1.5; for (let i = 0; i <= 8; i++){ x.beginPath(); x.moveTo(i*64, 0); x.lineTo(i*64, 512); x.stroke(); x.beginPath(); x.moveTo(0, i*64); x.lineTo(512, i*64); x.stroke(); }
+    });
   }
-
+  function landscape(x, w, h, warm){
+    const g = x.createLinearGradient(0, 0, 0, h); g.addColorStop(0, warm ? "#f2d9a8" : "#9fc4e0"); g.addColorStop(.6, warm ? "#f6e8c9" : "#dfeaf0"); x.fillStyle = g; x.fillRect(0, 0, w, h);
+    x.fillStyle = "#7f9a63"; x.beginPath(); x.moveTo(0, h*.7); x.bezierCurveTo(w*.3, h*.55, w*.6, h*.8, w, h*.62); x.lineTo(w, h); x.lineTo(0, h); x.fill();
+    x.fillStyle = "#5e7a4a"; x.beginPath(); x.moveTo(0, h*.85); x.bezierCurveTo(w*.4, h*.72, w*.7, h*.9, w, h*.8); x.lineTo(w, h); x.lineTo(0, h); x.fill();
+    x.fillStyle = "#4a5f3a"; for (let i = 0; i < 5; i++){ const tx = w*(.1 + i*.2), ty = h*(.62 + (i%2)*.08); x.beginPath(); x.arc(tx, ty, w*.04, 0, 7); x.fill(); x.fillRect(tx - 2, ty, 4, h*.08); }
+  }
   function build(){
-    _d = new THREE.Vector3(); _p = new THREE.Vector3(); _y = new THREE.Vector3(0,1,0); _H = new THREE.Vector3(); _C = new THREE.Vector3();
-    _B = new THREE.Vector3(); _E = new THREE.Vector3(); _L = new THREE.Vector3(); _q = new THREE.Quaternion(); _v = new THREE.Vector3();
+    _d = V(0,0,0); _p = V(0,0,0); _y = V(0,1,0); _H = V(0,0,0); _C = V(0,0,0); _B = V(0,0,0); _E = V(0,0,0); _L = V(0,0,0); _W = V(0,0,0); _q = new THREE.Quaternion(); _v = V(0,0,0);
     scene = new THREE.Scene();
     scene.background = new THREE.Color(0xe9dcc8).convertSRGBToLinear();
     scene.fog = new THREE.Fog(scene.background, 18, 34);
@@ -1098,83 +1249,200 @@ const Ens3D = (() => {
     R.setPixelRatio(Math.min(2, devicePixelRatio || 1)); R.shadowMap.enabled = true; R.shadowMap.type = THREE.PCFSoftShadowMap;
     R.outputEncoding = THREE.sRGBEncoding; R.toneMapping = THREE.ACESFilmicToneMapping; R.toneMappingExposure = 1.1;
     R.domElement.className = "e3canvas";
+    // 木目
+    const grain = canvasTex(256, 64, (x, w, h) => { x.fillStyle = "#fff"; x.fillRect(0, 0, w, h); for (let i = 0; i < 40; i++){ x.strokeStyle = `rgba(90,40,10,${.05 + Math.random()*.12})`; x.lineWidth = 1 + Math.random()*2; x.beginPath(); const y0 = Math.random()*h; x.moveTo(0, y0); x.bezierCurveTo(w*.3, y0 + Math.random()*6 - 3, w*.6, y0 + Math.random()*6 - 3, w, y0 + Math.random()*4 - 2); x.stroke(); } });
+    lidTex = canvasTex(512, 1024, (x, w, h) => { landscape(x, w, h, true); x.strokeStyle = "#b08a2e"; x.lineWidth = 14; x.strokeRect(10, 10, w - 20, h - 20); });
+    roseTex = canvasTex(128, 128, (x, w) => { x.translate(w/2, w/2); x.strokeStyle = "#b08a2e"; x.lineWidth = 3; for (let r = 0; r < 12; r++){ x.rotate(Math.PI/6); x.beginPath(); x.arc(18, 0, 18, 0, Math.PI*2); x.stroke(); } x.beginPath(); x.arc(0, 0, 60, 0, Math.PI*2); x.lineWidth = 5; x.stroke(); });
+    const soundTex = canvasTex(256, 512, (x, w, h) => { x.fillStyle = "#e3c891"; x.fillRect(0, 0, w, h); x.strokeStyle = "rgba(150,100,40,.18)"; for (let i = 0; i < w; i += 6){ x.beginPath(); x.moveTo(i, 0); x.lineTo(i, h); x.stroke(); }
+      const fl = ["#c0392b","#2b6cb0","#d4a017","#8e44ad"]; for (let i = 0; i < 26; i++){ x.fillStyle = fl[i % 4]; const fx = Math.random()*w, fy = Math.random()*h; for (let k = 0; k < 5; k++){ x.beginPath(); x.arc(fx + Math.cos(k*1.26)*4, fy + Math.sin(k*1.26)*4, 3, 0, 7); x.fill(); } x.fillStyle = "#4a6b2a"; x.fillRect(fx - 1, fy + 5, 2, 8); } });
     M = {
-      wood:mat(0x8a3f14, {roughness:.32, metalness:.05}), ebony:mat(0x1b1612, {roughness:.4}), bridge:mat(0xd9b98a), metal:mat(0x9a9a9a, {metalness:.8, roughness:.3}),
-      string:new THREE.LineBasicMaterial({color:0xdddddd}), bowstick:mat(0x4a2510, {roughness:.4}), hair:mat(0xf3eee2), skin:mat(0xe8c4a2, {roughness:.75}),
-      wig:mat(0xebe7e0, {roughness:.9}), ribbon:mat(0x151515), eye:mat(0x2a1d14), linen:mat(0xf7f4ee, {roughness:.9}), vest:mat(0xe9dcbc, {roughness:.8}),
-      breech:mat(0x3b2d22), stock:mat(0xf2efe8, {roughness:.9}), shoe:mat(0x161210, {roughness:.35}), chair:mat(0x6b3a1e, {roughness:.5}),
-      hpcase:mat(0x2d4a3e, {roughness:.45}), lid:mat(0x2d4a3e, {roughness:.45, side:THREE.DoubleSide}), sound:mat(0xd8c08c, {roughness:.6, side:THREE.DoubleSide}), keys:mat(0xf1ead8),
-      stand:mat(0x2a1a10), paper:mat(0xf3ecd8, {roughness:.95}),
+      wood:mat(0x9a4a16, {roughness:.28, metalness:.05, map:grain}), ebony:mat(0x1b1612, {roughness:.35}), bridge:mat(0xdcc29a), metal:mat(0x9a9a9a, {metalness:.8, roughness:.3}),
+      purfling:new THREE.LineBasicMaterial({color:0x2a1608}), hole:mat(0x120a05, {roughness:1}), string:new THREE.LineBasicMaterial({color:0xe8e2d0}),
+      bowstick:mat(0x4a2510, {roughness:.35}), hair:mat(0xf3eee2), skin:mat(0xeac6a4, {roughness:.7}), cheek:mat(0xe9a6a0, {roughness:.8}), lip:mat(0xa85a55),
+      wig:mat(0xeeeae2, {roughness:.95}), ribbon:mat(0x151515), eye:mat(0x2a1d14), eyeW:mat(0xffffff, {roughness:.4}), brow:mat(0x8a7a6a),
+      linen:mat(0xf8f5ef, {roughness:.9, side:THREE.DoubleSide}), vest:mat(0xeadcb6, {roughness:.75}), goldm:mat(0xd4a83a, {metalness:.85, roughness:.3}), goldLine:new THREE.LineBasicMaterial({color:0xc9a240}),
+      breech:mat(0x3b2d22, {roughness:.6}), stock:mat(0xf2efe8, {roughness:.9}), shoe:mat(0x161210, {roughness:.25}), chair:mat(0x6b3a1e, {roughness:.45, map:grain}), cushion:mat(0x8a2a2a, {roughness:.85}),
+      hpcase:mat(0x2d4a3e, {roughness:.4}), lid:mat(0x2d4a3e, {roughness:.4}), sound:new THREE.MeshStandardMaterial({map:soundTex, roughness:.7, side:THREE.DoubleSide}), keys:mat(0xf1ead8, {roughness:.4}),
+      paper:mat(0xf3ecd8, {roughness:.95}),
     };
     // 光
     hemi = new THREE.HemisphereLight(0xfff4e0, 0x6b5440, .75); scene.add(hemi);
     sun = new THREE.DirectionalLight(0xfff0d8, 1.25); sun.position.set(-4, 9, 6); sun.castShadow = true;
-    sun.shadow.mapSize.set(1024, 1024); Object.assign(sun.shadow.camera, {left:-7, right:7, top:7, bottom:-7, near:1, far:25}); sun.shadow.bias = -.0005; scene.add(sun);
+    sun.shadow.mapSize.set(2048, 2048); Object.assign(sun.shadow.camera, {left:-7, right:7, top:7, bottom:-7, near:1, far:25}); sun.shadow.bias = -.0004; sun.shadow.normalBias = .02; scene.add(sun);
     // 床と壁（教会の音楽室のような広間）
-    const floor = mesh(new THREE.PlaneGeometry(16, 12), new THREE.MeshStandardMaterial({map:hallFloor(), roughness:.35, metalness:.05}), scene, false); floor.rotation.x = -Math.PI/2; floor.position.z = -.5;
-    const wallM = mat(0xefe3cc, {roughness:.85}), trimM = mat(0xc9b48a, {roughness:.6, metalness:.15});
+    const floor = mesh(new THREE.PlaneGeometry(16, 12), new THREE.MeshStandardMaterial({map:hallFloor(), roughness:.3, metalness:.05}), scene, false); floor.rotation.x = -Math.PI/2; floor.position.z = -.5;
+    floor.material.map.wrapS = floor.material.map.wrapT = THREE.RepeatWrapping; floor.material.map.repeat.set(4, 3);
+    const wallM = mat(0xefe3cc, {roughness:.85}), trimM = mat(0xcdb68a, {roughness:.55, metalness:.15}), goldT = mat(0xc9a240, {metalness:.7, roughness:.35});
     const wall = mesh(new THREE.PlaneGeometry(16, 7), wallM, scene, false); wall.position.set(0, 3.5, -6.2);
     winMat = new THREE.MeshStandardMaterial({color:0xbfdcf0, emissive:new THREE.Color(0xcfe6ff), emissiveIntensity:.55, roughness:.2});
     [-4.2, 0, 4.2].forEach(x => {
       const arch = new THREE.Shape(); arch.moveTo(-.9, 0); arch.lineTo(-.9, 2.2); arch.absarc(0, 2.2, .9, Math.PI, 0, true); arch.lineTo(.9, 0); arch.lineTo(-.9, 0);
-      const w = mesh(new THREE.ShapeGeometry(arch, 20), winMat, scene, false); w.position.set(x, 1.2, -6.18);
-      const fr = mesh(new THREE.BoxGeometry(.08, 3.1, .06), trimM, scene, false); fr.position.set(x, 2.75, -6.15);
-      const fr2 = mesh(new THREE.BoxGeometry(1.8, .06, .06), trimM, scene, false); fr2.position.set(x, 2.4, -6.15);
+      const w = mesh(new THREE.ShapeGeometry(arch, 24), winMat, scene, false); w.position.set(x, 1.4, -6.18);
+      const fr = new THREE.Shape(); fr.moveTo(-1.05, 0); fr.lineTo(-1.05, 2.2); fr.absarc(0, 2.2, 1.05, Math.PI, 0, true); fr.lineTo(1.05, 0); fr.lineTo(-1.05, 0);
+      fr.holes.push(arch); const fm = mesh(new THREE.ExtrudeGeometry(fr, {depth:.08, bevelEnabled:false, curveSegments:24}), trimM, scene, false); fm.position.set(x, 1.4, -6.2);
+      const m1 = mesh(new THREE.BoxGeometry(.06, 3.1, .05), trimM, scene, false); m1.position.set(x, 2.95, -6.15);
+      for (let k = 1; k < 4; k++){ const m2 = mesh(new THREE.BoxGeometry(1.8, .05, .05), trimM, scene, false); m2.position.set(x, 1.4 + k * .72, -6.15); }
+      const sill = mesh(new THREE.BoxGeometry(2.3, .1, .3), trimM, scene, false); sill.position.set(x, 1.35, -6.05);
     });
-    [-6.3, -2.1, 2.1, 6.3].forEach(x => { const pl = mesh(new THREE.BoxGeometry(.5, 7, .3), trimM, scene); pl.position.set(x, 3.5, -6.05);
-      const cap = mesh(new THREE.BoxGeometry(.7, .2, .4), trimM, scene); cap.position.set(x, 5.2, -6); });
+    [-6.3, -2.1, 2.1, 6.3].forEach(x => { const pl = mesh(new THREE.BoxGeometry(.5, 6.4, .3), trimM, scene); pl.position.set(x, 3.2, -6.05);
+      const cap = mesh(new THREE.BoxGeometry(.75, .25, .45), goldT, scene); cap.position.set(x, 5.5, -6);
+      const bs = mesh(new THREE.BoxGeometry(.7, .4, .42), trimM, scene); bs.position.set(x, .2, -6); });
+    const cornice = mesh(new THREE.BoxGeometry(16, .35, .5), trimM, scene, false); cornice.position.set(0, 5.75, -5.95);
     const base = mesh(new THREE.BoxGeometry(16, .35, .2), trimM, scene, false); base.position.set(0, .17, -6.1);
-    [-1, 1].forEach(sd => { const sw = mesh(new THREE.PlaneGeometry(12, 7), wallM, scene, false); sw.position.set(sd*8, 3.5, -.5); sw.rotation.y = -sd*Math.PI/2; });
-    // 燭台
+    // 額に入った風景画
+    [-2.1 - .0, 2.1].forEach((x, i) => { const t = canvasTex(256, 192, (c, w, h) => landscape(c, w, h, i === 0));
+      const fr = mesh(new THREE.BoxGeometry(1.0, .78, .06), goldT, scene, false); fr.position.set(x * 3.0 > 0 ? 7.88 : -7.88, 3.0, -2 + i * 2); fr.rotation.y = x > 0 ? -Math.PI/2 : Math.PI/2;
+      const pic = mesh(new THREE.PlaneGeometry(.86, .64), new THREE.MeshStandardMaterial({map:t, roughness:.8}), scene, false); pic.position.copy(fr.position).add(V(x > 0 ? -.035 : .035, 0, 0)); pic.rotation.y = fr.rotation.y; });
+    [-1, 1].forEach(sd => { const sw = mesh(new THREE.PlaneGeometry(12, 7), wallM, scene, false); sw.position.set(sd*8, 3.5, -.5); sw.rotation.y = -sd*Math.PI/2;
+      const sb = mesh(new THREE.BoxGeometry(.2, .35, 12), trimM, scene, false); sb.position.set(sd*7.95, .17, -.5); });
+    // シャンデリア（ろうそく8本）
+    const ch = new THREE.Group(); ch.position.set(0, 4.6, -1.2); scene.add(ch);
+    const chain = mesh(new THREE.CylinderGeometry(.012, .012, 1.4, 6), goldT, ch, false); chain.position.y = .7;
+    const ringC = mesh(new THREE.TorusGeometry(.55, .025, 8, 40), goldT, ch, false); ringC.rotation.x = Math.PI/2;
+    const hub = mesh(new THREE.SphereGeometry(.1, 12, 10), goldT, ch, false); hub.scale.y = 1.6;
+    const flameM = new THREE.MeshBasicMaterial({color:0xffc56b});
+    for (let k = 0; k < 8; k++){ const a = k / 8 * Math.PI * 2, cx = Math.cos(a) * .55, cz = Math.sin(a) * .55;
+      const arm = mesh(new THREE.CylinderGeometry(.012, .012, .55, 6), goldT, ch, false); arm.position.set(cx/2, 0, cz/2); arm.rotation.z = Math.PI/2; arm.rotation.y = -a;
+      const cup = mesh(new THREE.CylinderGeometry(.04, .025, .04, 10), goldT, ch, false); cup.position.set(cx, .02, cz);
+      const cd = mesh(new THREE.CylinderGeometry(.018, .018, .16, 8), M.linen, ch, false); cd.position.set(cx, .12, cz);
+      const fl = mesh(new THREE.ConeGeometry(.012, .04, 8), flameM, ch, false); fl.position.set(cx, .22, cz); }
+    const chL = new THREE.PointLight(0xffb060, .5, 9); ch.add(chL);
+    // 壁の燭台
     [-2.1, 2.1].forEach(x => { const c = mesh(new THREE.CylinderGeometry(.03, .03, .25, 8), M.linen, scene, false); c.position.set(x, 3.2, -5.85);
-      const f = mesh(new THREE.SphereGeometry(.035, 8, 6), new THREE.MeshBasicMaterial({color:0xffc56b}), scene, false); f.position.set(x, 3.36, -5.85);
-      const pl = new THREE.PointLight(0xffb060, .35, 6); pl.position.set(x, 3.4, -5.6); scene.add(pl); });
+      const f = mesh(new THREE.ConeGeometry(.025, .07, 8), flameM, scene, false); f.position.set(x, 3.36, -5.85);
+      const pl = new THREE.PointLight(0xffb060, .3, 6); pl.position.set(x, 3.4, -5.6); scene.add(pl); });
     // 独奏者の足もとの光
     ring = mesh(new THREE.CircleGeometry(.75, 40), new THREE.MeshBasicMaterial({color:0xffe08a, transparent:true, opacity:0, depthWrite:false}), scene, false);
     ring.rotation.x = -Math.PI/2; ring.position.set(SEATS[0].x, .012, SEATS[0].z);
     // 奏者
     const cnt = {};
-    players = SEATS.map((s, i) => { const P = figure(s, i); P.chair = cnt[s.grp] = (cnt[s.grp] === undefined ? 0 : cnt[s.grp] + 1); return P; });
+    players = SEATS.map(s => { const P = figure(s); P.chair = cnt[s.grp] = (cnt[s.grp] === undefined ? 0 : cnt[s.grp] + 1); return P; });
+    const solo = players[0].root.position;
+    players.forEach(P => { const dx = solo.x - P.root.position.x, dz = solo.z - P.root.position.z; P.lookSolo = Math.atan2(dx, dz) - P.root.rotation.y; P.lookSolo = Math.max(-.9, Math.min(.9, P.lookSolo)); });
     // カメラ
     ctl = new THREE.OrbitControls(cam, R.domElement); ctl.enableDamping = true; ctl.dampingFactor = .08; ctl.enablePan = false;
-    ctl.minDistance = 4; ctl.maxDistance = 16; ctl.maxPolarAngle = Math.PI * .49;
+    ctl.minDistance = 2.5; ctl.maxDistance = 16; ctl.maxPolarAngle = Math.PI * .49;
     ctl.addEventListener("start", () => { camGoal = null; });
     setView("front", true);
+    // 楽器・奏者を押す
+    const ray = new THREE.Raycaster(), nd = new THREE.Vector2(); let down = null;
+    const pick = e => { const r = R.domElement.getBoundingClientRect(); nd.set((e.clientX - r.left) / r.width * 2 - 1, -((e.clientY - r.top) / r.height) * 2 + 1); ray.setFromCamera(nd, cam);
+      const hit = ray.intersectObjects(players.map(p => p.root), true)[0]; let o = hit && hit.object; while (o && !o.userData.player) o = o.parent; return o ? o.userData.player : null; };
+    R.domElement.addEventListener("pointerdown", e => { down = [e.clientX, e.clientY]; });
+    R.domElement.addEventListener("pointerup", e => { if (!down || Math.hypot(e.clientX - down[0], e.clientY - down[1]) > 6) return; const P = pick(e); if (P) openInfo(P.grp); });
+    R.domElement.addEventListener("pointermove", e => { if (e.buttons) return; const P = pick(e); hoverP = P; R.domElement.style.cursor = P ? "pointer" : "grab"; });
     // 重ねる表示（名札・視点・いま弾いている人）
     overlay = document.createElement("div"); overlay.className = "e3ov";
     overlay.innerHTML = `<div class="e3who"></div>
-      <div class="e3views">${[["front","正面"],["top","真上"],["side","横"]].map(([k,n]) => `<button data-v="${k}">${n}</button>`).join("")}</div>
-      <div class="e3legend"><span class="solo">独奏</span><span class="tutti">合奏</span><span class="cont">通奏低音</span></div>
+      <div class="e3views">${[["front","正面"],["top","真上"],["side","横"],["close","独奏に寄る"]].map(([k,n]) => `<button data-v="${k}">${n}</button>`).join("")}</div>
+      <div class="e3legend"><span class="solo">独奏</span><span class="tutti">合奏</span><span class="cont">通奏低音</span><span class="hint">楽器を押すと説明</span></div>
       ${GROUPS.map(g => `<button class="e3lab ${g.cls}" data-g="${g.key}"><b>${g.name}</b><small>${g.role}</small></button>`).join("")}`;
     whoEl = overlay.querySelector(".e3who"); viewBtns = overlay.querySelectorAll("[data-v]");
     viewBtns.forEach(b => b.onclick = () => setView(b.dataset.v));
-    GROUPS.forEach(g => { labels[g.key] = overlay.querySelector(`[data-g="${g.key}"]`); labels[g.key].onclick = () => { if (typeof openLightbox === "function") openLightbox(g.photo, ["violin","viola","cello","contrabass","harpsichord"]); }; });
+    GROUPS.forEach(g => { labels[g.key] = overlay.querySelector(`[data-g="${g.key}"]`); labels[g.key].onclick = () => openInfo(g.key); });
   }
-  const VIEWS = { front:{p:[0, 3.1, 7.6], t:[0, 1.05, -1.2]}, top:{p:[0, 12.5, .6], t:[0, 0, -1.0]}, side:{p:[9.2, 3.2, 1.2], t:[-.3, 1.0, -1.0]} };
-  function setView(v, now){ view = v; const V0 = VIEWS[v]; camGoal = {p:new THREE.Vector3(...V0.p), t:new THREE.Vector3(...V0.t)};
+  const VIEWS = { front:{p:[0, 3.1, 7.6], t:[0, 1.05, -1.2]}, top:{p:[0, 12.5, .6], t:[0, 0, -1.0]}, side:{p:[9.2, 3.2, 1.2], t:[-.3, 1.0, -1.0]}, close:{p:[.6, 1.75, 3.6], t:[-.75, 1.3, 1.5]} };
+  function setView(v, now){ const V0 = VIEWS[v]; camGoal = {p:new THREE.Vector3(...V0.p), t:new THREE.Vector3(...V0.t)};
     if (now){ cam.position.copy(camGoal.p); ctl.target.copy(camGoal.t); camGoal = null; }
     if (viewBtns) viewBtns.forEach(b => b.classList.toggle("on", b.dataset.v === v)); }
 
+  /* ---------- 楽器の説明シート ---------- */
+  let sheet, zR, zS, zC, zCtl, zObj, sheetKey = null;
+  function ensureSheet(){
+    if (sheet) return;
+    sheet = document.createElement("div"); sheet.id = "e3sheet"; sheet.className = "hidden";
+    sheet.innerHTML = `<div class="e3s-card" role="dialog" aria-modal="true"><button class="e3s-close" aria-label="閉じる">✕</button><div class="e3s-in"></div></div>`;
+    document.body.appendChild(sheet);
+    sheet.querySelector(".e3s-close").onclick = closeInfo;
+    sheet.addEventListener("click", e => { if (e.target === sheet) closeInfo(); });
+    document.addEventListener("keydown", e => { if (e.key === "Escape" && sheetKey && !lightboxOpen()) closeInfo(); });
+  }
+  function closeInfo(){ if (!sheet) return; sheet.classList.add("hidden"); sheetKey = null; }
+  function infoOpen(){ return !!sheetKey; }
+  function modelFor(kind){
+    if (kind === "hp"){ const h = harpsichord(); h.position.set(0, -.5, -.9); return h; }
+    const spec = {vn:[.6, .07, "vn", .72], va:[.68, .075, "vn", .7], vc:[1.22, .1, "vn", .7], cb:[1.8, .11, "cb", .66]}[kind];
+    const g = new THREE.Group(), inst = stringInst(spec[0], spec[1], spec[2]); g.add(inst);
+    const b = makeBow(spec[3]); b.position.set(spec[0] * .05, -spec[0] * .22, spec[0] * .12); b.rotation.z = .05; g.add(b);
+    inst.position.x = -spec[0] / 2; b.position.x -= spec[0] / 2;
+    g.rotation.x = -.35; return g;
+  }
+  async function openInfo(key){
+    ensureSheet(); sheetKey = key;
+    const G = GROUPS.find(g => g.key === key), I = INFO[key];
+    const kinds = [I.model].concat(I.model2 ? [I.model2] : []);
+    sheet.querySelector(".e3s-in").innerHTML = `
+      <div class="e3s-head"><span class="e3s-badge ${G.cls}">${G.badge}</span><h2>${G.name}</h2><span class="e3s-role">${G.role}</span></div>
+      <div class="e3s-body">
+        <div class="e3s-left">
+          <div class="e3s-photos">${I.inst.map(id => `<figure class="ph" data-ph="${id}"><div class="phimg"><div class="phnone">📷<br>写真を読み込み中</div></div><figcaption><b>${PHOTOS[id].title}</b>（本物の写真）</figcaption></figure>`).join("")}</div>
+          <div class="e3s-3d"><div class="e3s-3dtabs">${kinds.length > 1 ? kinds.map((k,i) => `<button data-m="${k}" class="${i ? "" : "on"}">${{vc:"チェロ", cb:"コントラバス"}[k]}</button>`).join("") : ""}<span>3Dで回して見る</span></div><div class="e3s-zoom"></div></div>
+        </div>
+        <div class="e3s-right">
+          <section><h3>🎻 楽器の解説</h3><p>${I.about}</p></section>
+          <section><h3>🎼 この曲での役割</h3><p>${I.role}</p></section>
+          <section><h3>📜 ソネットのどのことばを表しているか</h3>
+            ${I.sonnet.map((s,i) => `<div class="e3s-q"><div class="e3s-w">「${s.w}」</div><div class="e3s-how">→ ${s.how}</div><button class="smallbtn" data-clip="${i}">▶ 聴く</button></div>`).join("")}
+          </section>
+          ${I.extra ? `<p class="tip">💡 ${I.extra}</p>` : ""}
+        </div>
+      </div>`;
+    sheet.classList.remove("hidden");
+    sheet.querySelectorAll("[data-clip]").forEach(b => b.onclick = () => { const [f,l] = I.sonnet[+b.dataset.clip].clip(); loopSec = -1; playClip(f, l); });
+    sheet.querySelectorAll("[data-m]").forEach(b => b.onclick = () => { sheet.querySelectorAll("[data-m]").forEach(x => x.classList.toggle("on", x === b)); setZoom(b.dataset.m); });
+    setZoom(kinds[0]);
+    if (typeof fillPhotos === "function") fillPhotos(sheet.querySelector(".e3s-photos"));
+  }
+  function setZoom(kind){
+    const host = sheet.querySelector(".e3s-zoom");
+    if (!zR){
+      zR = new THREE.WebGLRenderer({antialias:true, alpha:true}); zR.setClearColor(0, 0); zR.setPixelRatio(Math.min(2, devicePixelRatio || 1));
+      zR.outputEncoding = THREE.sRGBEncoding; zR.toneMapping = THREE.ACESFilmicToneMapping; zR.toneMappingExposure = 1.15; zR.domElement.className = "e3canvas";
+      zS = new THREE.Scene(); zS.add(new THREE.HemisphereLight(0xfff4e0, 0x806850, .9));
+      const dl = new THREE.DirectionalLight(0xffffff, 1.3); dl.position.set(2, 3, 4); zS.add(dl);
+      const dl2 = new THREE.DirectionalLight(0xffe0c0, .5); dl2.position.set(-3, 1, -2); zS.add(dl2);
+      zC = new THREE.PerspectiveCamera(32, 1, .05, 50);
+      zCtl = new THREE.OrbitControls(zC, zR.domElement); zCtl.enableDamping = true; zCtl.enablePan = false; zCtl.autoRotate = true; zCtl.autoRotateSpeed = 1.6;
+    }
+    host.appendChild(zR.domElement);
+    if (zObj) zS.remove(zObj);
+    zObj = modelFor(kind); zS.add(zObj);
+    const box = new THREE.Box3().setFromObject(zObj), c = box.getCenter(V(0,0,0)), r = box.getSize(V(0,0,0)).length() / 2;
+    zCtl.target.copy(c); zC.position.copy(c).add(V(0, r * .5, r * 2.2)); zCtl.minDistance = r * .8; zCtl.maxDistance = r * 4; zCtl.update();
+  }
+  function zoomFrame(){
+    if (!sheetKey || !zR) return;
+    const host = zR.domElement.parentElement; if (!host || !host.clientWidth) return;
+    const w = host.clientWidth, h = host.clientHeight;
+    if (zR.domElement.width !== Math.round(w * zR.getPixelRatio()) || zR.domElement.height !== Math.round(h * zR.getPixelRatio())){ zR.setSize(w, h, false); zC.aspect = w / h; zC.updateProjectionMatrix(); }
+    zCtl.update(); zR.render(zS, zC);
+  }
+
   /* ---------- 毎フレーム ---------- */
-    function pose(P, kind, amp, dt, playing){
+  function placeHand(hand, target, from, wristBack){ _W.subVectors(target, from).normalize(); hand.quaternion.setFromUnitVectors(_y, _W); hand.position.copy(target).addScaledVector(_W, -wristBack); }
+  function pose(P, kind, amp, dt, playing){
     const target = actOf(P, kind); P.act += (target - P.act) * Math.min(1, dt * 4);
     const st = STYLE[styleOf(P, kind)];
     if (playing && target) P.phase += dt * st.sp * Math.PI * 2 * (st.sp > 6 ? 1 : (.65 + amp));
     const a = P.act;
-    // 体のゆれ（独奏者は大きく）
-    P.sway += dt * (playing ? 1.6 : .4);
+    // 呼吸・体のゆれ。休んでいる人は独奏者のほうを見る
+    P.breathe += dt * 1.7; P.sway += dt * (playing ? 1.6 : .4);
     const sw = (P.grp === "solo" ? .06 : .025) * a * (playing ? .4 + amp : .2);
-    P.head.rotation.z = Math.sin(P.sway) * sw * 1.5; P.head.rotation.x = .12 + Math.sin(P.sway * .7) * sw;
+    const vnTilt = (P.type === "vn" || P.type === "va") ? -.22 * a : 0;
+    P.head.rotation.z = vnTilt + Math.sin(P.sway) * sw * 1.5;
+    P.head.rotation.x = .1 + Math.sin(P.sway * .7) * sw + (P.seated ? .08 : 0);
+    P.head.rotation.y = (vnTilt ? .25 * a : 0) + (P.grp === "solo" ? 0 : (P.lookSolo || 0) * (1 - a) * .8);
+    P.head.position.y = P.shY + .2 + Math.sin(P.breathe) * .003;
     if (P.hp){
       const k = playing && target ? 1 : 0, t = P.phase;
-      const hR = V(-.14 + Math.sin(t * .9) * .05, .86 + Math.abs(Math.sin(t * 3)) * .02 * k, .38).lerp(V(-.16, P.hipY + .05, .3), 1 - a);
-      const hL = V(.16 + Math.sin(t * .6 + 1) * .04, .86 + Math.abs(Math.sin(t * 3 + 1.3)) * .02 * k, .38).lerp(V(.16, P.hipY + .05, .3), 1 - a);
-      arm(P, hR, hL); return;
+      const hR = V(-.15 + Math.sin(t * .9) * .05, .85 + Math.abs(Math.sin(t * 3)) * .02 * k, .37).lerp(V(-.16, P.hipY + .05, .3), 1 - a);
+      const hL = V(.15 + Math.sin(t * .6 + 1) * .04, .85 + Math.abs(Math.sin(t * 3 + 1.3)) * .02 * k, .37).lerp(V(.16, P.hipY + .05, .3), 1 - a);
+      arm(P, hR, hL, V(0, -.2, 1), V(0, -.2, 1)); return;
     }
     // 楽器：構える ⇔ 下ろす
     P.inst.position.lerpVectors(P.rest.p, P.play.p, a); P.inst.quaternion.copy(P.rest.q).slerp(P.play.q, a);
     const u = P.inst.userData;
-    _C.set(u.contact, 0, u.zt + .018).applyQuaternion(P.inst.quaternion).add(P.inst.position);
+    _C.set(u.contact, 0, u.zt + .03).applyQuaternion(P.inst.quaternion).add(P.inst.position);
     _B.set(0, 1, 0).applyQuaternion(P.inst.quaternion); if (_B.x < 0) _B.negate();       // 弓の向き：弦を横切る（手は奏者の右）
     const bl = P.bow.userData.len, s = bl * (.48 + st.a * Math.sin(P.phase));
     _H.copy(_C).addScaledVector(_B, -s);
@@ -1182,20 +1450,23 @@ const Ens3D = (() => {
     P.bow.position.copy(_H); _q.setFromUnitVectors(V(1, 0, 0), _B); P.bow.quaternion.copy(_q);
     // 左手：ネック（さえずり・トリルは指を細かく動かす）
     const tr = styleOf(P, kind) === "trill" && playing && target ? Math.sin(performance.now() / 35) * .006 : 0;
-    _L.set(u.neck, -.01 + tr, u.zt * .6).applyQuaternion(P.inst.quaternion).add(P.inst.position);
-    arm(P, _H, _L);
-    // 独奏者は動きにあわせて少し体を回す
+    _L.set(u.neck, -.012 + tr, u.zt * .55).applyQuaternion(P.inst.quaternion).add(P.inst.position);
+    arm(P, _H.clone(), _L.clone(), _B.clone(), V(0, 1, 0).applyQuaternion(P.inst.quaternion));
     if (P.grp === "solo") P.root.rotation.y = Math.atan2(-P.cfg.x * .35, 6) + Math.sin(P.sway * .8) * .06 * a;
   }
-  function arm(P, hR, hL){
+  function arm(P, hR, hL, dirR, dirL){
     const A = P.arms;
-    elbow(_E, P.shR, hR, -1); setLimb(A.ru, P.shR, _E); setLimb(A.rl, _E, hR); A.rh.position.copy(hR); A.rc.position.lerpVectors(_E, hR, .88); A.rc.quaternion.copy(A.rl.quaternion);
-    elbow(_E, P.shL, hL, 1); setLimb(A.lu, P.shL, _E); setLimb(A.ll, _E, hL); A.lh.position.copy(hL); A.lc.position.lerpVectors(_E, hL, .88); A.lc.quaternion.copy(A.ll.quaternion);
+    elbow(_E, P.shR, hR, -1); setLimb(A.ru, P.shR, _E); setLimb(A.rl, _E, hR); A.re.position.copy(_E);
+    A.rc.position.lerpVectors(_E, hR, .78); A.rc.quaternion.copy(A.rl.quaternion); A.rl2.position.lerpVectors(_E, hR, .92); A.rl2.quaternion.copy(A.rl.quaternion);
+    placeHand(A.rh, hR.clone().add(dirR.clone().multiplyScalar(.03)), _E, .045);
+    elbow(_E, P.shL, hL, 1); setLimb(A.lu, P.shL, _E); setLimb(A.ll, _E, hL); A.le.position.copy(_E);
+    A.lc.position.lerpVectors(_E, hL, .78); A.lc.quaternion.copy(A.ll.quaternion); A.ll2.position.lerpVectors(_E, hL, .92); A.ll2.quaternion.copy(A.ll.quaternion);
+    placeHand(A.lh, hL.clone().add(dirL.clone().multiplyScalar(.02)), _E, .045);
   }
 
   function frame(){
     if (!ready) return;
-    // ページ送りで一時的にはずれている場所もあるので、消さずに残しておく（多くなったら古いものから捨てる）
+    zoomFrame();
     if (hosts.length > 12) hosts = hosts.slice(-12);
     const host = hosts.find(h => h.isConnected && h.offsetParent && h.clientWidth > 40);
     if (!host) return;
@@ -1214,7 +1485,8 @@ const Ens3D = (() => {
     winMat.emissive.setRGB(...(storm ? [.25 + flash, .27 + flash, .35 + flash] : [.8, .9, 1]));
     const spot = kind === "birds" || kind === "solo" ? 1 : kind === "storm" ? .5 : 0;
     ring.material.opacity += (spot * .45 - ring.material.opacity) * Math.min(1, dt * 4);
-    players.forEach(P => { const on = actOf(P, kind) ? (playing ? .32 + amp * .35 : .18) : 0; P.glow.material.opacity += (on - P.glow.material.opacity) * Math.min(1, dt * 5); });
+    players.forEach(P => { const on = actOf(P, kind) ? (playing ? .32 + amp * .35 : .18) : 0, hv = hoverP && hoverP.grp === P.grp ? .25 : 0;
+      P.glow.material.opacity += (Math.max(on, hv) - P.glow.material.opacity) * Math.min(1, dt * 5); });
     // カメラ
     if (camGoal){ cam.position.lerp(camGoal.p, Math.min(1, dt * 3)); ctl.target.lerp(camGoal.t, Math.min(1, dt * 3)); if (cam.position.distanceTo(camGoal.p) < .02) camGoal = null; }
     ctl.update();
@@ -1226,7 +1498,7 @@ const Ens3D = (() => {
       const ps = players.filter(p => p.grp === g.key); _v.set(0, 0, 0); ps.forEach(p => _v.add(p.root.position)); _v.multiplyScalar(1 / ps.length);
       _v.y = (ps[0].seated ? 1.55 : 2.0); if (g.key === "hp") _v.z += .3;
       _v.project(cam); const el = labels[g.key];
-      if (_v.z > 1){ el.style.display = "none"; return; }
+      if (_v.z > 1 || Math.abs(_v.x) > 1.1){ el.style.display = "none"; return; }
       el.style.display = ""; el._x = (_v.x + 1) / 2 * w; el._y = (1 - _v.y) / 2 * h;
       el.classList.toggle("rest", !ps.some(p => actOf(p, kind)));
     });
@@ -1236,7 +1508,7 @@ const Ens3D = (() => {
       for (let k = 0; k < i; k++){ const o = vis[k]; if (Math.abs(o._x - el._x) < (wi + o.offsetWidth) / 2 + 4 && el._y > o._y - hi - 3 && el._y < o._y + hi) el._y = o._y - hi - 3; }
       el.style.left = el._x + "px"; el.style.top = Math.max(hi + 2, el._y) + "px"; });
   }
-  return {attach, frame};
+  return {attach, frame, openInfo, infoOpen};
 })();
 
 tick.push(() => Ens3D.frame());
