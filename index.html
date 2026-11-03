@@ -1379,7 +1379,7 @@ const Ens3D = (() => {
     viewBtns.forEach(b => b.onclick = () => setView(b.dataset.v));
     GROUPS.forEach(g => { labels[g.key] = overlay.querySelector(`[data-g="${g.key}"]`); labels[g.key].onclick = () => openInfo(g.key); });
   }
-  const VIEWS = { front:{p:[0, 3.1, 7.6], t:[0, 1.05, -1.2]}, top:{p:[0, 12.5, .6], t:[0, 0, -1.0]}, side:{p:[9.2, 3.2, 1.2], t:[-.3, 1.0, -1.0]}, close:{p:[.6, 1.75, 3.6], t:[-.75, 1.3, 1.5]} };
+  const VIEWS = { front:{p:[0, 3.1, 7.6], t:[0, 1.05, -1.2]}, top:{p:[0, 12.5, .6], t:[0, 0, -1.0]}, side:{p:[6.6, 3.0, 2.4], t:[-.4, 1.0, -1.0]}, close:{p:[.6, 1.75, 3.6], t:[-.75, 1.3, 1.5]} };
   function setView(v, now){ const V0 = VIEWS[v]; camGoal = {p:new THREE.Vector3(...V0.p), t:new THREE.Vector3(...V0.t)};
     if (now){ cam.position.copy(camGoal.p); ctl.target.copy(camGoal.t); camGoal = null; }
     if (viewBtns) viewBtns.forEach(b => b.classList.toggle("on", b.dataset.v === v)); }
@@ -1459,8 +1459,51 @@ const Ens3D = (() => {
 
   /* ---------- 毎フレーム ---------- */
   function placeHand(hand, target, from, wristBack){ _W.subVectors(target, from).normalize(); hand.quaternion.setFromUnitVectors(_y, _W); hand.position.copy(target).addScaledVector(_W, -wristBack); }
+  /* ---------- 楽譜どおりの弓づかい ---------- */
+  // 1音ごとに弓の向きを返し、スラーとタイの音は一弓で弾く。同じパートの人は同じ楽譜なので、動きがそろう
+  const PART_OF = {solo:"solo", vn1:"vn1", vn2:"vn2", va:"va", bass:"bass", hp:"bass"};
+  const OPEN = {vn:[55,62,69,76], va:[48,55,62,69], vc:[36,43,50,57], cb:[28,33,38,43]};   // 開放弦の高さ
+  let BOWS = null;
+  function bowPlan(){
+    if (BOWS || typeof SCORE === "undefined") return BOWS;
+    BOWS = {};
+    Object.keys(SCORE.parts).forEach(pk => {
+      const strokes = []; let cur = null, slur = 0;
+      SCORE.parts[pk].forEach(n => {
+        const [t, d, midi, , , fl] = n;
+        if (midi < 0) return;
+        const same = cur && (slur > 0 || cur.tie) && t <= cur.t1 + 1;
+        if (same){ cur.t1 = t + d; cur.notes.push(n); } else { cur = {t0:t, t1:t + d, notes:[n]}; strokes.push(cur); }
+        cur.tie = !!(fl & 1);
+        if (fl & 16) slur++;
+        if (fl & 32) slur = Math.max(0, slur - 1);
+      });
+      // 弓の位置（0＝毛箱側、1＝先）。下げ弓と上げ弓を交互に。長い休みのあとは下げ弓から
+      let pos = .25, dir = 1, last = -1e9;
+      strokes.forEach(st => {
+        if (st.t0 - last >= 24){ pos = Math.min(pos, .3); dir = 1; }
+        let amt = Math.min(.7, Math.max(.035, (st.t1 - st.t0) / 24 * .3));
+        if (dir > 0) amt = Math.max(.03, Math.min(amt, .9 - pos)); else amt = Math.max(.03, Math.min(amt, pos - .08));
+        st.s0 = pos; st.s1 = pos + dir * amt; pos = st.s1; dir = -dir; last = st.t1;
+      });
+      BOWS[pk] = strokes;
+    });
+    return BOWS;
+  }
+  function findStroke(L, q){ let lo = 0, hi = L.length - 1, k = -1; while (lo <= hi){ const m = (lo + hi) >> 1; if (L[m].t0 <= q){ k = m; lo = m + 1; } else hi = m - 1; } return k; }
+  // いまの弓の位置・音の高さ・弾いているか
+  function scoreState(P){
+    const plan = bowPlan(); if (!plan || typeof ScoreView === "undefined") return null;
+    const L = plan[PART_OF[P.grp]]; if (!L || !L.length) return null;
+    const q = ScoreView.qAt(au.currentTime), i = findStroke(L, q), S = L[i], nx = L[i + 1];
+    if (!S) return {s:.25, midi:null, on:L[0].t0 - q < 18, onset:99, trill:false};
+    const inS = q < S.t1, p = inS ? (q - S.t0) / (S.t1 - S.t0) : 1;
+    let note = S.notes[0]; for (const n of S.notes) if (n[0] <= q) note = n;
+    return {s:S.s0 + (S.s1 - S.s0) * p, midi:note[2], on:inS || q - S.t1 < 30 || (nx && nx.t0 - q < 18), onset:q - note[0], trill:inS && !!(note[5] & 2)};
+  }
   function pose(P, kind, amp, dt, playing){
-    const target = actOf(P, kind); P.act += (target - P.act) * Math.min(1, dt * 4);
+    const sc = scoreState(P);
+    const target = (sc ? sc.on : 1) && actOf(P, kind) ? 1 : 0; P.act += (target - P.act) * Math.min(1, dt * 4);
     const st = STYLE[styleOf(P, kind)];
     if (playing && target) P.phase += dt * st.sp * Math.PI * 2 * (st.sp > 6 ? 1 : (.65 + amp));
     const a = P.act;
@@ -1473,23 +1516,30 @@ const Ens3D = (() => {
     P.head.rotation.y = (vnTilt ? .25 * a : 0) + (P.grp === "solo" ? 0 : (P.lookSolo || 0) * (1 - a) * .8);
     P.head.position.y = P.shY + .2 + Math.sin(P.breathe) * .003;
     if (P.hp){
-      const k = playing && target ? 1 : 0, t = P.phase;
-      const hR = V(-.15 + Math.sin(t * .9) * .05, .85 + Math.abs(Math.sin(t * 3)) * .02 * k, .37).lerp(V(-.16, P.hipY + .05, .3), 1 - a);
-      const hL = V(.15 + Math.sin(t * .6 + 1) * .04, .85 + Math.abs(Math.sin(t * 3 + 1.3)) * .02 * k, .37).lerp(V(.16, P.hipY + .05, .3), 1 - a);
+      // 低音の音が鳴るたびに鍵盤を押す（左手はバスの高さの位置、右手は和音）
+      const t = P.phase, hit = sc && sc.midi != null ? Math.exp(-Math.max(0, sc.onset) / 5) : (playing && target ? Math.abs(Math.sin(t * 3)) : 0);
+      const lx = sc && sc.midi != null ? Math.max(-.05, Math.min(.35, (sc.midi - 40) / 24 * .4)) : .15;
+      const hR = V(-.15 + (sc && sc.midi != null ? -((sc.midi % 7) / 7) * .08 : Math.sin(t * .9) * .05), .86 - hit * .025, .37).lerp(V(-.16, P.hipY + .05, .3), 1 - a);
+      const hL = V(lx, .86 - hit * .025, .37).lerp(V(.16, P.hipY + .05, .3), 1 - a);
       arm(P, hR, hL, V(0, -.2, 1), V(0, -.2, 1)); return;
     }
     // 楽器：構える ⇔ 下ろす
     P.inst.position.lerpVectors(P.rest.p, P.play.p, a); P.inst.quaternion.copy(P.rest.q).slerp(P.play.q, a);
     const u = P.inst.userData;
     _C.set(u.contact, 0, u.zt + .03).applyQuaternion(P.inst.quaternion).add(P.inst.position);
-    _B.set(0, 1, 0).applyQuaternion(P.inst.quaternion); if (_B.x < 0) _B.negate();       // 弓の向き：弦を横切る（手は奏者の右）
-    const bl = P.bow.userData.len, s = bl * (.48 + st.a * Math.sin(P.phase));
+    // 弾く弦：音の高さから選び、弓の角度を変える（低い弦ほど右ひじが上がる）
+    let midi = sc && sc.midi != null ? sc.midi : null; if (midi != null && P.type === "cb") midi -= 12;
+    const op = OPEN[P.type] || OPEN.vn; let si = 0; if (midi != null) op.forEach((o, k) => { if (midi >= o) si = k; });
+    const th = midi != null ? (si - 1.5) * .2 : 0; P.th = (P.th || 0) + (th - (P.th || 0)) * Math.min(1, dt * 14);
+    _B.set(0, Math.cos(P.th), Math.sin(P.th)).applyQuaternion(P.inst.quaternion); if (_B.x < 0) _B.negate();   // 弓の向き：弦を横切る（手は奏者の右）
+    const bl = P.bow.userData.len, s = bl * (sc ? sc.s : .48 + st.a * Math.sin(P.phase));
     _H.copy(_C).addScaledVector(_B, -s);
     _H.lerp(P.handRest, 1 - a); _B.lerp(P.bowRest, 1 - a).normalize();
     P.bow.position.copy(_H); _q.setFromUnitVectors(V(1, 0, 0), _B); P.bow.quaternion.copy(_q);
     // 左手：ネック（さえずり・トリルは指を細かく動かす）
-    const tr = styleOf(P, kind) === "trill" && playing && target ? Math.sin(performance.now() / 35) * .006 : 0;
-    _L.set(u.neck, -.012 + tr, u.zt * .55).applyQuaternion(P.inst.quaternion).add(P.inst.position);
+    const tr = (sc ? sc.trill : styleOf(P, kind) === "trill") && playing && target ? Math.sin(performance.now() / 35) * .006 : 0;
+    const shift = midi != null ? Math.max(0, Math.min(1, (midi - op[si]) / 9)) * .07 * u.L : 0;      // 高い音は左手が駒のほうへ
+    _L.set(u.neck - shift, -.012 + tr, u.zt * .55).applyQuaternion(P.inst.quaternion).add(P.inst.position);
     arm(P, _H.clone(), _L.clone(), _B.clone(), V(0, 1, 0).applyQuaternion(P.inst.quaternion));
     if (P.grp === "solo") P.root.rotation.y = Math.atan2(-P.cfg.x * .35, 6) + Math.sin(P.sway * .8) * .06 * a;
   }
@@ -1794,7 +1844,7 @@ const ScoreView = (() => {
       while (lo <= hi){ const mid = (lo + hi) >> 1; if (row[mid].t0 <= q){ k = mid; lo = mid + 1; } else hi = mid - 1; }
       const n = row[k]; if (n && !n.rest && q < n.t1){ const el = n.sn.getSVGElement && n.sn.getSVGElement(); if (el){ el.classList.add("scv-on"); S.on.push(el); } } });
   }
-  return {attach, frame, setPart};
+  return {attach, frame, setPart, qAt};
 })();
 tick.push(() => ScoreView.frame());
 
