@@ -1719,7 +1719,7 @@ const ScoreView = (() => {
     for (let m = 0; m <= MEAS; m++){
       const s = mStart(m), e = mEnd(m); let c = 0;
       ALL.forEach(pk => { let k = 0; for (const n of SCORE.parts[pk]) if (n[0] < e && n[0] + n[1] > s) k++; c = Math.max(c, k); });
-      const w = Math.max(m === 0 ? 60 : 150, 44 + c * 20) + (m === 0 ? 92 : 0);
+      const w = Math.max(m === 0 ? 60 : 150, 44 + c * 20) + (m === 0 ? 30 : 0);
       mx.push(x); mw.push(w); x += w;
     }
     return layout = {mx, mw, total:x};
@@ -1733,7 +1733,7 @@ const ScoreView = (() => {
   }
   function drawMeasure(VF, ctx, pk, m, x, y, w, texts){
     const st = new VF.Stave(x, y, w);
-    if (m === 0) st.addClef(clefOf(pk)).addKeySignature("E").addTimeSignature("C");
+    if (m === 0) st.addTimeSignature("C");      // 音部記号と調号は左に固定した部分に出すので、ここでは拍子だけ
     st.setMeasure(m).setContext(ctx).draw();
     const items = buildMeasureNotes(VF, pk, m, texts), res = [];
     if (!items.length) return res;
@@ -1845,8 +1845,9 @@ const ScoreView = (() => {
     const msgEl = host.querySelector(".scv-msg"); if (msgEl) msgEl.remove();
     if (host._cur !== pk){ Object.entries(host._strips).forEach(([k, s]) => s.el.style.display = k === pk ? "" : "none"); host._cur = pk; track.style.height = S.H + "px"; }
     // 楽譜を横に流す：いまの位置が再生線（左から3割）にくる
-    const playX = Math.max(S.fix.offsetWidth + 30, track.clientWidth * .32);
+    // 曲の始めは楽譜を左の固定部分にくっつけたまま線が動き、左から3割まで来たら楽譜のほうが流れる
     const x = xAt(S, q) * S.sc;
+    const playX = Math.min(Math.max(S.fix.offsetWidth + 30, track.clientWidth * .32), S.fix.offsetWidth - 4 + x + 6 * S.sc);
     S.el.style.transform = `translateX(${(playX - x - 6 * S.sc).toFixed(1)}px)`;
     S.fix.style.transform = `translateX(${(-(playX - x - 6 * S.sc)).toFixed(1)}px)`;
     host.querySelector(".scv-play").style.left = playX + "px";
