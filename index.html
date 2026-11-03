@@ -1700,13 +1700,12 @@ const ScoreView = (() => {
       [[256, "a."], [512, "av"], [1024, "a>"], [2048, "a-"]].forEach(([b, c]) => { if (fl & b) sn.addModifier(new VF.Articulation(c).setPosition(up ? P.BELOW : P.ABOVE), 0); });
       // ヴィヴァルディの書きこみ（Solo・Tutti・小鳥の歌…）と強弱（p・f）
       const tx = texts[t];
+      let words = "", dyn = "";
       if (tx && t >= s){
-        const words = tx.replace(/\b(Piano|Forte|Allegro)\b/g, "").trim();
-        if (words) sn.addModifier(new VF.Annotation(words).setFont("Times", 11, "italic").setVerticalJustification(VF.Annotation.VerticalJustify.TOP), 0);
-        const dyn = /Piano/.test(tx) ? "p" : /Forte/.test(tx) ? "f" : "";
-        if (dyn) sn.addModifier(new VF.Annotation(dyn).setFont("Times", 15, "bold italic").setVerticalJustification(VF.Annotation.VerticalJustify.BOTTOM), 0);
+        words = tx.replace(/\b(Piano|Forte|Allegro)\b/g, "").replace(/\s+/g, " ").trim();
+        dyn = /Piano/.test(tx) ? "p" : /Forte/.test(tx) ? "f" : "";
       }
-      out.push({sn, t0, t1, d:dd, fl, name, start:t >= s});
+      out.push({sn, t0, t1, d:dd, fl, name, start:t >= s, words, dyn});
     }
     return out;
   }
@@ -1726,6 +1725,12 @@ const ScoreView = (() => {
     return layout = {mx, mw, total:x};
   }
   // 1小節を描く
+  const textEnd = {top:-1e9, bot:-1e9};
+  const tripCache = {};
+  function tripletIn(pk, m){
+    if (m < 0) return false; const k = pk + ":" + m; if (k in tripCache) return tripCache[k];
+    const s = mStart(m), e = mEnd(m); return tripCache[k] = SCORE.parts[pk].some(n => n[0] >= s && n[0] < e && (n[1] === 4 || n[1] === 8));
+  }
   function drawMeasure(VF, ctx, pk, m, x, y, w, texts){
     const st = new VF.Stave(x, y, w);
     if (m === 0) st.addClef(clefOf(pk)).addKeySignature("E").addTimeSignature("C");
@@ -1736,8 +1741,9 @@ const ScoreView = (() => {
     const voice = new VF.Voice({num_beats:4, beat_value:4}).setMode(VF.Voice.Mode.SOFT).addTickables(notes);
     try{ VF.Accidental.applyAccidentals([voice], "E"); }catch(e){}
     items.forEach(it => { if ((it.fl & 16384) && !it.sn.getModifiersByType("Accidental").length) it.sn.addModifier(new VF.Accidental(ACC[it.name.slice(1)] || "n"), 0); });
-    const tup = []; let run = [];
-    items.forEach(it => { if (!it.rest && (it.d === 4 || it.d === 8)){ run.push(it.sn); if (run.length === 3){ tup.push(new VF.Tuplet(run, {num_notes:3, notes_occupied:2, bracketed:false, ratioed:false})); run = []; } } else run = []; });
+    // 三連符の「3」は、三連符が始まる小節の最初のまとまりだけに書く（続く小節では省く）
+    const tup = []; let run = [], shown = tripletIn(pk, m - 1);
+    items.forEach(it => { if (!it.rest && (it.d === 4 || it.d === 8)){ run.push(it.sn); if (run.length === 3){ if (!shown){ tup.push(new VF.Tuplet(run, {num_notes:3, notes_occupied:2, bracketed:false, ratioed:false})); shown = true; } run = []; } } else run = []; });
     const beams = [], beamable = it => !it.rest && it.d < 24;
     let grp = null, free = [];
     const flushFree = () => { if (free.length > 1){ try{ beams.push(...VF.Beam.generateBeams(free, {groups:[new VF.Fraction(1, 4)]})); }catch(e){} } free = []; };
@@ -1750,6 +1756,12 @@ const ScoreView = (() => {
     flushFree();
     new VF.Formatter().joinVoices([voice]).format([voice], w - (st.getNoteStartX() - x) - 12);
     voice.draw(ctx, st); beams.forEach(b => b.setContext(ctx).draw()); tup.forEach(t => t.setContext(ctx).draw());
+    // 書きこみ（五線の上）と強弱（五線の下）。音符の幅には入れず、重ならないように右へずらす
+    items.forEach(it => {
+      const nx = it.sn.getAbsoluteX();
+      if (it.words){ ctx.save(); ctx.setFont("Times", 12, "italic"); const tx0 = Math.max(nx - 2, textEnd.top + 8); ctx.fillText(it.words, tx0, st.getYForLine(0) - 44); textEnd.top = tx0 + ctx.measureText(it.words).width; ctx.restore(); }
+      if (it.dyn){ ctx.save(); ctx.setFont("Times", 16, "bold italic"); const tx0 = Math.max(nx, textEnd.bot + 6); ctx.fillText(it.dyn, tx0, st.getYForLine(4) + 30); textEnd.bot = tx0 + 10; ctx.restore(); }
+    });
     items.forEach(it => res.push({t0:it.t0, t1:it.t1, sn:it.sn, x:it.sn.getAbsoluteX(), rest:!!it.rest, fl:it.fl}));
     return res;
   }
@@ -1764,8 +1776,8 @@ const ScoreView = (() => {
     curves.forEach(c => { try{ c.setContext(ctx).draw(); }catch(e){} });
   }
   function dims(pk, W){
-    const keys = pk === "all" ? ALL : [pk], sc = pk === "all" ? .7 : (W < 520 ? .8 : 1);
-    const rowH = pk === "all" ? 84 : 112, top = pk === "all" ? 12 : 28;
+    const keys = pk === "all" ? ALL : [pk], sc = pk === "all" ? .7 : (W < 520 ? .74 : 1);
+    const rowH = pk === "all" ? 92 : 122, top = pk === "all" ? 20 : 38;
     return {keys, sc, rowH, top, H:Math.round((keys.length * rowH + top + 8) * sc)};
   }
   // パート全体を1本の横長の楽譜にする（一度描いたら取っておく）
@@ -1776,7 +1788,7 @@ const ScoreView = (() => {
     const ctx = r.getContext(); ctx.scale(D.sc, D.sc);
     const rows = [];
     D.keys.forEach((k, i) => {
-      const texts = textMap(k), res = [];
+      const texts = textMap(k), res = []; textEnd.top = textEnd.bot = -1e9;
       for (let m = 0; m <= MEAS; m++) res.push(...drawMeasure(VF, ctx, k, m, L.mx[m] + 6, D.top + i * D.rowH, L.mw[m], texts));
       drawCurves(VF, ctx, res); rows.push(res);
     });
