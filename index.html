@@ -290,6 +290,44 @@ body.present .tch{max-width:none}
 .selfrow .lbl2{flex:1 1 260px;font-size:15px}
 @media (max-width:480px){ .rrow{grid-template-columns:1fr} .rdesc{grid-column:1} .raxis{margin-left:0} }
 
+/* ---------- restructure ---------- */
+.morehead{font-size:13px;font-weight:800;color:var(--sub);margin:8px 4px 0}
+.step.more{padding:6px 12px;font-size:14px}
+.step.more .no{background:transparent}
+.planck label.fixed{opacity:1;cursor:default}
+.planck label.fixed input{accent-color:var(--accent)}
+.tabs.sub{margin-top:-4px}
+.tabs.sub .tab{font-size:13px;padding:4px 10px;background:var(--bg)}
+.tabs.sub .tab.on{background:var(--accent);border-color:var(--accent);color:#fff}
+.apply{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);gap:14px;align-items:start}
+.apsec{font-weight:800;font-size:14px;margin-bottom:6px;display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.aptabs{display:inline-flex;gap:4px;flex-wrap:wrap}
+.aptabs .chip{font-size:12px;padding:2px 8px}
+.apR .tipcard{padding:8px 10px}
+.apR .tipcard .tipbody{font-size:14px}
+.apR .think4{grid-template-columns:1fr 1fr;gap:6px;margin-top:6px}
+.apR .think4 .th{padding:4px 7px;font-size:12px}
+.apR .think4 .thq{margin-bottom:2px}
+.apR .think4 .tip{font-size:11.5px;line-height:1.45}
+.apR .chips.sm{gap:3px;margin:2px 0}
+.apR .chips.sm .chip{font-size:11.5px;padding:1px 7px}
+.apR .think4 textarea{min-height:0;height:40px;font-size:12.5px;margin-top:3px}
+.apR .tipcard .tipbody{font-size:13px;line-height:1.55;margin-top:4px}
+.apR .tipcard .btnrow{margin-top:4px!important}
+.apR .tiphead h3{font-size:16px}
+#student .apply .stage{aspect-ratio:16/8.5}
+.aprog{margin-top:8px;display:flex;gap:4px;align-items:center;flex-wrap:wrap}
+.apchip{border:1px solid var(--line);background:var(--bg);border-radius:999px;padding:1px 8px;font-size:14px}
+.apchip.ok{background:color-mix(in srgb,var(--accent2) 20%,var(--bg));border-color:var(--accent2)}
+.ttip{border-top:1px dashed var(--line);padding-top:6px;margin-top:6px}
+.ttip:first-child{border-top:none;margin-top:0;padding-top:0}
+.ttn{font-size:15px}
+.tq{margin:4px 0 0;padding-left:1.3em;font-size:13.5px}
+.tq li{margin:2px 0}
+.tq .tip{display:block;font-size:12px}
+details.pt summary{cursor:pointer;font-size:13px;color:var(--sub);margin-top:8px}
+@media (max-width:900px){ .apply{grid-template-columns:1fr} }
+
 /* ---------- tips / think ---------- */
 .tchip,.thchip{display:inline-block;border-radius:999px;padding:1px 10px;margin:2px 4px 2px 0;font-size:13px;background:color-mix(in srgb,var(--birds) 22%,var(--panel));border:1px solid color-mix(in srgb,var(--birds) 45%,var(--line))}
 .thchip{background:color-mix(in srgb,var(--solo) 18%,var(--panel));border-color:color-mix(in srgb,var(--solo) 45%,var(--line))}
@@ -442,12 +480,13 @@ body.present .tch{max-width:none}
     <div class="card bigcard" data-go="student">
       <div class="ic">🧑‍🎓</div>
       <h2>ひとりで学ぶ</h2>
-      <p>ステップに分かれていて、自分のペースで進められます。コースの長さも選べます。</p>
+      <p>4つのステップで「聴き方」が身につきます。</p>
       <ul>
-        <li>まず聴いて、感じたことを書く</li>
-        <li>ソネット（詩）と音楽を結びつける</li>
-        <li>クイズ・ゲームで場面と主題を聴き分ける</li>
-        <li>最後に「紹介文」を書いて印刷・保存</li>
+        <li>① 聴く：まず聴いて、感じたことを書く</li>
+        <li>② コツを知る：「こう聴くと楽しい」7つのコツ</li>
+        <li>③ コツで聴く：場面ごとのコツで、何が聞こえて・どう感じ・なぜかを書く</li>
+        <li>④ まとめる：紹介文を書いて印刷・保存</li>
+        <li>📚 もっと知る：詩・協奏曲・楽器・時代・クイズ</li>
       </ul>
     </div>
     <div class="card bigcard" data-go="teacher">
@@ -487,15 +526,18 @@ body.present .tch{max-width:none}
 <section id="teacher" class="hidden">
   <div class="tch">
     <div class="tabs" id="ttabs">
+      <button class="tab on" data-t="show">📺 授業画面</button>
+      <button class="tab" data-t="more">📚 もっと知る</button>
       <button class="tab" data-t="plan">🎯 ねらいとプラン</button>
-      <button class="tab on" data-t="show">📺 提示画面</button>
-      <button class="tab" data-t="quiz">❓ みんなでクイズ</button>
-      <button class="tab" data-t="tap">🌸 主題さがしゲーム</button>
-      <button class="tab" data-t="tips">🎧 鑑賞のコツ</button>
-      <button class="tab" data-t="know">📚 知識カード</button>
-      <button class="tab" data-t="photos">📷 写真</button>
       <button class="tab" data-t="guide">📋 指導の流れ</button>
       <button class="tab" data-t="settings">⚙️ 設定</button>
+    </div>
+    <div class="tabs sub hidden" id="tsub">
+      <button class="tab" data-t="tips">🎧 鑑賞のコツ</button>
+      <button class="tab" data-t="know">🎻 協奏曲・楽器・時代</button>
+      <button class="tab" data-t="photos">📷 写真</button>
+      <button class="tab" data-t="quiz">❓ みんなでクイズ</button>
+      <button class="tab" data-t="tap">🌸 主題さがしゲーム</button>
     </div>
 
     <div id="t-show">
@@ -518,8 +560,9 @@ body.present .tch{max-width:none}
             </div>
           </div>
           <div class="card">
-            <h3>いまの場面の聴きどころ</h3>
-            <div id="tPoint" style="font-size:15px"></div>
+            <h3>🎧 いまの場面のコツ</h3>
+            <div id="tTip"></div>
+            <details class="pt"><summary>この場面の聴きどころ ▾</summary><div id="tPoint" style="font-size:14px"></div></details>
           </div>
           <details class="keys"><summary>⌨ キーボード操作 ▾</summary>
             <kbd>Space</kbd> 再生/一時停止　<kbd>←</kbd><kbd>→</kbd> 前/次の場面<br>
@@ -1891,41 +1934,44 @@ const ABILITIES = {
 const TIPS_ALL = ["echo","okaeri","atsumi","oto_e","ugoki","kage","kakeai"];
 // cs: 中学校学習指導要領 音楽「B鑑賞」との関わり（例）
 const MODULES = [
-  {id:"listen", title:"まず聴いてみよう", mins:10, core:true,
+  {id:"listen", title:"聴く", mins:10, core:true,
    aim:"何も知らないまま聴いて、感じたことをことばにする", know:[], tips:[], think:["kanju","hyogen"], ab:["kataru"], cs:["共通事項"],
    act:"通して聴き、感じたことを書く", ask:"「どんな景色が見えた？ 気分はどう変わった？」", app:"提示画面で🙈場面名をかくす → 通して再生"},
-  {id:"poem", title:"詩と音楽", mins:15, core:true,
+  {id:"tips", title:"コツを知る", mins:10, core:true,
+   aim:"「こう聴くと曲の楽しみ方がよくわかる」コツを知る", know:["強弱","形式","テクスチュア","音色","旋律","長調と短調","独奏と合奏"], tips:TIPS_ALL, think:[], ab:["kiku"], cs:["共通事項","イ(ア)"],
+   act:"鑑賞のコツを知る（コツごとに▶で聴いて確かめる）", ask:"「このコツで聴くと、何が聞こえてくるかな？」", app:"📚もっと知る →「鑑賞のコツ」"},
+  {id:"apply", title:"コツで聴く", mins:15, core:true,
+   aim:"場面ごとのコツを使い、👂何が聞こえた → 💗どんな感じ → 🔍なぜ → ✍️ことばに の4ステップで聴く", know:["強弱","形式","テクスチュア","音色","旋律","長調と短調","独奏と合奏"], tips:TIPS_ALL, think:["chikaku","kanju","riyu","hyogen"], ab:["kiku","musubu","kataru"], cs:["共通事項","イ(ア)","ア(ア)"],
+   act:"場面ごとのコツを使って聴き、4つのステップで考える", ask:"「何が聞こえた？」「どんな感じ？」「なぜそう感じた？」「ひとことで言うと？」", app:"📺授業画面（右に、いまの場面のコツと発問が自動で出る）"},
+  {id:"write", title:"まとめる", mins:15, core:true,
+   aim:"学んだ知識を根拠にして、曲のよさを紹介し、ふりかえる", know:["これまで使った知識すべて"], tips:[], think:["riyu","hyogen"], ab:["kataru","musubu","ikasu"], cs:["ア(ア)"],
+   act:"紹介文を書き、ふりかえる", ask:"「音楽の工夫を根拠に、この曲のよさを紹介しよう」", app:"ワークシート印刷（設定）／生徒用モードの最後のステップ"},
+  {id:"poem", title:"詩と音楽", mins:15,
    aim:"ソネット（詩）の場面と、音楽のようすを結びつける", know:["ソネット","音色","音の高さ","強弱"], tips:["oto_e","ugoki"], think:["chikaku","kanju","riyu"], ab:["musubu","kiku"], cs:["イ(ア)","イ(イ)"],
    act:"ソネットと音楽を結びつける", ask:"「この部分は詩のどの行に合いそう？」「音のどんなところからそう思った？」", app:"場面名をかくしたまま場面ボタンで再生 → 意見が出たら表示"},
-  {id:"tips", title:"聴き方のコツ", mins:15, core:true,
-   aim:"「こう聴くと楽しみ方が分かる」コツを知り、知覚→感受→理由→表現の4ステップで聴く", know:["強弱","形式","テクスチュア","音色","旋律","長調と短調","独奏と合奏"], tips:TIPS_ALL, think:["chikaku","kanju","riyu","hyogen"], ab:["kiku","musubu","kataru"], cs:["共通事項","イ(ア)","ア(ア)"],
-   act:"鑑賞のコツを知り、4つのステップで聴く", ask:"「何が聞こえた？」「どんな感じ？」「なぜそう感じた？」「ひとことで言うと？」", app:"🎧鑑賞のコツ（コツごとに▶で頭出し）"},
+  {id:"form", title:"主題をさがせ", mins:10,
+   aim:"春の主題がもどってくることに気づき、曲の組み立て（リトルネロ形式）をつかむ", know:["形式","リトルネロ形式","長調と短調"], tips:["okaeri","kage"], think:["chikaku","riyu"], ab:["kiku","musubu"], cs:["イ(ア)"],
+   act:"主題がもどることに気づき、リトルネロ形式を知る", ask:"「最初のメロディーがもどってきたら手を挙げよう」「なぜ何度ももどってくるのだろう？」", app:"🌸主題さがしゲーム → 提示画面のタイムライン（色の並び）"},
   {id:"which", title:"場面あてクイズ", mins:10,
    aim:"音のちがいを手がかりに、場面を聴き分ける", know:["音色","強弱","音の高さ","リズム"], tips:["atsumi","oto_e"], think:["chikaku","riyu"], ab:["kiku"], cs:["イ(ア)"],
    act:"場面を聴き分けて確かめる", ask:"「どの場面かな？ 決め手になった音は？」", app:"❓みんなでクイズ（答えはボタンで表示）"},
-  {id:"form", title:"主題をさがせ", mins:10, core:true,
-   aim:"春の主題がもどってくることに気づき、曲の組み立て（リトルネロ形式）をつかむ", know:["形式","リトルネロ形式","長調と短調"], tips:["okaeri","kage"], think:["chikaku","riyu"], ab:["kiku","musubu"], cs:["イ(ア)"],
-   act:"主題がもどることに気づき、リトルネロ形式を知る", ask:"「最初のメロディーがもどってきたら手を挙げよう」「なぜ何度ももどってくるのだろう？」", app:"🌸主題さがしゲーム → 提示画面のタイムライン（色の並び）"},
+  {id:"elem", title:"音楽のしくみ", mins:15,
+   aim:"それぞれの場面を表す音楽の工夫を、くわしく聴き取る", know:["トリル","トレモロ","音階","強弱","音の高さ","旋律"], tips:["echo","oto_e","ugoki"], think:["chikaku","kanju","riyu"], ab:["kiku","musubu"], cs:["イ(ア)"],
+   act:"各場面の音楽の工夫を聴き取る", ask:"「小鳥・泉・雷は、どんな音の工夫で表されている？」", app:"🔁場面をくり返す ＋「聴きどころ」"},
   {id:"concerto", title:"協奏曲ってなに？", mins:15,
    aim:"独奏と合奏の関わりを聴き取り、協奏曲というジャンルを知る", know:["協奏曲","独奏と合奏","楽章","速度","テクスチュア"], tips:["kakeai","atsumi"], think:["chikaku","riyu"], ab:["kiku","haikei"], cs:["イ(ア)","イ(イ)"],
    act:"協奏曲（独奏と合奏）と楽章構成、この型がはやった理由を知る", ask:"「いまは独奏？ 合奏？」「独奏と合奏が交代すると、どんな感じがする？」「なぜこの頃、この形がはやったのだろう？」", app:"提示画面の🎻3D合奏（だれが弾いているかが動きでわかる）／📚知識カード「協奏曲」"},
   {id:"instruments", title:"楽器と奏法", mins:15,
    aim:"楽器や弾き方（奏法）による音色のちがいを知り、情景の表し方に気づく", know:["弦楽器","チェンバロ","通奏低音","トリル","トレモロ","音階","音色"], tips:["oto_e"], think:["chikaku","riyu"], ab:["kiku","haikei"], cs:["イ(ア)","イ(イ)"],
    act:"楽器と奏法を知り、音色に注目して聴く", ask:"「小鳥のさえずりや雷は、どんな弾き方で表している？」", app:"📚知識カード「楽器と奏法」の ▶聴く"},
-  {id:"elem", title:"音楽のしくみ", mins:15,
-   aim:"それぞれの場面を表す音楽の工夫を、くわしく聴き取る", know:["トリル","トレモロ","音階","強弱","音の高さ","旋律"], tips:["echo","oto_e","ugoki"], think:["chikaku","kanju","riyu"], ab:["kiku","musubu"], cs:["イ(ア)"],
-   act:"各場面の音楽の工夫を聴き取る", ask:"「小鳥・泉・雷は、どんな音の工夫で表されている？」", app:"🔁場面をくり返す ＋「聴きどころ」"},
   {id:"baroque", title:"バロック時代の音楽", mins:15,
    aim:"作曲者と時代（バロック時代）を知り、背景と結びつけて聴く", know:["バロック時代","通奏低音","強弱の段階的な変化","標題音楽"], tips:["echo"], think:["riyu"], ab:["haikei","ikasu"], cs:["イ(イ)"],
    act:"作品の背景（バロック時代・ヴィヴァルディ）を知る", ask:"「ヴィヴァルディが生きたころ、日本は何時代？」「詩や物語を音で表す曲は、ほかにもあるかな？」", app:"📚知識カード「バロック時代」"},
-  {id:"write", title:"紹介文を書こう", mins:20, core:true,
-   aim:"学んだ知識を根拠にして、曲のよさを紹介し、ふりかえる", know:["これまで使った知識すべて"], tips:[], think:["riyu","hyogen"], ab:["kataru","musubu","ikasu"], cs:["ア(ア)"],
-   act:"紹介文を書き、ふりかえる", ask:"「音楽の工夫を根拠に、この曲のよさを紹介しよう」", app:"ワークシート印刷（設定）／生徒用モードの最後のステップ"},
 ];
 const MOD = Object.fromEntries(MODULES.map(m => [m.id, m]));
 const PRESETS = [
-  {id:"p1", label:"1時間（50分）", note:"軸だけをしぼって（主題さがしは「コツ」の中で）", ids:["listen","poem","tips","write"]},
-  {id:"p2", label:"2時間",         note:"主題さがし・協奏曲・工夫を追加", ids:["listen","poem","tips","form","concerto","elem","write"]},
+  {id:"p1", label:"1時間（50分）", note:"4つのステップだけ（聴く→コツを知る→コツで聴く→まとめる）", ids:["listen","tips","apply","write"]},
+  {id:"p2", label:"2時間",         note:"もっと知る：詩と音楽・主題さがし・協奏曲を追加", ids:["listen","tips","apply","write","poem","form","concerto"]},
   {id:"p3", label:"3時間",         note:"楽器・時代背景までじっくり", ids:MODULES.map(m => m.id)},
 ];
 const CS_LABEL = {
@@ -1936,7 +1982,7 @@ const CS_LABEL = {
 };
 const AXIS = "「なぜ、そう聞こえるの？」── 音楽のしくみ（音色・強弱・形式など）が、春の情景や気分をどのように生み出しているのかを、詩と結びつけながら探る。";
 
-function cleanPlan(ids){ const ok = MODULES.map(m => m.id).filter(id => (ids || []).includes(id)); return ok.length ? ok : PRESETS[1].ids.slice(); }
+function cleanPlan(ids){ return MODULES.filter(m => m.core || (ids || []).includes(m.id)).map(m => m.id); }   // 4つのステップはいつも入れる
 let plan = cleanPlan(store.get("plan", PRESETS[1].ids));
 let planLocked = store.get("planLocked", false);
 (function planFromURL(){
@@ -2066,7 +2112,7 @@ function tipCard(t, opts={}){
     <div class="tiphead"><span class="elbadge">${t.el}</span><h3>${t.icon} ${t.name}</h3></div>
     <div class="tipbody">💡 <b>コツ</b>：${t.tip}</div>
     <div class="btnrow" style="margin-top:6px"><button class="smallbtn" data-tipplay="${t.id}">▶ 聴いてみる（${t.where}）</button></div>
-    ${opts.teacher ? `
+    ${opts.learn ? `<div class="tip" style="margin-top:8px">💭 このコツで聴いたら：👂何が聞こえる？ → 💗どんな感じ？ → 🔍なぜ？ → ✍️ひとことで</div>` : opts.teacher ? `
     <div class="think4">${THINK.map(s => `<div class="th"><div class="thq">${s.icon} ${s.name}「${s.q}」</div><div class="tip">${
       s.id === "chikaku" ? "例：" + t.kakaku.slice(0,2).join("、") :
       s.id === "kanju" ? "例：" + t.kanju.slice(0,3).join("、") :
@@ -2091,7 +2137,33 @@ function bindTipCards(root, teacher){
     card.querySelectorAll("textarea").forEach(ta => ta.oninput = () => { n[ta.dataset.k] = ta.value; saveNotes(); checkTipsDone(); });
   });
 }
-function checkTipsDone(){ const n = notes.tips || {}; if (Object.values(n).filter(x => x.riyu && x.riyu.trim()).length >= 3) markDone("tips"); }
+function checkTipsDone(){ const n = notes.tips || {}; if (Object.values(n).filter(x => x.riyu && x.riyu.trim()).length >= 3) markDone("apply"); }
+// 場面ごとに使えるコツ
+function secTips(si){
+  const s = SECTIONS[si]; if (!s) return [];
+  if (s.kind === "theme"){
+    if (si === 0) return ["echo"];
+    if (/短調/.test(s.name)) return ["kage"];
+    if (si === SECTIONS.length - 1) return ["okaeri", "echo"];
+    return ["okaeri"];
+  }
+  return {birds:["atsumi","oto_e"], stream:["ugoki"], storm:["oto_e"], solo:["kakeai"]}[s.kind] || [];
+}
+// 「コツで聴く」の右側：いまの場面のコツと書きこみ
+let applySi = -1, applyPick = {};
+function renderApplyTip(si){
+  const box = document.getElementById("applyTip"); if (!box) return;
+  if (box.contains(document.activeElement) && document.activeElement.tagName === "TEXTAREA"){ document.activeElement.onblur = () => renderApplyTip(secAt(au.currentTime)); return; }
+  applySi = si;
+  const list = secTips(si), id = applyPick[si] && list.includes(applyPick[si]) ? applyPick[si] : list[0], s = SECTIONS[si];
+  box.innerHTML = `<div class="apsec">${KIND[s.kind].emoji} 場面${si + 1}：${s.name}${list.length > 1 ? `　<span class="aptabs">${list.map(k => `<button class="chip ${k === id ? "on" : ""}" data-pick="${k}">${TIP[k].icon} ${TIP[k].name}</button>`).join("")}</span>` : ""}</div>${id ? tipCard(TIP[id]) : ""}`;
+  box.querySelectorAll("[data-pick]").forEach(b => b.onclick = () => { applyPick[si] = b.dataset.pick; renderApplyTip(si); });
+  bindTipCards(box, false);
+  const prog = document.getElementById("applyProg"), n = notes.tips || {};
+  prog.innerHTML = `<span class="tip">書いたコツ：</span>` + TIPS.map(t => { const ok = n[t.id] && n[t.id].riyu && n[t.id].riyu.trim(); const at = SECTIONS.findIndex((x, k) => secTips(k).includes(t.id));
+    return `<button class="apchip ${ok ? "ok" : ""}" data-go="${at}" title="${t.name}（場面${at + 1}へ）">${t.icon}${ok ? "✓" : ""}</button>`; }).join("");
+  prog.querySelectorAll("[data-go]").forEach(b => b.onclick = () => { applyPick[+b.dataset.go] = TIPS.find(t => b.title.startsWith(t.name)).id; jump(+b.dataset.go); });
+}
 
 function renderTipsTab(){
   document.getElementById("tTips").innerHTML = `
@@ -2376,11 +2448,10 @@ let STEPS = activeSteps();
 let curStep = Math.max(0, Math.min(store.get("step", 0), STEPS.length - 1));
 function setPlan(ids){ plan = cleanPlan(ids); store.set("plan", plan); STEPS = activeSteps(); if (curStep >= STEPS.length) curStep = 0; }
 function planChecks(box, onChange){
-  box.innerHTML = MODULES.map(m => `<label class="${plan.includes(m.id) ? "" : "off"}"><input type="checkbox" data-id="${m.id}" ${plan.includes(m.id) ? "checked" : ""}>
-    <span><b>${m.title}</b>${m.core ? '<span class="core">軸</span>' : ''} <span class="tip">${m.mins}分</span><br><span class="tip">${m.aim}</span></span></label>`).join("");
+  box.innerHTML = MODULES.map(m => `<label class="${plan.includes(m.id) ? "" : "off"} ${m.core ? "fixed" : ""}"><input type="checkbox" data-id="${m.id}" ${plan.includes(m.id) ? "checked" : ""} ${m.core ? "disabled" : ""}>
+    <span><b>${m.core ? "ステップ" + (MODULES.filter(x => x.core).indexOf(m) + 1) + "　" : "📚 "}${m.title}</b>${m.core ? '<span class="core">軸</span>' : ''} <span class="tip">${m.mins}分</span><br><span class="tip">${m.aim}</span></span></label>`).join("");
   box.querySelectorAll("input").forEach(c => c.onchange = () => {
     const ids = [...box.querySelectorAll("input:checked")].map(x => x.dataset.id);
-    if (!ids.length){ c.checked = true; return; }
     setPlan(ids); onChange();
   });
 }
@@ -2395,8 +2466,13 @@ let stuScene = null;
 const stuPlayer = makePlayer(document.getElementById("stuPlayer"), {nowLabel:true, hideNames:() => stuHide});
 let stuHide = false;
 
+function stepNo(s){ const core = STEPS.filter(x => x.core); const k = core.indexOf(s); return k >= 0 ? k + 1 : 0; }
 function renderStepNav(){
-  document.getElementById("steps").innerHTML = STEPS.map((s,i) => `<button class="step ${i===curStep?'on':''} ${done[s.id]?'done':''}" data-i="${i}"><span class="no"><span>${i ? i : "🎯"}</span></span><span class="lbl">${s.title}</span></button>`).join("");
+  let shownMore = false;
+  document.getElementById("steps").innerHTML = STEPS.map((s,i) => {
+    const n = stepNo(s), more = s.id !== "goal" && !n;
+    const head = more && !shownMore ? (shownMore = true, '<div class="morehead">📚 もっと知る</div>') : "";
+    return head + `<button class="step ${more ? "more" : ""} ${i===curStep?'on':''} ${done[s.id]?'done':''}" data-i="${i}"><span class="no"><span>${s.id === "goal" ? "🎯" : n || "📚"}</span></span><span class="lbl">${s.title}</span></button>`; }).join("");
   document.querySelectorAll("#steps .step").forEach(b => b.onclick = () => renderStep(+b.dataset.i));
 }
 function stageHTML(){ return `<div class="stage"><canvas></canvas><div class="badge"></div><div class="hidelbl hidden">場面名はまだひみつ</div><div class="caption"><div class="nm"></div><div class="poem"></div></div></div>`; }
@@ -2411,7 +2487,7 @@ function navBtns(i){
     ${i > 0 ? `<button class="btn sec" data-nav="${i-1}">← もどる</button>` : ''}
     ${i < STEPS.length-1 ? `<button class="btn" data-nav="${i+1}">次へ →</button>` : ''}</div>`;
 }
-function H(i){ const m = STEPS[i]; return `<div class="h2row"><h2>ステップ${i}　${m.title}</h2>${navBtns(i)}</div>` + goalCard(m); }
+function H(i){ const m = STEPS[i], n = stepNo(m); return `<div class="h2row"><h2>${n ? "ステップ" + n + "　" : "📚 もっと知る："}${m.title}</h2>${navBtns(i)}</div>` + goalCard(m); }
 function renderStep(i){
   i = Math.max(0, Math.min(i, STEPS.length - 1));
   curStep = i; store.set("step", i);
@@ -2469,8 +2545,22 @@ function renderStep(i){
       </div>`;
   } else if (s.id === "tips"){
     html = `<div class="panel">${H(i)}
-      <p class="tip" style="margin-top:0">コツを知ったら4つのステップで聴こう：${THINK.map((t,k) => `${k+1}${t.icon}${t.name}「${t.q}」`).join(" → ")}　／　3つ以上のコツで「理由」まで書けたらクリア</p>
+      <p class="tip" style="margin-top:0">音楽には「こう聴くと楽しみ方がよくわかる」<b>コツ</b>があります。7つのコツを、▶で聴いて確かめよう。次のステップでは、このコツを使って曲を聴きます。</p>
       <div id="tipsBox"></div>
+      </div>`;
+  } else if (s.id === "apply"){
+    html = `<div class="panel">${H(i)}
+      <div class="apply">
+        <div class="apL">
+          <div class="btnrow" style="margin:0 0 6px"><button class="smallbtn on" data-asv="scene">🌸 情景</button><button class="smallbtn" data-asv="e3d">🎻 3D合奏</button></div>
+          <div id="applyStage"></div>
+          <div class="tip" style="margin-top:8px">▶で曲を流すと、右に<b>いまの場面で使えるコツ</b>が出ます。4つのステップで書こう（3つのコツで「なぜ」まで書けたらクリア）。</div>
+          <div class="aprog" id="applyProg"></div>
+        </div>
+        <div class="apR">
+          <div id="applyTip"></div>
+        </div>
+      </div>
       </div>`;
   } else if (s.id === "elem"){
     html = `<div class="panel">${H(i)}
@@ -2544,7 +2634,14 @@ function renderStep(i){
   if (s.id === "which") startQuiz(document.getElementById("quizBox"), false);
   if (s.id === "form") startTap(document.getElementById("tapBox"), false);
   if (s.id === "elem"){ const box = document.getElementById("elemBox"); renderElements(box); box.querySelectorAll(".card").forEach(c => c.style.marginTop = 0); pageBySelector(box, ".card", "elem", ["theme","birds","stream","storm"].map(k => KIND[k].emoji)); }
-  if (s.id === "tips"){ const box = document.getElementById("tipsBox"); box.innerHTML = TIPS.map(t => tipCard(t)).join(""); bindTipCards(box, false); pageBySelector(box, ".tipcard", "tips", TIPS.map(t => t.icon)); }
+  if (s.id === "tips"){ const box = document.getElementById("tipsBox"); box.innerHTML = TIPS.map(t => tipCard(t, {learn:true})).join(""); bindTipCards(box, true); pageBySelector(box, ".tipcard", "tips", TIPS.map(t => t.icon)); markDone("tips"); }
+  if (s.id === "apply"){
+    attachStuScene(document.getElementById("applyStage"), {onSection: si => renderApplyTip(si)});
+    const v = store.get("stuStageView", "scene"), st = document.querySelector("#applyStage .stage");
+    const setV = v => { store.set("stuStageView", v); document.querySelectorAll("[data-asv]").forEach(b => b.classList.toggle("on", b.dataset.asv === v)); stageView(st, v); };
+    document.querySelectorAll("[data-asv]").forEach(b => b.onclick = () => setV(b.dataset.asv)); setV(v);
+    renderApplyTip(secAt(au.currentTime));
+  }
   if (s.id === "write"){
     chipGroup(document.getElementById("feel2"), FEEL_WORDS, notes.feel2, v => { notes.feel2 = v; saveNotes(); showBA(); });
     const favOpts = ["春の主題","小鳥の歌","泉とそよ風","雷と稲妻","小鳥がふたたび歌う","独奏ヴァイオリン"];
@@ -2750,8 +2847,20 @@ function printSheet(filled){
 let curTab = "show", tHide = false, tPoem = true;
 const tScene = makeScene(document.getElementById("tStage"), {hideNames:() => tHide, showPoem:() => tPoem, onSection: si => {
   const s = SECTIONS[si];
+  renderTTip(si);
   document.getElementById("tPoint").innerHTML = tHide ? `<span class="tip">（場面名をかくしています）</span><br>発問例：「いまの音楽は、どんな場面を表していると思う？ 音のどんなところからそう思った？」` : `<b>${KIND[s.kind].emoji} ${s.name}</b><br>${s.point}`;
 }});
+let tPick = {};
+function renderTTip(si){
+  const list = secTips(si), id = tPick[si] && list.includes(tPick[si]) ? tPick[si] : list[0], t = TIP[id], box = document.getElementById("tTip");
+  if (!t){ box.innerHTML = ""; return; }
+  box.innerHTML = `${list.length > 1 ? `<div class="aptabs" style="margin-bottom:6px">${list.map(k => `<button class="chip ${k === id ? "on" : ""}" data-tp="${k}">${TIP[k].icon} ${TIP[k].name}</button>`).join("")}</div>` : ""}
+    <div class="ttip"><div class="ttn">${t.icon} <b>${t.name}</b> <span class="elbadge">${t.el}</span></div><div class="tip">${t.tip}</div>
+    <ol class="tq">${THINK.map(q => `<li>${q.icon}<b>${q.name}</b>「${q.q}」<span class="tip">${q.id === "chikaku" ? "例：" + t.kakaku.slice(0,2).join("、") : q.id === "kanju" ? "例：" + t.kanju.slice(0,3).join("、") : q.id === "riyu" ? t.riyu : ""}</span></li>`).join("")}</ol>
+    <button class="smallbtn" data-ttplay>▶ このコツの部分を聴く</button></div>`;
+  box.querySelectorAll("[data-tp]").forEach(b => b.onclick = () => { tPick[si] = b.dataset.tp; renderTTip(si); });
+  box.querySelector("[data-ttplay]").onclick = () => { const [f,l] = t.clip(); loopSec = -1; playClip(f, l); };
+}
 const tPlayer = makePlayer(document.getElementById("tPlayer"), {secButtons:true, legend:true, hideNames:() => tHide});
 function applyTHide(){
   document.getElementById("tHide").classList.toggle("on", tHide);
@@ -2762,6 +2871,11 @@ document.getElementById("tHide").onclick = () => { tHide = !tHide; applyTHide();
 document.getElementById("tPoem").onclick = e => { tPoem = !tPoem; e.target.classList.toggle("on", tPoem); tScene.dirty = true; };
 document.getElementById("tPoem").classList.add("on");
 document.getElementById("tFull").onclick = () => togglePresent();
+function stageView(st, v){
+  let L = st.querySelector(".e3layer");
+  if (v === "e3d" && !L){ L = document.createElement("div"); L.className = "e3layer"; st.querySelector("canvas").after(L); Ens3D.attach(L); }
+  if (L) L.classList.toggle("hidden", v !== "e3d");
+}
 function setStageView(v){
   store.set("stageView", v);
   document.querySelectorAll("[data-sv]").forEach(b => b.classList.toggle("on", b.dataset.sv === v));
@@ -2780,9 +2894,15 @@ function togglePresent(force){
 }
 document.addEventListener("fullscreenchange", () => { if (!document.fullscreenElement) { document.body.classList.remove("present"); requestAnimationFrame(() => { tScene.resize(); drawTimeline(tPlayer); }); } });
 
+const MORE_TABS = ["tips","know","photos","quiz","tap"];
 function showTab(t){
+  if (t === "more") t = store.get("moreTab", "tips");
+  if (MORE_TABS.includes(t)) store.set("moreTab", t);
   curTab = t; pause(); stopAt = null; tapState = null;
-  document.querySelectorAll("#ttabs .tab").forEach(b => b.classList.toggle("on", b.dataset.t === t));
+  const isMore = MORE_TABS.includes(t);
+  document.querySelectorAll("#ttabs .tab").forEach(b => b.classList.toggle("on", b.dataset.t === t || (isMore && b.dataset.t === "more")));
+  document.getElementById("tsub").classList.toggle("hidden", !isMore);
+  document.querySelectorAll("#tsub .tab").forEach(b => b.classList.toggle("on", b.dataset.t === t));
   ["plan","show","tips","know","photos","quiz","tap","guide","settings"].forEach(k => document.getElementById("t-" + k).classList.toggle("hidden", k !== t));
   if (t === "quiz") startQuiz(document.getElementById("tQuiz"), true);
   if (t === "tap") startTap(document.getElementById("tTap"), true);
@@ -2794,7 +2914,7 @@ function showTab(t){
   if (t === "settings") renderSettings();
   if (t === "show") requestAnimationFrame(() => { tScene.resize(); drawTimeline(tPlayer); tScene.dirty = true; });
 }
-document.querySelectorAll("#ttabs .tab").forEach(b => b.onclick = () => showTab(b.dataset.t));
+document.querySelectorAll("#ttabs .tab, #tsub .tab").forEach(b => b.onclick = () => showTab(b.dataset.t));
 
 function renderGuide(){
   const L = lessonsOf(planModules()), has = id => plan.includes(id);
