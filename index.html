@@ -2137,7 +2137,9 @@ function bindTipCards(root, teacher){
     card.querySelectorAll("textarea").forEach(ta => ta.oninput = () => { n[ta.dataset.k] = ta.value; saveNotes(); checkTipsDone(); });
   });
 }
-function checkTipsDone(){ const n = notes.tips || {}; if (Object.values(n).filter(x => x.riyu && x.riyu.trim()).length >= 3) markDone("apply"); }
+function checkTipsDone(){ const n = notes.tips || {}; if (Object.values(n).filter(x => x.riyu && x.riyu.trim()).length >= 3) markDone("apply");
+  // 「書いたコツ」の ✓ をすぐ反映
+  document.querySelectorAll("#applyProg [data-go]").forEach(b => { const t = TIPS.find(t => b.title.startsWith(t.name)), ok = t && n[t.id] && n[t.id].riyu && n[t.id].riyu.trim(); b.classList.toggle("ok", !!ok); b.textContent = t.icon + (ok ? "✓" : ""); }); }
 // 場面ごとに使えるコツ
 function secTips(si){
   const s = SECTIONS[si]; if (!s) return [];
