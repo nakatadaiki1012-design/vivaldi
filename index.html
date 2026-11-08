@@ -136,7 +136,7 @@ details.keys summary{cursor:pointer;font-weight:700;font-size:14px;list-style:no
 details.keys summary::-webkit-details-marker{display:none}
 details.keys{font-size:13px;color:var(--sub)}
 .lead{color:var(--sub);margin-top:-.3em}
-.bottomplayer{position:fixed;left:0;right:0;bottom:0;z-index:15;padding:8px 16px calc(8px + env(safe-area-inset-bottom));background:color-mix(in srgb,var(--bg) 85%,transparent);backdrop-filter:blur(8px);border-top:1px solid var(--line)}
+.bottomplayer{position:fixed;left:0;right:0;bottom:0;z-index:15;padding:8px 16px calc(8px + env(safe-area-inset-bottom));background:var(--bg);background:color-mix(in srgb,var(--bg) 85%,transparent);backdrop-filter:blur(8px);border-top:1px solid var(--line)}
 .bottomplayer .player{max-width:1200px;margin:0 auto;padding:6px 12px;display:flex;flex-wrap:wrap;align-items:center;gap:4px 14px}
 .bottomplayer .prow:first-of-type{flex:1 1 420px;order:1}
 .bottomplayer .prow + .prow{margin-top:0!important;flex:0 0 auto;order:2;gap:4px!important}
@@ -289,6 +289,45 @@ body.present .tch{max-width:none}
 .selfrow{display:flex;flex-wrap:wrap;align-items:center;gap:6px 12px;border-bottom:1px solid var(--line);padding:6px 0}
 .selfrow .lbl2{flex:1 1 260px;font-size:15px}
 @media (max-width:480px){ .rrow{grid-template-columns:1fr} .rdesc{grid-column:1} .raxis{margin-left:0} }
+
+/* ---------- classroom use ---------- */
+.classbtn{display:none;border:1px solid var(--line);background:var(--panel);color:var(--ink);border-radius:999px;padding:5px 12px;font-size:13px;white-space:nowrap}
+body.stumode .classbtn{display:inline-block}
+@media (max-width:600px){ .classbtn{font-size:11px;padding:3px 8px} }
+.classbtn.on{background:#2b2622;color:#fff;border-color:#2b2622}
+body.classmode #stuPlayer .playbtn{opacity:.45}
+#muteToast{position:fixed;left:50%;bottom:110px;transform:translateX(-50%) translateY(20px);background:#2b2622;color:#fff;border-radius:999px;padding:8px 18px;font-size:15px;opacity:0;pointer-events:none;transition:.25s;z-index:120}
+#muteToast.on{opacity:1;transform:translateX(-50%)}
+.lessonbar{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin-bottom:6px}
+.lessonbar .lbt{font-weight:800;font-size:14px;margin-right:4px}
+.lessonbar button{border:2px solid var(--accent);background:var(--panel);color:var(--accent);border-radius:999px;padding:4px 14px;font-weight:700;font-size:14px}
+.lessonbar button.on{background:var(--accent);color:#fff}
+.lessonbar .lblink{margin-left:auto;border-color:var(--line);color:var(--ink);font-weight:400}
+.lbhint{font-size:13.5px;color:var(--sub);min-height:1em;margin-bottom:6px}
+.lbhint:empty{display:none}
+body.present .lessonbar,body.present .lbhint{display:none}
+#linkDlg{position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:110;display:flex;align-items:center;justify-content:center;padding:16px}
+#linkDlg.hidden{display:none}
+.ldcard{background:var(--panel);color:var(--ink);border-radius:16px;padding:18px 20px;max-width:640px;width:100%}
+.ldcard input{width:100%;border:1px solid var(--line);border-radius:10px;padding:8px;background:var(--bg);margin-top:6px}
+.namebox{display:flex;flex-wrap:wrap;gap:8px 16px;align-items:center;margin:4px 0 10px}
+.namebox label{font-weight:700;font-size:15px;display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.namebox input{border:1px solid var(--line);border-radius:10px;padding:6px 10px;background:var(--bg);min-width:230px}
+.oldwarn{background:#fff4d6;color:#5a4200;border-radius:10px;padding:6px 10px;font-size:14px}
+.mynotes{background:var(--bg);border:1px solid var(--line);border-radius:12px;padding:6px 10px;margin:6px 0}
+.mn{display:flex;gap:8px;align-items:center;justify-content:space-between;border-top:1px dashed var(--line);padding:4px 0;font-size:13.5px}
+.mn:first-of-type{border-top:none}
+/* iPad 横向きなど、高さが低い画面 */
+@media (max-height:820px) and (min-width:861px){
+  #student .split .stage{aspect-ratio:16/9.5}
+  #student .chips{gap:4px;margin:4px 0}
+  #student .chip{padding:2px 10px;font-size:13.5px}
+  #student .panel h3{font-size:16px;margin-bottom:.3em}
+  #student #feel1txt{min-height:60px}
+  #student .apply .stage{aspect-ratio:16/10}
+  #student .note{margin:4px 0 6px}
+  #student .apR .think4 .tip{display:none}
+}
 
 /* ---------- restructure ---------- */
 .morehead{font-size:13px;font-weight:800;color:var(--sub);margin:8px 4px 0}
@@ -466,6 +505,7 @@ details.pt summary{cursor:pointer;font-size:13px;color:var(--sub);margin-top:8px
 <header class="top">
   <div class="logo" id="logo">🌸 「春」鑑賞ノート<small>ヴィヴァルディ《四季》より 第1楽章</small></div>
   <div class="sp"></div>
+  <button id="classBtn" class="classbtn" title="授業中は音を出さない／イヤホンや家では自分で聴く"></button>
   <button class="modebtn" data-mode="student">🧑‍🎓 <span class="lg">ひとりで学ぶ</span><span class="sm">生徒</span></button>
   <button class="modebtn" data-mode="teacher">🧑‍🏫 <span class="lg">授業で使う</span><span class="sm">先生</span></button>
 </header>
@@ -525,6 +565,12 @@ details.pt summary{cursor:pointer;font-size:13px;color:var(--sub);margin-top:8px
 <!-- ======================= TEACHER ======================= -->
 <section id="teacher" class="hidden">
   <div class="tch">
+    <div class="lessonbar" id="lessonbar">
+      <span class="lbt">授業の進行</span>
+      <button data-ls="1">① 聴く</button><button data-ls="2">② コツを知る</button><button data-ls="3">③ コツで聴く</button><button data-ls="4">④ まとめる</button>
+      <button class="lblink" id="lbLink">🔗 生徒用リンク</button>
+    </div>
+    <div class="lbhint" id="lbHint"></div>
     <div class="tabs" id="ttabs">
       <button class="tab on" data-t="show">📺 授業画面</button>
       <button class="tab" data-t="more">📚 もっと知る</button>
@@ -732,11 +778,29 @@ let onClipEnd = null;
 function dur(){ return isFinite(au.duration) && au.duration > 0 ? au.duration : env.length / ENV_RATE; }
 function secEnd(i){ return i + 1 < SECTIONS.length ? SECTIONS[i+1].t : dur(); }
 function secAt(t){ let k = 0; for (let i = 0; i < SECTIONS.length; i++) if (t >= SECTIONS[i].t - 0.01) k = i; return k; }
-function play(){ const p = au.play(); if (p && p.catch) p.catch(()=>{}); }
+// 授業中モード：生徒の端末では音を出さない（音は先生の画面から）。イヤホンや家で聴くときは切りかえる
+let classMode = (() => { const q = new URLSearchParams(location.search).get("class"); if (q != null){ store.set("classMode", q === "1"); } return store.get("classMode", false); })();
+function muted(){ return classMode && typeof mode !== "undefined" && mode === "student"; }
+function play(){
+  if (muted()){ showMuteToast(); return; }
+  const p = au.play(); if (p && p.catch) p.catch(()=>{});
+}
+function showMuteToast(){
+  let t = document.getElementById("muteToast");
+  if (!t){ t = document.createElement("div"); t.id = "muteToast"; document.body.appendChild(t); }
+  t.innerHTML = "🔇 授業中は、先生の画面の音を聴きます";
+  t.classList.add("on"); clearTimeout(t._h); t._h = setTimeout(() => t.classList.remove("on"), 1800);
+}
+function paintClassMode(){
+  const b = document.getElementById("classBtn"); if (!b) return;
+  b.textContent = classMode ? "🔇 授業中（音は先生の画面）" : "🔊 自分で聴く";
+  b.classList.toggle("on", classMode);
+  document.body.classList.toggle("classmode", classMode);
+}
 function pause(){ au.pause(); }
 function toggle(){ au.paused ? play() : pause(); }
 function seek(t){ au.currentTime = Math.max(0, Math.min(dur() - 0.05, t)); }
-function jump(i, autoplay=true){ i = Math.max(0, Math.min(SECTIONS.length-1, i)); stopAt = null; seek(SECTIONS[i].t); if (loopSec >= 0) loopSec = i; if (autoplay) play(); }
+function jump(i, autoplay=true){ i = Math.max(0, Math.min(SECTIONS.length-1, i)); stopAt = null; seek(SECTIONS[i].t); if (loopSec >= 0) loopSec = i; if (autoplay && !muted()) play(); }
 function playClip(from, len, cb){ stopAt = from + len; onClipEnd = cb || null; loopSec = -1; seek(from); play(); }
 function fmt(t){ t = Math.max(0, t|0); return (t/60|0) + ":" + String(t%60).padStart(2,"0"); }
 function envAt(t){ const i = Math.floor(t * ENV_RATE); return (env[i] || 0) / 99; }
@@ -1913,13 +1977,15 @@ function setMode(m){
   Object.entries(views).forEach(([k,el]) => el.classList.toggle("hidden", k !== m));
   document.querySelectorAll(".modebtn").forEach(b => b.classList.toggle("on", b.dataset.mode === m));
   document.body.classList.remove("present");
-  if (m === "student"){ renderStep(curStep); requestAnimationFrame(fitBottom); }
+  document.body.classList.toggle("stumode", m === "student");
+  if (m === "student"){ renderStep(curStep); requestAnimationFrame(fitBottom); paintClassMode(); }
   if (m === "teacher") showTab(curTab);
   store.set("mode", m);
   requestAnimationFrame(() => { players.forEach(drawTimeline); scenes.forEach(sc => { sc.resize(); sc.dirty = true; }); });
   window.scrollTo(0,0);
 }
 document.querySelectorAll(".modebtn").forEach(b => b.onclick = () => setMode(b.dataset.mode));
+document.getElementById("classBtn").onclick = () => { classMode = !classMode; store.set("classMode", classMode); if (classMode) pause(); paintClassMode(); };
 document.querySelectorAll("[data-go]").forEach(b => b.onclick = () => setMode(b.dataset.go));
 document.getElementById("logo").onclick = () => setMode("home");
 
@@ -1934,16 +2000,16 @@ const ABILITIES = {
 const TIPS_ALL = ["echo","okaeri","atsumi","oto_e","ugoki","kage","kakeai"];
 // cs: 中学校学習指導要領 音楽「B鑑賞」との関わり（例）
 const MODULES = [
-  {id:"listen", title:"聴く", mins:10, core:true,
+  {id:"listen", title:"聴く", mins:8, core:true,
    aim:"何も知らないまま聴いて、感じたことをことばにする", know:[], tips:[], think:["kanju","hyogen"], ab:["kataru"], cs:["共通事項"],
    act:"通して聴き、感じたことを書く", ask:"「どんな景色が見えた？ 気分はどう変わった？」", app:"提示画面で🙈場面名をかくす → 通して再生"},
-  {id:"tips", title:"コツを知る", mins:10, core:true,
+  {id:"tips", title:"コツを知る", mins:8, core:true,
    aim:"「こう聴くと曲の楽しみ方がよくわかる」コツを知る", know:["強弱","形式","テクスチュア","音色","旋律","長調と短調","独奏と合奏"], tips:TIPS_ALL, think:[], ab:["kiku"], cs:["共通事項","イ(ア)"],
    act:"鑑賞のコツを知る（コツごとに▶で聴いて確かめる）", ask:"「このコツで聴くと、何が聞こえてくるかな？」", app:"📚もっと知る →「鑑賞のコツ」"},
-  {id:"apply", title:"コツで聴く", mins:15, core:true,
+  {id:"apply", title:"コツで聴く", mins:17, core:true,
    aim:"場面ごとのコツを使い、👂何が聞こえた → 💗どんな感じ → 🔍なぜ → ✍️ことばに の4ステップで聴く", know:["強弱","形式","テクスチュア","音色","旋律","長調と短調","独奏と合奏"], tips:TIPS_ALL, think:["chikaku","kanju","riyu","hyogen"], ab:["kiku","musubu","kataru"], cs:["共通事項","イ(ア)","ア(ア)"],
    act:"場面ごとのコツを使って聴き、4つのステップで考える", ask:"「何が聞こえた？」「どんな感じ？」「なぜそう感じた？」「ひとことで言うと？」", app:"📺授業画面（右に、いまの場面のコツと発問が自動で出る）"},
-  {id:"write", title:"まとめる", mins:15, core:true,
+  {id:"write", title:"まとめる", mins:12, core:true,
    aim:"学んだ知識を根拠にして、曲のよさを紹介し、ふりかえる", know:["これまで使った知識すべて"], tips:[], think:["riyu","hyogen"], ab:["kataru","musubu","ikasu"], cs:["ア(ア)"],
    act:"紹介文を書き、ふりかえる", ask:"「音楽の工夫を根拠に、この曲のよさを紹介しよう」", app:"ワークシート印刷（設定）／生徒用モードの最後のステップ"},
   {id:"poem", title:"詩と音楽", mins:15,
@@ -1994,8 +2060,8 @@ function planMinutes(){ return planModules().reduce((a,m) => a + m.mins, 0); }
 function planKnow(){ const s = []; planModules().forEach(m => m.know.forEach(k => { if (!k.startsWith("これまで") && !s.includes(k)) s.push(k); })); return s; }
 function planAbilities(){ return Object.keys(ABILITIES).filter(a => planModules().some(m => m.ab.includes(a))); }
 function presetOf(ids){ const p = PRESETS.find(p => p.ids.length === ids.length && p.ids.every(x => ids.includes(x))); return p ? p.id : "custom"; }
-function lessonsOf(mods){ const out = []; let cur = [], t = 0; mods.forEach(m => { if (t + m.mins > 50 && cur.length){ out.push(cur); cur = []; t = 0; } cur.push(m); t += m.mins; }); if (cur.length) out.push(cur); return out; }
-function studentLink(){ return location.href.split(/[?#]/)[0] + "?mode=student&plan=" + plan.join(","); }
+function lessonsOf(mods){ const out = []; let cur = [], t = 0; mods.forEach(m => { if (t + m.mins > 45 && cur.length){ out.push(cur); cur = []; t = 0; } cur.push(m); t += m.mins; }); if (cur.length) out.push(cur); return out; }
+function studentLink(){ return location.href.split(/[?#]/)[0] + "?mode=student&class=1&plan=" + plan.join(","); }
 
 function goalCard(m){
   return `<div class="goalcard">
@@ -2500,7 +2566,12 @@ function renderStep(i){
   let html = "";
   if (s.id === "goal"){
     const pid = presetOf(plan);
+    const hasOld = (notes.feel1 || []).length || (notes.feel1txt || "").trim() || Object.keys(notes.tips || {}).length || (notes.intro || "").trim();
     html = `<div class="panel"><div class="h2row"><h2>🎯 はじめに：この学習で身につけること</h2>${navBtns(i)}</div>
+      <div class="namebox">
+        <label>✏️ 名前（または出席番号）<input id="stuName" value="${esc(notes.name || "")}" placeholder="例：1年2組 15番 山田"></label>
+        ${hasOld ? `<div class="oldwarn">⚠️ ${notes.name ? `「${esc(notes.name)}」さんの` : "前に使った人の"}記録が残っています。<button class="smallbtn" id="clearOld">🧹 消して新しく始める</button></div>` : ""}
+      </div>
       <div class="axis"><span class="gk">🧭 学びの軸</span>${AXIS}</div>
       <h3>🔑 使う知識</h3><div>${planKnow().map(k => `<span class="kchip">${k}</span>`).join("")}</div>
       <h3 style="margin-top:.8em">🌱 高まる鑑賞の力</h3>
@@ -2556,7 +2627,7 @@ function renderStep(i){
         <div class="apL">
           <div class="btnrow" style="margin:0 0 6px"><button class="smallbtn on" data-asv="scene">🌸 情景</button><button class="smallbtn" data-asv="e3d">🎻 3D合奏</button></div>
           <div id="applyStage"></div>
-          <div class="tip" style="margin-top:8px">▶で曲を流すと、右に<b>いまの場面で使えるコツ</b>が出ます。4つのステップで書こう（3つのコツで「なぜ」まで書けたらクリア）。</div>
+          <div class="tip" style="margin-top:8px">${classMode ? "先生が流している場面に合わせて、下の「前の場面・次の場面」や、下の印を押そう。" : "▶で曲を流すと、"}右に<b>いまの場面で使えるコツ</b>が出ます。4つのステップで書こう（3つのコツで「なぜ」まで書けたらクリア）。</div>
           <div class="aprog" id="applyProg"></div>
         </div>
         <div class="apR">
@@ -2581,6 +2652,7 @@ function renderStep(i){
       </div>
       <div class="pgsec" data-title="理由" data-short="🔍">
       <h3>その理由（4つのステップで）</h3>
+      <div id="myNotes"></div>
       <div class="think4">${THINK.map(t => `<div class="th"><div class="thq">${t.icon} ${t.name}</div><div class="tip">${t.q}</div></div>`).join("")}</div>
       <p class="tip">👂 聞こえた音 → 💗 感じたこと → 🔍 なぜ（音楽のしくみ）の順に書くと、根拠のある理由になります。<br>使えることば：強弱・音の高さ・速さ・音色・トリル・トレモロ・音階・独奏と合奏・長調と短調・リトルネロ形式・こだま・音の厚み</p>
       <textarea id="why" placeholder="例：雷の場面が好き。👂合奏が同じ音を速くきざむトレモロと、ヴァイオリンのかけ上がる音階が聞こえた。💗こわいけれど、どきどきする。🔍低くゴロゴロ続く音が雷、一気にかけ上がる音が稲妻の光に似ているから、本当に嵐が来たみたいに感じた。"></textarea>
@@ -2598,7 +2670,7 @@ function renderStep(i){
         <span class="tip" id="copyMsg"></span>
       </div>
       <p class="tip">書いた内容は、このブラウザに自動で保存されます。</p>
-      <div class="btnrow"><button class="btn sec" id="resetAll">はじめからやり直す（記録を消す）</button></div>
+      <div class="btnrow"><button class="btn sec" id="resetAll">🧹 終わったら：次の人のために記録を消す</button></div>
       </div>
       </div>
       </div>`;
@@ -2608,6 +2680,8 @@ function renderStep(i){
   setStuHide(s.id === "listen" || s.id === "which" || s.id === "form");
 
   if (s.id === "goal"){
+    const nm = document.getElementById("stuName"); nm.oninput = () => { notes.name = nm.value; saveNotes(); };
+    const co = document.getElementById("clearOld"); if (co) co.onclick = () => { if (confirm("前の人の記録をすべて消して、新しく始めますか？")) clearStudent(); };
     const ub = document.getElementById("unlockPlan");
     if (ub) ub.onclick = () => { planLocked = false; store.set("planLocked", false); renderStep(0); };
     const cp = document.getElementById("coursePick");
@@ -2649,6 +2723,15 @@ function renderStep(i){
     const favOpts = ["春の主題","小鳥の歌","泉とそよ風","雷と稲妻","小鳥がふたたび歌う","独奏ヴァイオリン"];
     chipGroup(document.getElementById("favs"), favOpts, notes.fav ? [notes.fav] : [], v => { notes.fav = v[v.length-1] || ""; saveNotes(); }, true);
     bindText("why","why"); bindText("intro","intro");
+    // ステップ3で書いたことを見ながら書けるように
+    const mine = TIPS.filter(t => { const n = (notes.tips || {})[t.id]; return n && ((n.riyu || "").trim() || (n.kakaku || []).length); });
+    document.getElementById("myNotes").innerHTML = mine.length ? `<div class="mynotes"><div class="tip"><b>📝 ステップ③で書いたこと</b>（「使う」で下の欄に入ります）</div>${mine.map(t => { const n = notes.tips[t.id];
+      const line = [(n.kakaku || []).length ? "👂" + n.kakaku.join("・") : "", (n.kanju || []).length ? "💗" + n.kanju.join("・") : "", (n.riyu || "").trim() ? "🔍" + n.riyu.trim() : ""].filter(Boolean).join("　");
+      return `<div class="mn"><span>${t.icon} <b>${t.name}</b>：${esc(line)}</span><button class="smallbtn" data-use="${t.id}">使う</button></div>`; }).join("")}</div>`
+      : `<div class="tip">ステップ③「コツで聴く」で書いたことが、ここに出ます。</div>`;
+    document.querySelectorAll("[data-use]").forEach(b => b.onclick = () => { const n = notes.tips[b.dataset.use], ta = document.getElementById("why");
+      const add = [(n.kakaku || []).length ? "👂" + n.kakaku.join("、") + "が聞こえた。" : "", (n.kanju || []).length ? "💗" + n.kanju.join("、") + "感じがした。" : "", (n.riyu || "").trim() ? "🔍" + n.riyu.trim() : ""].join("");
+      ta.value = (ta.value ? ta.value + "\n" : "") + add; notes.why = ta.value; saveNotes(); });
     showBA();
     notes.self = notes.self || {};
     document.getElementById("selfEval").innerHTML = planAbilities().map(a => `<div class="selfrow"><span class="lbl2">${ABILITIES[a].icon} <b>${ABILITIES[a].name}</b>：${ABILITIES[a].can}</span><span class="chips" style="margin:0" data-a="${a}"></span></div>`).join("");
@@ -2661,13 +2744,18 @@ function renderStep(i){
       if (navigator.clipboard) navigator.clipboard.writeText(txt).then(ok, () => {});
     };
     document.getElementById("resetAll").onclick = () => {
-      if (!confirm("書いた内容やクイズの記録をすべて消して、はじめからやり直しますか？")) return;
-      ["notes","done","step","quizBest","tapBest","elem"].forEach(k => store.del(k));
-      notes = {feel1:[], feel1txt:"", feel2:[], fav:"", why:"", intro:"", tips:{}}; done = {}; renderStep(0);
+      if (!confirm("印刷やコピーはすみましたか？ 書いた内容をすべて消して、次の人が使えるようにします。")) return;
+      clearStudent();
     };
     pageBySelector(document.getElementById("writePages"), ".pgsec", "write");
   }
 }
+function clearStudent(){
+  ["notes","done","step","quizBest","tapBest","elem"].forEach(k => store.del(k));
+  Object.keys(localStorageKeys()).forEach(k => { if (k.startsWith("vspring:pg:")) try{ localStorage.removeItem(k); }catch(e){} });
+  notes = {name:"", feel1:[], feel1txt:"", feel2:[], fav:"", why:"", intro:"", tips:{}}; done = {}; applyPick = {}; renderStep(0);
+}
+function localStorageKeys(){ const o = {}; try{ for (let i = 0; i < localStorage.length; i++) o[localStorage.key(i)] = 1; }catch(e){} return o; }
 function showBA(){
   const el = document.getElementById("beforeAfter"); if (!el) return;
   el.innerHTML = `<b>はじめに聴いたとき：</b>${notes.feel1.join("・") || "（まだ選んでいません）"}<br><b>いま：</b>${notes.feel2.join("・") || "（上から選ぼう）"}<br><span class="tip">感じ方は変わったかな？ 新しく気づいたことを紹介文に入れよう。</span>`;
@@ -2820,7 +2908,7 @@ function printSheet(filled){
   const N = filled ? notes : {feel1:[], feel1txt:"", feel2:[], fav:"", why:"", intro:"", tips:{}};
   document.getElementById("printsheet").innerHTML = `
     <h1>ヴィヴァルディ「春」第1楽章 鑑賞ワークシート</h1>
-    <p>　年　　組　　番　名前（　　　　　　　　　　　　）</p>
+    <p>${N.name ? "名前：" + esc(N.name) : "　年　　組　　番　名前（　　　　　　　　　　　　）"}</p>
     <h3>1. はじめに聴いて感じたこと</h3>
     <div class="box">${esc(N.feel1.join("・"))}${N.feel1.length ? "\n" : ""}${esc(N.feel1txt)}</div>
     <h3>2. 場面と音楽の工夫</h3>
@@ -2855,6 +2943,12 @@ const tScene = makeScene(document.getElementById("tStage"), {hideNames:() => tHi
 let tPick = {};
 function renderTTip(si){
   const list = secTips(si), id = tPick[si] && list.includes(tPick[si]) ? tPick[si] : list[0], t = TIP[id], box = document.getElementById("tTip");
+  if (typeof lessonStep !== "undefined" && lessonStep === 4){
+    box.innerHTML = `<div class="ttip"><div class="ttn">✍️ <b>紹介文の書き方</b></div>
+      <ol class="tq"><li>いちばん好きな場面を決める</li><li>👂 その場面で<b>聞こえた音</b>（コツで聴いたこと）</li><li>💗 どんな<b>感じ</b>がしたか</li><li>🔍 <b>なぜ</b>そう感じたか（音楽のしくみ）</li><li>この曲を知らない人に<b>おすすめ</b>する一文</li></ol>
+      <p class="tip">ステップ③で書いたことが、生徒の画面に並んで出ます。</p></div>`;
+    return;
+  }
   if (!t){ box.innerHTML = ""; return; }
   box.innerHTML = `${list.length > 1 ? `<div class="aptabs" style="margin-bottom:6px">${list.map(k => `<button class="chip ${k === id ? "on" : ""}" data-tp="${k}">${TIP[k].icon} ${TIP[k].name}</button>`).join("")}</div>` : ""}
     <div class="ttip"><div class="ttn">${t.icon} <b>${t.name}</b> <span class="elbadge">${t.el}</span></div><div class="tip">${t.tip}</div>
@@ -2917,6 +3011,36 @@ function showTab(t){
   if (t === "show") requestAnimationFrame(() => { tScene.resize(); drawTimeline(tPlayer); tScene.dirty = true; });
 }
 document.querySelectorAll("#ttabs .tab, #tsub .tab").forEach(b => b.onclick = () => showTab(b.dataset.t));
+// 授業の進行：ボタン1つで、その段階に合った画面にする
+const LESSON = {
+  1:{tab:"show", hide:true,  hint:"① 聴く：場面名をかくしたまま、最初から通して流します。生徒は感じたことばを選んで書きます。発問「どんな景色が見えた？ 気分はどう変わった？」"},
+  2:{tab:"tips",             hint:"② コツを知る：› でコツを1つずつ映し、「▶ 聴いてみる」で確かめます。"},
+  3:{tab:"show", hide:false, hint:"③ コツで聴く：場面ボタンで場面を流すと、右に「いまの場面のコツ」と発問が出ます。生徒は手元で4つのステップを書きます。"},
+  4:{tab:"show", hide:false, sum:true, hint:"④ まとめる：もう一度通して流し、生徒は紹介文を書きます。右に書き方の手順を出しています。"},
+};
+let lessonStep = 0;
+function setLesson(n){
+  lessonStep = n; const L = LESSON[n];
+  document.querySelectorAll("#lessonbar [data-ls]").forEach(b => b.classList.toggle("on", +b.dataset.ls === n));
+  document.getElementById("lbHint").textContent = L.hint;
+  showTab(L.tab);
+  if (L.hide !== undefined && tHide !== L.hide){ tHide = L.hide; applyTHide(); }
+  if (n === 1 || n === 4){ stopAt = null; loopSec = -1; seek(0); }
+  renderTTip(secAt(au.currentTime));
+}
+document.querySelectorAll("#lessonbar [data-ls]").forEach(b => b.onclick = () => setLesson(+b.dataset.ls));
+document.getElementById("lbLink").onclick = () => {
+  const url = studentLink();
+  let d = document.getElementById("linkDlg");
+  if (!d){ d = document.createElement("div"); d.id = "linkDlg"; document.body.appendChild(d); d.onclick = e => { if (e.target === d) d.classList.add("hidden"); }; }
+  d.className = ""; d.innerHTML = `<div class="ldcard"><h3>🔗 生徒用リンク</h3>
+    <p class="tip">このリンクを配ると、生徒の画面がいまのプラン（${planModules().map(m => m.title).join("・")}）になり、<b>授業中モード</b>（生徒の端末は音を出さない）で始まります。</p>
+    <input readonly value="${esc(url)}" id="ldUrl"><div class="btnrow"><button class="btn" id="ldCopy">📋 コピー</button><button class="btn sec" id="ldClose">閉じる</button><span class="tip" id="ldMsg"></span></div>
+    <p class="tip">※ GitHub Pages など、公開したURLで開いたときに使えます。</p></div>`;
+  d.querySelector("#ldClose").onclick = () => d.classList.add("hidden");
+  d.querySelector("#ldCopy").onclick = () => { const i = d.querySelector("#ldUrl"); i.select(); const ok = () => d.querySelector("#ldMsg").textContent = "コピーしました";
+    if (navigator.clipboard) navigator.clipboard.writeText(url).then(ok, () => { try{ document.execCommand("copy"); ok(); }catch(e){} }); else { try{ document.execCommand("copy"); ok(); }catch(e){} } };
+};
 
 function renderGuide(){
   const L = lessonsOf(planModules()), has = id => plan.includes(id);
@@ -2928,7 +3052,7 @@ function renderGuide(){
   <div class="note"><b>学びの軸</b>：${AXIS}</div>
   <div class="defbox"><div><b>📘 知識</b>＝鑑賞のコツ（${planTips().map(id => TIP[id].name).join("・") || "—"}）</div>
   <div><b>💭 思考・判断・表現</b>＝4つのステップ：${THINK.map(t => `${t.icon}${t.name}「${t.q}」`).join(" → ")}</div></div>
-  ${L.map((ms,k) => `<h3>第${k+1}時（目安${ms.reduce((x,m) => x + m.mins, 0)}分）</h3>
+  ${L.map((ms,k) => `<h3>第${k+1}時（目安${ms.reduce((x,m) => x + m.mins, 0)}分＋導入・あいさつ5分）</h3>
   <div class="tblwrap"><table>
     <tr><th style="width:22%">学習活動</th><th>主な発問・指示</th><th style="width:28%">このアプリで</th></tr>
     ${ms.map(m => `<tr><td><b>${m.act}</b><br><span class="tip">${m.mins}分</span></td><td>${m.ask}<br><span class="tip">めあて：${m.aim}</span></td><td>${m.app}</td></tr>`).join("")}
