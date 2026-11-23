@@ -297,6 +297,26 @@ body.present .tch{max-width:none}
 @media (max-width:480px){ .rrow{grid-template-columns:1fr} .rdesc{grid-column:1} .raxis{margin-left:0} }
 
 /* ---------- 3 axes ---------- */
+.seg{display:flex;gap:4px;justify-content:center;margin:0 0 8px;flex-wrap:wrap}
+.seg button{border:1px solid var(--line);background:var(--bg);border-radius:999px;padding:3px 12px;font-size:14px}
+.seg button.on{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.ifcard{text-align:center;max-width:640px;margin:0 auto}
+.ifcard h3{font-size:19px;margin:0 0 8px}
+.ifab{display:flex;gap:8px;justify-content:center;flex-wrap:wrap}
+.ifab .btn{padding:8px 14px;font-size:15px}
+.ifq{font-size:17px;font-weight:800;margin:10px 0 4px}
+.ifcard .chips{justify-content:center}
+.ifcard .chips .chip{font-size:18px;padding:4px 22px}
+.ifcard textarea{min-height:56px}
+.ifcard.big h3{font-size:30px}
+.ifcard.big .ifab .btn{font-size:22px;padding:12px 22px}
+.ifcard.big .ifq{font-size:26px}
+.body1{text-align:center;font-size:15px;margin:8px 0 0;color:var(--accent2)}
+.textra .ifbtn{background:#fff6e0}
+.textra .vbtn b{background:var(--accent);color:#fff;border-radius:999px;padding:0 7px;margin-left:4px}
+.vwall{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;min-height:160px;align-items:center;margin:10px 0}
+.vb{background:#fff8e6;border:2px solid #f0d9a0;border-radius:18px;padding:8px 16px;font-size:24px;transform:rotate(var(--r))}
+.th [data-reveal]{display:block;margin-top:4px}
 .knowcard{text-align:center;padding:4px 6px}
 .knowcard h3{font-size:20px;margin:0 0 6px}
 .kv{display:flex;justify-content:center;margin:4px 0 8px}
@@ -926,6 +946,7 @@ function play(){
   if (muted()){ showMuteToast(); return; }
   const p = au.play(); if (p && p.catch) p.catch(()=>{});
 }
+function toast(msg){ let t = document.getElementById("muteToast"); if (!t){ t = document.createElement("div"); t.id = "muteToast"; document.body.appendChild(t); } t.innerHTML = msg; t.classList.add("on"); clearTimeout(t._h); t._h = setTimeout(() => t.classList.remove("on"), 2200); }
 function showMuteToast(){
   let t = document.getElementById("muteToast");
   if (!t){ t = document.createElement("div"); t.id = "muteToast"; document.body.appendChild(t); }
@@ -2382,9 +2403,9 @@ function tipCard(t, opts={}){
       s.id === "riyu" ? t.riyu : "ひとことで言うと？ 体の動きで表すと？"}</div></div>`).join("")}</div>`
     : `
     <div class="think4 ${opts.compact ? "wiz" : ""}">
-      <div class="th" data-q="0"><div class="thq">👂 何が聞こえた？</div><div class="chips sm" data-k="kakaku"></div></div>
-      <div class="th" data-q="1"><div class="thq">💗 どんな感じがした？</div><div class="chips sm" data-k="kanju"></div></div>
-      <div class="th" data-q="2"><div class="thq">🔍 なぜそう感じた？</div><div class="tip">${t.riyu}</div><textarea data-k="riyu" rows="2" placeholder="例：…だから、…に聞こえた">${esc(n.riyu || "")}</textarea></div>
+      <div class="th" data-q="0"><div class="thq">👂 何が聞こえた？</div><textarea data-k="own0" rows="2" placeholder="まず、自分の耳で気づいたことを書こう">${esc(n.own0 || "")}</textarea><button class="linkbtn" data-reveal>💡 ことばのヒント</button><div class="chips sm hidden" data-k="kakaku"></div></div>
+      <div class="th" data-q="1"><div class="thq">💗 どんな感じがした？</div><textarea data-k="own1" rows="2" placeholder="感じたことを、自分のことばで">${esc(n.own1 || "")}</textarea><button class="linkbtn" data-reveal>💡 ことばのヒント</button><div class="chips sm hidden" data-k="kanju"></div></div>
+      <div class="th" data-q="2"><div class="thq">🔍 なぜそう感じた？</div><textarea data-k="riyu" rows="2" placeholder="「…の音が…だから、…に聞こえた」">${esc(n.riyu || "")}</textarea><button class="linkbtn" data-reveal>💡 考えるヒント</button><div class="tip hidden">${t.riyu}</div></div>
       <div class="th" data-q="3"><div class="thq">✍️ ひとことで言うと？</div><textarea data-k="hyogen" rows="1" placeholder="例：春がこだまと遊んでいる">${esc(n.hyogen || "")}</textarea></div>
     </div>
     ${opts.compact ? `<div class="wiznav"><button class="smallbtn" data-wz="-1">‹ もどる</button><span class="wzdots"></span><button class="btn" data-wz="1">次へ ›</button></div>` : ""}`}
@@ -2398,15 +2419,19 @@ function bindTipCards(root, teacher){
     const t = TIP[card.dataset.tip]; const n = notes.tips[t.id] = notes.tips[t.id] || {kakaku:[], kanju:[], riyu:"", hyogen:""};
     chipGroup(card.querySelector('[data-k="kakaku"]'), t.kakaku, n.kakaku, v => { n.kakaku = v; saveNotes(); });
     chipGroup(card.querySelector('[data-k="kanju"]'), t.kanju, n.kanju, v => { n.kanju = v; saveNotes(); });
-    card.querySelectorAll("textarea").forEach(ta => ta.oninput = () => { n[ta.dataset.k] = ta.value; saveNotes(); checkTipsDone(); });
+    card.querySelectorAll("textarea[data-k]").forEach(ta => ta.oninput = () => { n[ta.dataset.k] = ta.value; saveNotes(); checkTipsDone(); });
+    card.querySelectorAll("[data-reveal]").forEach(b => b.onclick = () => { const x = b.nextElementSibling; x.classList.toggle("hidden"); b.textContent = x.classList.contains("hidden") ? b.textContent.replace("とじる", "💡") : b.textContent.replace("💡", "とじる"); });
   });
 }
 /* ---------- コツ①の「知る」：トリル・高い音と低い音・細かいくり返し ---------- */
 // ヴァイオリンらしい合成音（のこぎり波＋ビブラート＋やわらかいフィルター）
-let synthCtx = null;
-function synth(seq){   // seq: [開始(秒), MIDI番号, 長さ(秒), 音量]
+let synthCtx = null, synthOuts = [];
+function stopSynth(){ synthOuts.forEach(g => { try{ g.disconnect(); }catch(e){} }); synthOuts = []; }
+function synth(seq, gain){   // seq: [開始(秒), MIDI番号, 長さ(秒), 音量]
   try{ synthCtx = synthCtx || new (window.AudioContext || window.webkitAudioContext)(); }catch(e){ return; }
-  const ctx = synthCtx, t0 = ctx.currentTime + .06, out = ctx.createGain(); out.gain.value = .22; out.connect(ctx.destination);
+  if (synthCtx.state === "suspended") synthCtx.resume();
+  stopSynth();
+  const ctx = synthCtx, t0 = ctx.currentTime + .06, out = ctx.createGain(); out.gain.value = gain || .22; out.connect(ctx.destination); synthOuts.push(out);
   const lp = ctx.createBiquadFilter(); lp.type = "lowpass"; lp.frequency.value = 2600; lp.Q.value = .7; lp.connect(out);
   seq.forEach(([st, m, d, v]) => {
     const f = 440 * Math.pow(2, (m - 69) / 12), o = ctx.createOscillator(), g = ctx.createGain(), lfo = ctx.createOscillator(), lg = ctx.createGain();
@@ -2474,6 +2499,72 @@ function openKnow(id){
   d.className = ""; d.innerHTML = `<div class="kdcard"><button class="lbclose kdclose" aria-label="閉じる">✕</button>${knowHTML(id, true)}</div>`;
   d.querySelector(".kdclose").onclick = () => d.classList.add("hidden"); bindKnow(d);
 }
+/* ---------- 「もし〜だったら？」：楽譜どおりの合成音と、変えた版を聴きくらべる ---------- */
+const QB = .55;                                     // 合成音の四分音符の長さ（秒）
+function barQ(b){ return 12 + (b - 1) * 96; }       // 小節 → 楽譜上の位置（1拍＝24）
+function dynAt(pk, q){ let d = 1; for (const [t, tx] of SCORE.texts[pk] || []){ if (t > q) break; if (/Piano/.test(tx)) d = .42; else if (/Forte/.test(tx)) d = 1; } return d; }
+const PW = {solo:.85, vn1:.75, vn2:.6, va:.5, bass:.75};
+function scoreSeq(b0, b1, o = {}){
+  const q0 = barQ(b0), q1 = barQ(b1), seq = [];
+  (o.parts || ["solo","vn1","vn2","va","bass"]).forEach(pk => {
+    let ns = SCORE.parts[pk].filter(n => n[2] >= 0 && n[0] >= q0 && n[0] < q1).map(n => ({t:n[0], d:n[1], m:n[2]}));
+    if (o.mod) ns = o.mod(pk, ns, q0, q1);
+    ns.forEach(n => { const st = (n.t - q0) / 24 * QB, dd = Math.max(.05, n.d / 24 * QB * .95), v = PW[pk] * (o.flat ? 1 : dynAt(pk, n.t));
+      seq.push([st, n.m, dd, v]); if (pk === "bass") seq.push([st, n.m - 12, dd, v * .5]); });
+  });
+  (o.extra ? o.extra(q0, q1) : []).forEach(x => seq.push(x));
+  return seq;
+}
+const IFS = {
+  birds:  {ax:"ax_bird", title:"小鳥の場面に、低い音を足すと？", bars:[13.5, 17.5], b:"低い音を足す",
+           q:"どちらが小鳥らしい？ それはなぜ？",
+           o:{extra:(q0, q1) => { const x = []; for (let q = q0; q < q1; q += 24) x.push([(q - q0) / 24 * QB, 40, QB * .95, .9], [(q - q0) / 24 * QB, 52, QB * .95, .7]); return x; }}},
+  stream: {ax:"ax_stream", title:"細かいくり返しを、のばす音にすると？", bars:[31, 33.5], b:"のばす音にする",
+           q:"どちらが川の流れに聞こえる？ なぜ？",
+           o:{mod:(pk, ns) => { const out = []; ns.forEach(n => { const beat = Math.floor(n.t / 24); if (!out.length || Math.floor(out[out.length - 1].t / 24) !== beat) out.push({t:beat * 24, d:24, m:n.m}); }); return out; }}},
+  ritcut: {ax:"ax_rit", title:"主題がもどってこなかったら？", bars:[25, 33.5], b:"主題を消す",
+           q:"主題がもどると、何が変わる？",
+           o:{mod:(pk, ns) => { const a = barQ(27.875), b = barQ(31.125); return ns.filter(n => n.t < a || n.t >= b).map(n => n.t >= b ? {...n, t:n.t - (b - a)} : n); }}},
+  major:  {ax:"ax_rit", title:"嵐のあとの主題を、長調にすると？", bars:[55.875, 59.2], b:"長調にする",
+           q:"どちらが嵐のあとに合う？ なぜ？",
+           o:{mod:(pk, ns) => ns.map(n => ({...n, m:n.m + ([4, 9].includes(n.m % 12) ? 1 : 0)}))}},
+  echo:   {ax:"ax_conc", title:"こだま（f→p）を、全部 f にすると？", bars:[1, 7.5], b:"全部 f にする",
+           q:"どちらが楽しい？ f と p は、何を表している？", o:{flat:true}},
+  tutti:  {ax:"ax_conc", title:"独奏の見せ場を、全員で弾くと？", bars:[70.5, 75], b:"全員で弾く",
+           q:"独奏だからこそ、伝わることは？",
+           o:{flat:true, mod:(pk, ns, q0, q1) => (pk === "vn1" || pk === "vn2") ? SCORE.parts.solo.filter(n => n[2] >= 0 && n[0] >= q0 && n[0] < q1).map(n => ({t:n[0], d:n[1], m:n[2]})) : ns}},
+};
+function playIf(id, which){
+  const I = IFS[id]; pause();
+  synth(scoreSeq(I.bars[0], I.bars[1], which === "b" ? I.o : {}), .1);
+}
+function ifCard(id, big){
+  const I = IFS[id], n = ((notes.ifs || {})[id]) || {}, silent = muted() && !big;
+  return `<div class="ifcard ${big ? "big" : ""}" data-if="${id}"><h3>🤔 ${I.title}</h3>
+    ${silent ? `<p class="tip">🔇 先生の画面で、A と B を聴きくらべよう。</p>` : `<div class="ifab"><button class="btn sec" data-ifp="a">▶ A 楽譜どおり</button><button class="btn sec" data-ifp="b">▶ B ${I.b}</button><button class="smallbtn" data-ifstop>■</button></div>`}
+    <p class="ifq">${I.q}</p>
+    ${big ? "" : `<div class="chips" data-ifpick>${["A","B"].map(x => `<button class="chip ${n.pick === x ? "on" : ""}">${x}</button>`).join("")}</div>
+    <textarea data-ifwhy rows="2" placeholder="なぜ？（例：Bは低い音が…だから）">${esc(n.why || "")}</textarea>`}
+    <p class="tip" style="margin:4px 0 0">※ A・B とも楽譜から作った合成音です。</p></div>`;
+}
+function bindIf(root){
+  root.querySelectorAll(".ifcard").forEach(c => {
+    const id = c.dataset.if; notes.ifs = notes.ifs || {}; const n = notes.ifs[id] = notes.ifs[id] || {};
+    c.querySelectorAll("[data-ifp]").forEach(b => b.onclick = () => playIf(id, b.dataset.ifp));
+    const st = c.querySelector("[data-ifstop]"); if (st) st.onclick = stopSynth;
+    const pk = c.querySelector("[data-ifpick]"); if (pk) pk.querySelectorAll(".chip").forEach(b => b.onclick = () => { n.pick = b.textContent; pk.querySelectorAll(".chip").forEach(x => x.classList.toggle("on", x === b)); saveNotes(); });
+    const w = c.querySelector("[data-ifwhy]"); if (w) w.oninput = () => { n.why = w.value; saveNotes(); };
+  });
+}
+function openIf(id){
+  let d = document.getElementById("knowDlg");
+  if (!d){ d = document.createElement("div"); d.id = "knowDlg"; document.body.appendChild(d); d.onclick = e => { if (e.target === d){ d.classList.add("hidden"); stopSynth(); } }; }
+  d.className = ""; d.innerHTML = `<div class="kdcard"><button class="lbclose kdclose" aria-label="閉じる">✕</button>${ifCard(id, true)}</div>`;
+  d.querySelector(".kdclose").onclick = () => { d.classList.add("hidden"); stopSynth(); }; bindIf(d);
+}
+// ページの中の小さなタブ
+function segHTML(items){ return `<div class="seg">${items.map((x, i) => `<button class="${i ? "" : "on"}" data-seg="${i}">${x[0]}</button>`).join("")}</div>${items.map((x, i) => `<div class="segbody ${i ? "hidden" : ""}" data-segb="${i}">${x[1]}</div>`).join("")}`; }
+function bindSeg(root){ root.querySelectorAll(".seg").forEach(sg => { const par = sg.parentElement; sg.querySelectorAll("[data-seg]").forEach(b => b.onclick = () => { sg.querySelectorAll("[data-seg]").forEach(x => x.classList.toggle("on", x === b)); par.querySelectorAll(":scope > [data-segb]").forEach(x => x.classList.toggle("hidden", x.dataset.segb !== b.dataset.seg)); stopSynth(); }); }); }
 /* ---------- コツ①：絵とソネットの並べかえ ---------- */
 const SORT = [{k:"theme", img:"scene-theme", line:"春がやってきた"}, {k:"birds", img:"scene-birds", line:"小鳥たちは楽しい歌で春にあいさつする"}, {k:"stream", img:"scene-stream", line:"泉はそよ風にふかれ、ささやきながら流れ出す"}, {k:"storm", img:"scene-storm", line:"空は黒い雲におおわれ、稲妻と雷鳴"}];
 function renderSort(box){
@@ -2522,7 +2613,7 @@ function bindWiz(root){
       card.querySelector('[data-wz="-1"]').style.visibility = k ? "" : "hidden";
       const nx = card.querySelector('[data-wz="1"]'); nx.textContent = k === 3 ? "できた ✓" : "次へ ›";
     };
-    card.querySelectorAll("[data-wz]").forEach(b => b.onclick = () => { const k = (wizStage[id] || 0) + +b.dataset.wz; if (k > 3){ card.querySelector(".wiznav").insertAdjacentHTML("beforeend", ""); card.classList.add("wizdone"); setTimeout(() => card.classList.remove("wizdone"), 900); return; } show(k); });
+    card.querySelectorAll("[data-wz]").forEach(b => b.onclick = () => { const k = (wizStage[id] || 0) + +b.dataset.wz; if (k > 3){ const n = (notes.tips || {})[id] || {}; if (typeof Sync !== "undefined" && TIP[id] && TIP[id].ax && Sync.say(id, n.hyogen)) toast("💬 ひとことを先生の画面に送りました（名前は出ません）"); card.classList.add("wizdone"); setTimeout(() => card.classList.remove("wizdone"), 900); return; } show(k); });
     show(wizStage[id] || 0);
   });
 }
@@ -2960,13 +3051,10 @@ function renderStep(i){
         <p class="big1">ヴィヴァルディは、<b>詩（ソネット）</b>の場面を、音で表しました。</p>
         <p>楽譜にも「小鳥の歌」「泉が流れる」「雷」と書きこんであります。</p>
         <p class="ask1">🤔 音は、どんな景色を表しているのかな？</p></div></div>
-      <div class="pgsec" data-title="トリル" data-short="🎶">${knowHTML("trill")}</div>
-      <div class="pgsec" data-title="高い音・低い音" data-short="↕">${knowHTML("pitch")}</div>
-      <div class="pgsec" data-title="くり返しと重なり" data-short="〰">${knowHTML("repeat")}</div>
+      <div class="pgsec" data-title="音のしくみ" data-short="🎶">${segHTML([["🎶 トリル", knowHTML("trill")], ["↕ 高い・低い", knowHTML("pitch")], ["〰 くり返し", knowHTML("repeat")]])}</div>
       <div class="pgsec" data-title="並べかえ" data-short="🧩"><h3>🧩 詩の順に、絵を並べよう</h3><div id="sortBox"></div></div>
-      <div class="pgsec" data-title="場面当て" data-short="❓"><h3>❓ どの場面かな？</h3><div id="axQuiz"></div></div>
-      <div class="pgsec" data-title="考える：小鳥" data-short="🐦"><div class="thinkrow"><img class="thinkimg" src="images/scene-birds.jpg" alt=""><div>${tipCard(TIP.ax_bird, {compact:true})}</div></div></div>
-      <div class="pgsec" data-title="考える：川" data-short="💧"><div class="thinkrow"><img class="thinkimg" src="images/scene-stream.jpg" alt=""><div>${tipCard(TIP.ax_stream, {compact:true})}</div></div></div>
+      <div class="pgsec" data-title="考える" data-short="🔍">${segHTML([["🐦 小鳥", `<div class="thinkrow"><img class="thinkimg" src="images/scene-birds.jpg" alt=""><div>${tipCard(TIP.ax_bird, {compact:true})}</div></div>`], ["💧 川", `<div class="thinkrow"><img class="thinkimg" src="images/scene-stream.jpg" alt=""><div>${tipCard(TIP.ax_stream, {compact:true})}</div></div>`]])}</div>
+      <div class="pgsec" data-title="もし〜だったら？" data-short="🤔">${segHTML([["🐦 低い音を足すと？", ifCard("birds")], ["💧 のばす音にすると？", ifCard("stream")]])}<p class="body1">🙌 先生の音に合わせて、川の音の動きを<b>指でなぞって</b>みよう。</p></div>
       </div></div>`;
   } else if (s.id === "k2"){
     html = `<div class="panel">${H(i)}<div id="axPages">
@@ -2975,8 +3063,9 @@ function renderStep(i){
         <p>これを<b>リトルネッロ形式</b>といいます（リトルネッロ＝もどってくるもの）。</p>
         <div class="formfig">${SECTIONS.map((x, k) => `<div style="background:${KIND[x.kind].hex};flex-grow:${Math.max(1, (secEnd(k) - x.t) / 10)}">${x.kind === "theme" ? "🌸" : KIND[x.kind].emoji}</div>`).join("")}</div>
         <p class="ask1">🤔 もどってくるたびに、同じ？ それとも変わる？</p></div></div>
-      <div class="pgsec" data-title="聴きくらべ" data-short="🔁"><h3>🔁 主題の聴きくらべ</h3><div id="ritBox"></div></div>
+      <div class="pgsec" data-title="聴きくらべ" data-short="🔁"><h3>🔁 主題の聴きくらべ</h3><div id="ritBox"></div><p class="body1">🙌 主題がもどってきたと思ったら、<b>手を挙げよう</b>。</p></div>
       <div class="pgsec" data-title="考える" data-short="🔍"><div class="thinkrow"><div class="ritmini" id="ritMini"></div><div>${tipCard(TIP.ax_rit, {compact:true})}</div></div></div>
+      <div class="pgsec" data-title="もし〜だったら？" data-short="🤔">${segHTML([["🌸 主題がなかったら？", ifCard("ritcut")], ["🌥 長調だったら？", ifCard("major")]])}</div>
       </div></div>`;
   } else if (s.id === "k3"){
     html = `<div class="panel">${H(i)}<div id="axPages">
@@ -2986,6 +3075,7 @@ function renderStep(i){
         <p class="ask1">🤔 いまは、だれが弾いている？</p></div></div>
       <div class="pgsec" data-title="見る" data-short="👀"><div id="soloBand"></div><div class="e3box"></div></div>
       <div class="pgsec" data-title="考える" data-short="🔍"><div class="thinkrow"><img class="thinkimg" src="images/concerto.jpg" alt=""><div>${tipCard(TIP.ax_conc, {compact:true})}</div></div></div>
+      <div class="pgsec" data-title="もし〜だったら？" data-short="🤔">${segHTML([["🔊 全部 f だったら？", ifCard("echo")], ["🎻 全員で弾いたら？", ifCard("tutti")]])}<p class="body1">🙌 f では<b>大きく</b>、p では<b>小さく</b>手を動かしてみよう。</p></div>
       </div></div>`;
   } else if (s.id === "tips"){
     html = `<div class="panel">${H(i)}
@@ -3084,7 +3174,8 @@ function renderStep(i){
   if (["k1","k2","k3"].includes(s.id)){
     const box = document.getElementById("axPages");
     bindTipCards(box, false); bindWiz(box);
-    if (s.id === "k1"){ bindKnow(box); renderSort(document.getElementById("sortBox")); if (muted()) document.getElementById("axQuiz").innerHTML = `<div class="note">先生の画面のクイズを見て、考えよう。<br>決め手になった音を、となりの人と話そう。</div>`; else startQuiz(document.getElementById("axQuiz"), false); }
+    bindIf(box); bindSeg(box);
+    if (s.id === "k1"){ bindKnow(box); renderSort(document.getElementById("sortBox")); }
     if (s.id === "k2"){ renderRits(document.getElementById("ritBox")); document.getElementById("ritMini").innerHTML = RITS.map((r,k) => `<div><b>${k+1}</b> ${r.key}<span>${r.len.replace(/（.*）/, "")}</span></div>`).join(""); }
     if (s.id === "k3"){ renderSoloBand(document.getElementById("soloBand")); box.querySelectorAll(".e3box").forEach(h => Ens3D.attach(h)); }
     pageBySelector(box, ".pgsec", "ax:" + s.id);
@@ -3108,7 +3199,7 @@ function renderStep(i){
     // ステップ3で書いたことを見ながら書けるように
     const mine = [...AXES, ...TIPS].filter(t => { const n = (notes.tips || {})[t.id]; return n && ((n.riyu || "").trim() || (n.kakaku || []).length); });
     document.getElementById("myNotes").innerHTML = mine.length ? `<div class="mynotes"><div class="tip"><b>📝 コツ①〜③で書いたこと</b>（「使う」で下の欄に入ります）</div><div class="mnlist">${mine.map(t => { const n = notes.tips[t.id];
-      const line = [(n.kakaku || []).length ? "👂" + n.kakaku.join("・") : "", (n.kanju || []).length ? "💗" + n.kanju.join("・") : "", (n.riyu || "").trim() ? "🔍" + n.riyu.trim() : ""].filter(Boolean).join("　");
+      const line = [(n.own0 || "").trim() ? "👂" + n.own0.trim() : (n.kakaku || []).length ? "👂" + n.kakaku.join("・") : "", (n.kanju || []).length ? "💗" + n.kanju.join("・") : "", (n.riyu || "").trim() ? "🔍" + n.riyu.trim() : ""].filter(Boolean).join("　");
       return `<div class="mn"><span>${t.icon} <b>${t.name}</b>：${esc(line)}</span><button class="smallbtn" data-use="${t.id}">使う</button></div>`; }).join("")}</div></div>`
       : `<div class="tip">ステップ③「コツで聴く」で書いたことが、ここに出ます。</div>`;
     document.querySelectorAll("[data-use]").forEach(b => b.onclick = () => { const n = notes.tips[b.dataset.use], ta = document.getElementById("why");
@@ -3305,7 +3396,7 @@ function printSheet(filled){
     ${plan.includes("baroque") ? "<p>ヴィヴァルディは（　　　　　）時代の作曲家。《四季》が出版された1725年ごろ、日本は（　　　）時代だった。</p>" : ""}
     ${planTips().length ? `<h3>3'. 3つのコツで聴く（👂何が聞こえた → 💗どんな感じ → 🔍なぜ）</h3>
     <table><tr><th style="width:24%">コツ</th><th style="width:22%">👂 聞こえた音</th><th style="width:22%">💗 感じ</th><th>🔍 なぜ（音楽のしくみ）</th></tr>
-    ${planTips().map(id => { const t = TIP[id], n = (N.tips || {})[id] || {}; return `<tr><td>${t.icon} ${t.name}</td><td>${esc((n.kakaku || []).join("・"))}</td><td>${esc((n.kanju || []).join("・"))}</td><td style="height:14mm">${esc(n.riyu || "")}</td></tr>`; }).join("")}
+    ${planTips().map(id => { const t = TIP[id], n = (N.tips || {})[id] || {}; return `<tr><td>${t.icon} ${t.name}</td><td>${esc([(n.own0 || "").trim(), (n.kakaku || []).join("・")].filter(Boolean).join(" ／ "))}</td><td>${esc((n.kanju || []).join("・"))}</td><td style="height:14mm">${esc(n.riyu || "")}</td></tr>`; }).join("")}
     </table>` : ""}
     <h3>4. いちばん好きな場面とその理由（👂→💗→🔍の順に）</h3>
     <div class="box">${N.fav ? "好きな場面：" + esc(N.fav) + "\n" : ""}${esc(N.why)}</div>
@@ -3324,6 +3415,16 @@ const tScene = makeScene(document.getElementById("tStage"), {hideNames:() => tHi
   document.getElementById("tPoint").innerHTML = tHide ? `<span class="tip">（場面名をかくしています）</span><br>発問例：「いまの音楽は、どんな場面を表していると思う？ 音のどんなところからそう思った？」` : `<b>${KIND[s.kind].emoji} ${s.name}</b><br>${s.point}`;
 }});
 let tPick = {}, tQ = {};
+function openVoices(id){
+  let d = document.getElementById("knowDlg");
+  if (!d){ d = document.createElement("div"); d.id = "knowDlg"; document.body.appendChild(d); d.onclick = e => { if (e.target === d) d.classList.add("hidden"); }; }
+  const draw = () => { if (d.classList.contains("hidden") || !d.querySelector(".vwall")) return; const v = Sync.voices(id);
+    d.querySelector(".vwall").innerHTML = v.length ? v.map((w, i) => `<span class="vb" style="--r:${(i * 37 % 7) - 3}deg">${esc(w)}</span>`).join("") : `<p class="tip">まだ届いていません。生徒が「できた ✓」を押すと、ここに出ます（名前は出ません）。</p>`; };
+  d.className = ""; d.innerHTML = `<div class="kdcard"><button class="lbclose kdclose" aria-label="閉じる">✕</button><h2 style="margin-top:0">💬 みんなのひとこと：${TIP[id].icon} ${TIP[id].name}</h2><div class="vwall"></div><div class="btnrow"><button class="smallbtn" id="vclear">🧹 消す（次のクラスへ）</button></div></div>`;
+  d.querySelector(".kdclose").onclick = () => d.classList.add("hidden");
+  d.querySelector("#vclear").onclick = () => { if (confirm("届いたひとことを消しますか？")) Sync.clearVoices(); };
+  draw(); Sync.onVoices = () => { draw(); const c = document.getElementById("vcount"); if (c && TIP[id]) c.textContent = Sync.voices(id).length; };
+}
 function renderTTip(si){
   let list = secTips(si), id = tPick[si] && list.includes(tPick[si]) ? tPick[si] : list[0], box = document.getElementById("tTip"), extra = "";
   const ls = typeof lessonStep !== "undefined" ? lessonStep : 0;
@@ -3348,7 +3449,14 @@ function renderTTip(si){
     <div class="wiznav"><button class="smallbtn" data-tq="-1" ${k ? "" : 'style="visibility:hidden"'}>‹</button><span class="wzdots">${[0,1,2,3].map(i => `<i class="${i === k ? "on" : i < k ? "done" : ""}"></i>`).join("")}</span><button class="smallbtn" data-tq="1" ${k < 3 ? "" : 'style="visibility:hidden"'}>次の問い ›</button></div>
     <details class="pt"><summary>コツの説明 ▾</summary><div class="tip">${t.tip}</div></details>
     <button class="smallbtn" data-ttplay>▶ このコツの部分を聴く</button></div>`;
+  if (ls >= 2 && ls <= 4){
+    const ifs = Object.keys(IFS).filter(k => list.includes(IFS[k].ax));
+    extra += ifs.map(k => `<button class="smallbtn ifbtn" data-ifopen="${k}">🤔 ${IFS[k].title.replace(/？$/, "")}</button>`).join("");
+    extra += `<button class="smallbtn vbtn" data-voices="${id}">💬 みんなのひとこと <b id="vcount">${typeof Sync !== "undefined" ? Sync.voices(id).length : 0}</b></button>`;
+  }
   if (extra) box.insertAdjacentHTML("afterbegin", `<div class="textra">${extra}</div>`);
+  box.querySelectorAll("[data-ifopen]").forEach(b => b.onclick = () => openIf(b.dataset.ifopen));
+  box.querySelectorAll("[data-voices]").forEach(b => b.onclick = () => openVoices(b.dataset.voices));
   box.querySelectorAll("[data-go-tab]").forEach(b => b.onclick = () => showTab(b.dataset.goTab));
   box.querySelectorAll("[data-know]").forEach(b => b.onclick = () => openKnow(b.dataset.know));
   box.querySelectorAll("[data-rit]").forEach(b => b.onclick = () => { const i = +b.dataset.rit; loopSec = -1; playClip(SECTIONS[i].t, Math.min(9, secEnd(i) - SECTIONS[i].t)); });
@@ -3682,6 +3790,7 @@ const Sync = (() => {
   }
   let lastSeek = 0;
   function tick(){
+    if (mode === "teacher") listenVoices();
     if (mode !== "student" || !classMode){ disconnect(); return; }
     connect();
     if (!follow || !target) return;
@@ -3699,10 +3808,24 @@ const Sync = (() => {
     if (t){ t.textContent = !sendOn ? "📡 生徒の画面を連動：オフ" : status === "err" ? "📡 連動：送れていません" : "📡 生徒の画面を連動：オン";
       t.classList.toggle("on", sendOn); }
   }
+  /* ---------- みんなのひとこと（名前は送らない） ---------- */
+  let cid = store.get("cid", ""); if (!cid){ cid = Math.random().toString(36).slice(2, 10); store.set("cid", cid); }
+  function say(ax, text){ if (!room || !classMode || !(text || "").trim()) return false;
+    fetch(relay() + "/" + room + "-say", {method:"POST", body:JSON.stringify({c:cid, a:ax, w:text.trim().slice(0, 60)})}).catch(() => {}); return true; }
+  let ves = null, voices = {}, clearedAt = store.get("voiceClear", 0), onVoices = null;
+  function listenVoices(){
+    if (ves || mode !== "teacher" || !sendOn) return;
+    try{ ves = new EventSource(relay() + "/" + teacherRoom() + "-say/sse?since=90m");
+      ves.onmessage = ev => { let o, m; try{ o = JSON.parse(ev.data); m = JSON.parse(o.message); }catch(e){ return; } if (!m || !m.a || (o.time || 0) * 1000 < clearedAt) return;
+        (voices[m.a] = voices[m.a] || {})[m.c] = m.w; if (onVoices) onVoices();
+        const vb = document.querySelector("[data-voices]"); if (vb) vb.querySelector("b").textContent = Object.keys(voices[vb.dataset.voices] || {}).length; }; }catch(e){}
+  }
+  function clearVoices(){ voices = {}; clearedAt = Date.now(); store.set("voiceClear", clearedAt); if (onVoices) onVoices(); }
   function toggleFollow(){ follow = !follow; store.set("syncFollow", follow); lastStep = null; paint(); }
   function toggleSend(){ sendOn = !sendOn; store.set("syncSend", sendOn); if (sendOn) send(true); paint(); }
   function newRoom(){ store.set("tRoom", ""); teacherRoom(); }
-  return {tick, paint, send:() => send(true), toggleFollow, toggleSend, teacherRoom, newRoom, relay, following:() => follow && !!target};
+  return {tick, paint, send:() => send(true), toggleFollow, toggleSend, teacherRoom, newRoom, relay, following:() => follow && !!target,
+    say, voices:a => Object.values(voices[a] || {}), clearVoices, listenVoices, set onVoices(f){ onVoices = f; }};
 })();
 tick.push(() => Sync.tick());
 
