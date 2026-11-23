@@ -322,6 +322,8 @@ body.present .lessonbar,body.present .lbhint{display:none}
 .oldwarn{background:#fff4d6;color:#5a4200;border-radius:10px;padding:6px 10px;font-size:14px}
 .donebadge{display:flex;align-items:center;gap:14px;background:#fff8e6;border:1px solid #f0d9a0;border-radius:14px;padding:8px 14px;margin:6px 0}
 .donebadge img{width:84px;height:84px;border-radius:50%}
+.tipmore summary{cursor:pointer;font-size:13px;color:var(--sub);margin-top:4px}
+.mynotes .mnlist{max-height:96px;overflow:auto}
 .mynotes{background:var(--bg);border:1px solid var(--line);border-radius:12px;padding:6px 10px;margin:6px 0}
 .mn{display:flex;gap:8px;align-items:center;justify-content:space-between;border-top:1px dashed var(--line);padding:4px 0;font-size:13.5px}
 .mn:first-of-type{border-top:none}
@@ -2224,7 +2226,7 @@ function tipCard(t, opts={}){
   const n = (notes.tips || {})[t.id] || {};
   return `<div class="card tipcard ${opts.learn || opts.teacher ? "big" : ""}" data-tip="${t.id}">
     <div class="tiphead">${tipPic(t)}<div><span class="elbadge">${t.el}</span><h3>${t.name}</h3></div></div>
-    <div class="tipbody">💡 <b>コツ</b>：${t.tip}</div>
+    ${opts.compact ? `<details class="tipmore"><summary>💡 コツの説明 ▾</summary><div class="tipbody">${t.tip}</div></details>` : `<div class="tipbody">💡 <b>コツ</b>：${t.tip}</div>`}
     <div class="btnrow" style="margin-top:6px"><button class="smallbtn" data-tipplay="${t.id}">▶ 聴いてみる（${t.where}）</button></div>
     ${opts.learn ? `<div class="tip" style="margin-top:8px">💭 このコツで聴いたら：👂何が聞こえる？ → 💗どんな感じ？ → 🔍なぜ？ → ✍️ひとことで</div>` : opts.teacher ? `
     <div class="think4">${THINK.map(s => `<div class="th"><div class="thq">${s.icon} ${s.name}「${s.q}」</div><div class="tip">${
@@ -2272,13 +2274,13 @@ function renderApplyTip(si){
   if (box.contains(document.activeElement) && document.activeElement.tagName === "TEXTAREA"){ document.activeElement.onblur = () => renderApplyTip(secAt(au.currentTime)); return; }
   applySi = si;
   const list = secTips(si), id = applyPick[si] && list.includes(applyPick[si]) ? applyPick[si] : list[0], s = SECTIONS[si];
-  box.innerHTML = `<div class="apsec">${KIND[s.kind].emoji} 場面${si + 1}：${s.name}${list.length > 1 ? `　<span class="aptabs">${list.map(k => `<button class="chip ${k === id ? "on" : ""}" data-pick="${k}">${TIP[k].icon} ${TIP[k].name}</button>`).join("")}</span>` : ""}</div>${id ? tipCard(TIP[id]) : ""}`;
+  box.innerHTML = `<div class="apsec">${KIND[s.kind].emoji} 場面${si + 1}：${s.name}${list.length > 1 ? `　<span class="aptabs">${list.map(k => `<button class="chip ${k === id ? "on" : ""}" data-pick="${k}">${TIP[k].icon} ${TIP[k].name}</button>`).join("")}</span>` : ""}</div>${id ? tipCard(TIP[id], {compact:true}) : ""}`;
   box.querySelectorAll("[data-pick]").forEach(b => b.onclick = () => { applyPick[si] = b.dataset.pick; renderApplyTip(si); });
   bindTipCards(box, false);
   const prog = document.getElementById("applyProg"), n = notes.tips || {};
-  prog.innerHTML = `<span class="tip">書いたコツ：</span>` + TIPS.map(t => { const ok = n[t.id] && n[t.id].riyu && n[t.id].riyu.trim(); const at = SECTIONS.findIndex((x, k) => secTips(k).includes(t.id));
+  prog.innerHTML = `<span class="tip">書いたコツ：</span>` + TIPS.map(t => { const ok = n[t.id] && n[t.id].riyu && n[t.id].riyu.trim(); let at = SECTIONS.findIndex((x, k) => secTips(k)[0] === t.id); if (at < 0) at = SECTIONS.findIndex((x, k) => secTips(k).includes(t.id));   // そのコツが「主役」の場面へ
     return `<button class="apchip ${ok ? "ok" : ""}" data-go="${at}" title="${t.name}（場面${at + 1}へ）">${t.icon}${ok ? "✓" : ""}</button>`; }).join("");
-  prog.querySelectorAll("[data-go]").forEach(b => b.onclick = () => { applyPick[+b.dataset.go] = TIPS.find(t => b.title.startsWith(t.name)).id; jump(+b.dataset.go); });
+  prog.querySelectorAll("[data-go]").forEach(b => b.onclick = () => { applyPick[+b.dataset.go] = TIPS.find(t => b.title.startsWith(t.name)).id; jump(+b.dataset.go); renderApplyTip(+b.dataset.go); });
 }
 
 function renderTipsTab(){
@@ -2774,13 +2776,14 @@ function renderStep(i){
     const favOpts = ["春の主題","小鳥の歌","泉とそよ風","雷と稲妻","小鳥がふたたび歌う","独奏ヴァイオリン"];
     chipGroup(document.getElementById("favs"), favOpts, notes.fav ? [notes.fav] : [], v => { notes.fav = v[v.length-1] || ""; saveNotes(); }, true);
     bindText("why","why"); bindText("intro","intro");
-    const paintBadge = () => { const ok = done.apply && (notes.intro || "").trim().length >= 20; document.getElementById("doneBadge").innerHTML = ok ? `<div class="donebadge"><img src="images/badge.jpg" alt=""><div><b>🎉 4つのステップ、クリア！</b><br><span class="tip">コツを使って聴き、紹介文まで書けました。</span></div></div>` : `<div class="tip">ステップ③で3つのコツの「なぜ」を書き、紹介文を書くと、ごほうびバッジがもらえます。</div>`; };
+    const badgeEl = document.getElementById("doneBadge");   // ページ送りで画面から外れても書きかえられるように、先に取っておく
+    const paintBadge = () => { const ok = done.apply && (notes.intro || "").trim().length >= 20; badgeEl.innerHTML = ok ? `<div class="donebadge"><img src="images/badge.jpg" alt=""><div><b>🎉 4つのステップ、クリア！</b><br><span class="tip">コツを使って聴き、紹介文まで書けました。</span></div></div>` : `<div class="tip">ステップ③で3つのコツの「なぜ」を書き、紹介文を書くと、ごほうびバッジがもらえます。</div>`; };
     paintBadge(); document.getElementById("intro").addEventListener("input", paintBadge);
     // ステップ3で書いたことを見ながら書けるように
     const mine = TIPS.filter(t => { const n = (notes.tips || {})[t.id]; return n && ((n.riyu || "").trim() || (n.kakaku || []).length); });
-    document.getElementById("myNotes").innerHTML = mine.length ? `<div class="mynotes"><div class="tip"><b>📝 ステップ③で書いたこと</b>（「使う」で下の欄に入ります）</div>${mine.map(t => { const n = notes.tips[t.id];
+    document.getElementById("myNotes").innerHTML = mine.length ? `<div class="mynotes"><div class="tip"><b>📝 ステップ③で書いたこと</b>（「使う」で下の欄に入ります）</div><div class="mnlist">${mine.map(t => { const n = notes.tips[t.id];
       const line = [(n.kakaku || []).length ? "👂" + n.kakaku.join("・") : "", (n.kanju || []).length ? "💗" + n.kanju.join("・") : "", (n.riyu || "").trim() ? "🔍" + n.riyu.trim() : ""].filter(Boolean).join("　");
-      return `<div class="mn"><span>${t.icon} <b>${t.name}</b>：${esc(line)}</span><button class="smallbtn" data-use="${t.id}">使う</button></div>`; }).join("")}</div>`
+      return `<div class="mn"><span>${t.icon} <b>${t.name}</b>：${esc(line)}</span><button class="smallbtn" data-use="${t.id}">使う</button></div>`; }).join("")}</div></div>`
       : `<div class="tip">ステップ③「コツで聴く」で書いたことが、ここに出ます。</div>`;
     document.querySelectorAll("[data-use]").forEach(b => b.onclick = () => { const n = notes.tips[b.dataset.use], ta = document.getElementById("why");
       const add = [(n.kakaku || []).length ? "👂" + n.kakaku.join("、") + "が聞こえた。" : "", (n.kanju || []).length ? "💗" + n.kanju.join("、") + "感じがした。" : "", (n.riyu || "").trim() ? "🔍" + n.riyu.trim() : ""].join("");
@@ -2969,7 +2972,7 @@ function printSheet(filled){
     <table><tr><th style="width:22%">場面</th><th style="width:38%">詩（ソネット）</th><th>気づいた音楽の工夫</th></tr>
     ${["theme","birds","stream","storm"].map(k => { const s = SECTIONS.find(x => x.kind === k); return `<tr><td>${KIND[k].emoji} ${KIND[k].label}</td><td>${esc(k === "theme" ? "春がやってきた" : s.poem)}</td><td style="height:18mm"></td></tr>`; }).join("")}
     </table>
-    <h3>3. 曲のしくみ・知識</h3>
+    ${["form","concerto","instruments","baroque"].some(k => plan.includes(k)) ? "<h3>3. 曲のしくみ・知識</h3>" : ""}
     ${plan.includes("form") ? "<p>春の主題は全部で（　　）回出てくる。このように主題が何度ももどってくる形式を（　　　　　　）形式という。</p>" : ""}
     ${plan.includes("concerto") ? "<p>独奏楽器と合奏が競い合い、協力し合う音楽を（　　　　　）という。</p>" : ""}
     ${plan.includes("instruments") ? "<p>小鳥のさえずりは（　　　　）、雷のゴロゴロは（　　　　）という奏法で表されている。</p>" : ""}
