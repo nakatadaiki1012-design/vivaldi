@@ -296,6 +296,28 @@ body.present .tch{max-width:none}
 .selfrow .lbl2{flex:1 1 260px;font-size:15px}
 @media (max-width:480px){ .rrow{grid-template-columns:1fr} .rdesc{grid-column:1} .raxis{margin-left:0} }
 
+/* ---------- one thing at a time ---------- */
+@media (max-width:1200px){ body.stumode header.top .logo small{display:none} body.stumode .modebtn .lg{display:none} body.stumode .modebtn .sm{display:inline} }
+.wiz{grid-template-columns:1fr!important}
+.wiz .th{display:none}
+.wiz .th.cur{display:block;padding:8px 10px!important}
+.wiz .th.cur .thq{font-size:17px!important;margin-bottom:6px}
+.wiz .th.cur .chips.sm .chip{font-size:14px!important;padding:3px 12px!important}
+.wiz .th.cur textarea{height:90px!important;font-size:15px!important}
+.wiznav{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:8px}
+.wiznav .btn{padding:6px 16px;font-size:15px}
+.wzdots{display:flex;gap:6px}
+.wzdots i{width:10px;height:10px;border-radius:50%;background:var(--line)}
+.wzdots i.on{background:var(--accent);transform:scale(1.25)}
+.wzdots i.done{background:var(--accent2)}
+.tipcard.wizdone{box-shadow:0 0 0 3px var(--accent2)}
+.tqbig{background:var(--soft);border-radius:12px;padding:10px 12px;margin:8px 0 4px}
+.tqn{font-size:22px;font-weight:800;line-height:1.4}
+.goalsteps{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:12px 0}
+.goalsteps div{background:var(--bg);border:1px solid var(--line);border-radius:14px;padding:12px 6px;text-align:center;display:flex;flex-direction:column;align-items:center;gap:4px}
+.goalsteps b{width:32px;height:32px;border-radius:50%;background:var(--accent);color:#fff;display:flex;align-items:center;justify-content:center}
+.goalone{font-size:16px;margin:6px 0 10px}
+
 /* ---------- classroom use ---------- */
 .classbtn{display:none;border:1px solid var(--line);background:var(--panel);color:var(--ink);border-radius:999px;padding:5px 12px;font-size:13px;white-space:nowrap}
 body.stumode .classbtn{display:inline-block}
@@ -308,7 +330,10 @@ body.classmode #stuPlayer .playbtn{opacity:.45}
 .lessonbar .lbt{font-weight:800;font-size:14px;margin-right:4px}
 .lessonbar button{border:2px solid var(--accent);background:var(--panel);color:var(--accent);border-radius:999px;padding:4px 14px;font-weight:700;font-size:14px}
 .lessonbar button.on{background:var(--accent);color:#fff}
-.lessonbar .lblink{margin-left:auto;border-color:var(--line);color:var(--ink);font-weight:400}
+.lessonbar .lblink{border-color:var(--line);color:var(--ink);font-weight:400}
+.lessonbar #lbSync{margin-left:auto}
+.lessonbar #lbSync.on{background:#e8f5ec;border-color:var(--accent2);color:#1f6b3e}
+.syncbtn.on{background:#e8f5ec!important;color:#1f6b3e!important;border-color:var(--accent2)!important}
 .lbhint{font-size:13.5px;color:var(--sub);min-height:1em;margin-bottom:6px}
 .lbhint:empty{display:none}
 body.present .lessonbar,body.present .lbhint{display:none}
@@ -561,6 +586,7 @@ details.pt summary{cursor:pointer;font-size:13px;color:var(--sub);margin-top:8px
 <header class="top">
   <div class="logo" id="logo">🌸 「春」鑑賞ノート<small>ヴィヴァルディ《四季》より 第1楽章</small></div>
   <div class="sp"></div>
+  <button id="syncBtn" class="classbtn syncbtn hidden" title="先生の画面に合わせて、場面が自動で切りかわります（押すと止める）"></button>
   <button id="classBtn" class="classbtn" title="授業中は音を出さない／イヤホンや家では自分で聴く"></button>
   <button class="modebtn" data-mode="student">🧑‍🎓 <span class="lg">ひとりで学ぶ</span><span class="sm">生徒</span></button>
   <button class="modebtn" data-mode="teacher">🧑‍🏫 <span class="lg">授業で使う</span><span class="sm">先生</span></button>
@@ -578,33 +604,17 @@ details.pt summary{cursor:pointer;font-size:13px;color:var(--sub);margin-top:8px
     <div class="card bigcard" data-go="student">
       <div class="ic">🧑‍🎓</div>
       <h2>ひとりで学ぶ</h2>
-      <p>4つのステップで「聴き方」が身につきます。</p>
-      <ul>
-        <li>① 聴く：まず聴いて、感じたことを書く</li>
-        <li>② コツを知る：「こう聴くと楽しい」7つのコツ</li>
-        <li>③ コツで聴く：場面ごとのコツで、何が聞こえて・どう感じ・なぜかを書く</li>
-        <li>④ まとめる：紹介文を書いて印刷・保存</li>
-        <li>📚 もっと知る：詩・協奏曲・楽器・時代・クイズ</li>
-      </ul>
+      <p>聴く → コツを知る → コツで聴く → まとめる</p>
     </div>
     <div class="card bigcard" data-go="teacher">
       <div class="ic">🧑‍🏫</div>
       <h2>授業で使う（先生用）</h2>
-      <p>テレビや電子黒板に映して、授業を進めます。</p>
-      <ul>
-        <li>大きな画面で場面ごとに再生・くり返し</li>
-        <li>場面名を<b>かくして</b>「何の場面？」と問える</li>
-        <li>クラス全員でのクイズ（答えはボタンで表示）</li>
-        <li>授業時間に合わせて<b>学ぶ内容を増減</b>（協奏曲・楽器・バロック時代も）</li>
-        <li>ねらい・使う知識・高まる力を一覧で確認、指導の流れを自動作成</li>
-      </ul>
+      <p>テレビに映して進める。生徒の画面も連動します。</p>
     </div>
   </div>
   <div class="card" style="margin-top:18px">
     <h3>この曲について</h3>
-    <p style="margin:0">《四季》は、イタリアの作曲家 <b>アントニオ・ヴィヴァルディ</b>（1678〜1741）が作ったヴァイオリン協奏曲集です。
-    「春」「夏」「秋」「冬」の4曲それぞれに<b>ソネット（14行の詩）</b>がついていて、詩に書かれた場面が音で表されています。
-    「春」第1楽章では、<b>春の主題</b>（合奏でくり返し出てくるメロディー）の間に、小鳥・泉・雷などの場面がはさまる <b>リトルネロ形式</b> で作られています。</p>
+    <p style="margin:0">ヴィヴァルディ（1678〜1741）が、<b>詩</b>の場面を音で表した協奏曲。小鳥・泉・雷が聞こえてきます。</p>
   </div>
   <p class="credit">音源：ルイス・カウフマン（独奏ヴァイオリン）／ヘンリー・スウォボダ指揮 コンサートホール室内管弦楽団（1947年録音）<br>
   イラスト：トップ画面と情景の背景は、生成AI（Gemini）で作成したイメージイラストです。<br>
@@ -627,6 +637,7 @@ details.pt summary{cursor:pointer;font-size:13px;color:var(--sub);margin-top:8px
     <div class="lessonbar" id="lessonbar">
       <span class="lbt">授業の進行</span>
       <button data-ls="1">① 聴く</button><button data-ls="2">② コツを知る</button><button data-ls="3">③ コツで聴く</button><button data-ls="4">④ まとめる</button>
+      <button class="lblink" id="lbSync"></button>
       <button class="lblink" id="lbLink">🔗 生徒用リンク</button>
     </div>
     <div class="lbhint" id="lbHint"></div>
@@ -731,6 +742,10 @@ details.pt summary{cursor:pointer;font-size:13px;color:var(--sub);margin-top:8px
         <div class="btnrow" style="margin-top:4px"><input type="number" id="scoreOff" step="0.05" style="width:90px;border:1px solid var(--line);border-radius:8px;padding:3px 6px;background:var(--bg)"> 秒
           <button class="smallbtn" id="scoreOff0">0にもどす</button></div>
         <p class="tip">楽譜：<a href="https://www.mutopiaproject.org/" target="_blank" rel="noopener">Mutopia Project</a>「La Primavera」（1725年の初版をもとに入力、CC BY-SA 3.0）。アプリ用に音符データへ変換し、この録音に合わせて各拍の時刻を求めています。</p>
+        <h3 style="margin-top:1.4em">生徒の画面の連動</h3>
+        <p class="tip">先生の端末から「いまの場面・再生位置・授業の段階」（数字だけ）を中継サーバーに送り、生徒の端末がそれを受け取ってついてきます。名前や書いた内容は送りません。</p>
+        <div class="btnrow" style="margin-top:4px"><label class="tip">中継サーバー <input id="relayIn" style="width:260px;border:1px solid var(--line);border-radius:8px;padding:3px 6px;background:var(--bg)" placeholder="https://ntfy.sh"></label>
+          <button class="smallbtn" id="newRoom">🔄 クラスごとに部屋を作り直す</button></div>
         <h3 style="margin-top:1.4em">別の録音を使う</h3>
         <p class="tip">手元の音声ファイル（mp3など）を読み込めます。読み込んだら、上の表で場面の時間を合わせてください。ファイルはこの画面の中だけで使われ、どこにも送られません。</p>
         <input type="file" id="fileIn" accept="audio/*">
@@ -851,6 +866,7 @@ function showMuteToast(){
   t.classList.add("on"); clearTimeout(t._h); t._h = setTimeout(() => t.classList.remove("on"), 1800);
 }
 function paintClassMode(){
+  if (typeof Sync !== "undefined") Sync.paint();
   const b = document.getElementById("classBtn"); if (!b) return;
   b.textContent = classMode ? "🔇 授業中（音は先生の画面）" : "🔊 自分で聴く";
   b.classList.toggle("on", classMode);
@@ -2062,6 +2078,7 @@ function setMode(m){
   document.body.classList.remove("present");
   document.body.classList.toggle("stumode", m === "student");
   if (m === "student"){ renderStep(curStep); requestAnimationFrame(fitBottom); paintClassMode(); }
+  if (typeof Sync !== "undefined") Sync.paint();
   if (m === "teacher") showTab(curTab);
   store.set("mode", m);
   requestAnimationFrame(() => { players.forEach(drawTimeline); scenes.forEach(sc => { sc.resize(); sc.dirty = true; }); });
@@ -2144,7 +2161,7 @@ function planKnow(){ const s = []; planModules().forEach(m => m.know.forEach(k =
 function planAbilities(){ return Object.keys(ABILITIES).filter(a => planModules().some(m => m.ab.includes(a))); }
 function presetOf(ids){ const p = PRESETS.find(p => p.ids.length === ids.length && p.ids.every(x => ids.includes(x))); return p ? p.id : "custom"; }
 function lessonsOf(mods){ const out = []; let cur = [], t = 0; mods.forEach(m => { if (t + m.mins > 45 && cur.length){ out.push(cur); cur = []; t = 0; } cur.push(m); t += m.mins; }); if (cur.length) out.push(cur); return out; }
-function studentLink(){ return location.href.split(/[?#]/)[0] + "?mode=student&class=1&plan=" + plan.join(","); }
+function studentLink(){ return location.href.split(/[?#]/)[0] + "?mode=student&class=1&plan=" + plan.join(",") + (typeof Sync !== "undefined" ? "&room=" + Sync.teacherRoom() : ""); }
 
 function goalCard(m){
   return `<div class="goalcard">
@@ -2262,20 +2279,21 @@ function tipCard(t, opts={}){
   const n = (notes.tips || {})[t.id] || {};
   return `<div class="card tipcard ${opts.learn || opts.teacher ? "big" : ""}" data-tip="${t.id}">
     <div class="tiphead">${tipPic(t)}<div><span class="elbadge">${t.el}</span><h3>${t.name}</h3></div></div>
-    ${opts.compact ? `<details class="tipmore"><summary>💡 コツの説明 ▾</summary><div class="tipbody">${t.tip}</div></details>` : `<div class="tipbody">💡 <b>コツ</b>：${t.tip}</div>`}
-    <div class="btnrow" style="margin-top:6px"><button class="smallbtn" data-tipplay="${t.id}">▶ 聴いてみる（${t.where}）</button></div>
+    ${opts.compact ? "" : `<div class="tipbody">💡 <b>コツ</b>：${t.tip}</div>`}
+    ${opts.compact && muted() ? "" : `<div class="btnrow" style="margin-top:6px"><button class="smallbtn" data-tipplay="${t.id}">▶ 聴いてみる（${t.where}）</button></div>`}
     ${opts.learn ? `<div class="tip" style="margin-top:8px">💭 このコツで聴いたら：👂何が聞こえる？ → 💗どんな感じ？ → 🔍なぜ？ → ✍️ひとことで</div>` : opts.teacher ? `
     <div class="think4">${THINK.map(s => `<div class="th"><div class="thq">${s.icon} ${s.name}「${s.q}」</div><div class="tip">${
       s.id === "chikaku" ? "例：" + t.kakaku.slice(0,2).join("、") :
       s.id === "kanju" ? "例：" + t.kanju.slice(0,3).join("、") :
       s.id === "riyu" ? t.riyu : "ひとことで言うと？ 体の動きで表すと？"}</div></div>`).join("")}</div>`
     : `
-    <div class="think4">
-      <div class="th"><div class="thq">👂 知覚「何が聞こえた？」</div><div class="chips sm" data-k="kakaku"></div></div>
-      <div class="th"><div class="thq">💗 感受「どんな感じがした？」</div><div class="chips sm" data-k="kanju"></div></div>
-      <div class="th"><div class="thq">🔍 理由「なぜそう感じた？」</div><div class="tip">${t.riyu}</div><textarea data-k="riyu" rows="2" placeholder="例：…だから、…に聞こえた">${esc(n.riyu || "")}</textarea></div>
-      <div class="th"><div class="thq">✍️ 表現「ひとことで言うと？」</div><textarea data-k="hyogen" rows="1" placeholder="例：春がこだまと遊んでいる">${esc(n.hyogen || "")}</textarea></div>
-    </div>`}
+    <div class="think4 ${opts.compact ? "wiz" : ""}">
+      <div class="th" data-q="0"><div class="thq">👂 何が聞こえた？</div><div class="chips sm" data-k="kakaku"></div></div>
+      <div class="th" data-q="1"><div class="thq">💗 どんな感じがした？</div><div class="chips sm" data-k="kanju"></div></div>
+      <div class="th" data-q="2"><div class="thq">🔍 なぜそう感じた？</div><div class="tip">${t.riyu}</div><textarea data-k="riyu" rows="2" placeholder="例：…だから、…に聞こえた">${esc(n.riyu || "")}</textarea></div>
+      <div class="th" data-q="3"><div class="thq">✍️ ひとことで言うと？</div><textarea data-k="hyogen" rows="1" placeholder="例：春がこだまと遊んでいる">${esc(n.hyogen || "")}</textarea></div>
+    </div>
+    ${opts.compact ? `<div class="wiznav"><button class="smallbtn" data-wz="-1">‹ もどる</button><span class="wzdots"></span><button class="btn" data-wz="1">次へ ›</button></div>` : ""}`}
   </div>`;
 }
 function bindTipCards(root, teacher){
@@ -2287,6 +2305,22 @@ function bindTipCards(root, teacher){
     chipGroup(card.querySelector('[data-k="kakaku"]'), t.kakaku, n.kakaku, v => { n.kakaku = v; saveNotes(); });
     chipGroup(card.querySelector('[data-k="kanju"]'), t.kanju, n.kanju, v => { n.kanju = v; saveNotes(); });
     card.querySelectorAll("textarea").forEach(ta => ta.oninput = () => { n[ta.dataset.k] = ta.value; saveNotes(); checkTipsDone(); });
+  });
+}
+// 「コツで聴く」は 1つの問いずつ
+let wizStage = {};
+function bindWiz(root){
+  root.querySelectorAll(".tipcard").forEach(card => {
+    const w = card.querySelector(".wiz"); if (!w) return;
+    const id = card.dataset.tip, show = k => {
+      k = Math.max(0, Math.min(3, k)); wizStage[id] = k;
+      w.querySelectorAll(".th").forEach(th => th.classList.toggle("cur", +th.dataset.q === k));
+      card.querySelector(".wzdots").innerHTML = [0,1,2,3].map(i => `<i class="${i === k ? "on" : i < k ? "done" : ""}"></i>`).join("");
+      card.querySelector('[data-wz="-1"]').style.visibility = k ? "" : "hidden";
+      const nx = card.querySelector('[data-wz="1"]'); nx.textContent = k === 3 ? "できた ✓" : "次へ ›";
+    };
+    card.querySelectorAll("[data-wz]").forEach(b => b.onclick = () => { const k = (wizStage[id] || 0) + +b.dataset.wz; if (k > 3){ card.querySelector(".wiznav").insertAdjacentHTML("beforeend", ""); card.classList.add("wizdone"); setTimeout(() => card.classList.remove("wizdone"), 900); return; } show(k); });
+    show(wizStage[id] || 0);
   });
 }
 function checkTipsDone(){ const n = notes.tips || {}; if (Object.values(n).filter(x => x.riyu && x.riyu.trim()).length >= 3) markDone("apply");
@@ -2312,7 +2346,7 @@ function renderApplyTip(si){
   const list = secTips(si), id = applyPick[si] && list.includes(applyPick[si]) ? applyPick[si] : list[0], s = SECTIONS[si];
   box.innerHTML = `<div class="apsec">${KIND[s.kind].emoji} 場面${si + 1}：${s.name}${list.length > 1 ? `　<span class="aptabs">${list.map(k => `<button class="chip ${k === id ? "on" : ""}" data-pick="${k}">${TIP[k].icon} ${TIP[k].name}</button>`).join("")}</span>` : ""}</div>${id ? tipCard(TIP[id], {compact:true}) : ""}`;
   box.querySelectorAll("[data-pick]").forEach(b => b.onclick = () => { applyPick[si] = b.dataset.pick; renderApplyTip(si); });
-  bindTipCards(box, false);
+  bindTipCards(box, false); bindWiz(box);
   const prog = document.getElementById("applyProg"), n = notes.tips || {};
   prog.innerHTML = `<span class="tip">書いたコツ：</span>` + TIPS.map(t => { const ok = n[t.id] && n[t.id].riyu && n[t.id].riyu.trim(); let at = SECTIONS.findIndex((x, k) => secTips(k)[0] === t.id); if (at < 0) at = SECTIONS.findIndex((x, k) => secTips(k).includes(t.id));   // そのコツが「主役」の場面へ
     return `<button class="apchip ${ok ? "ok" : ""}" data-go="${at}" title="${t.name}（場面${at + 1}へ）">${t.icon}${ok ? "✓" : ""}</button>`; }).join("");
@@ -2660,6 +2694,9 @@ function renderStep(i){
         <label>✏️ 名前（または出席番号）<input id="stuName" value="${esc(notes.name || "")}" placeholder="例：1年2組 15番 山田"></label>
         ${hasOld ? `<div class="oldwarn">⚠️ ${notes.name ? `「${esc(notes.name)}」さんの` : "前に使った人の"}記録が残っています。<button class="smallbtn" id="clearOld">🧹 消して新しく始める</button></div>` : ""}
       </div>
+      <div class="goalsteps">${planModules().filter(m => m.core).map((m,k) => `<div><b>${k+1}</b><span>${m.title}</span></div>`).join("")}</div>
+      <p class="goalone">きょうのめあて：<b>コツを使って聴き、「なぜそう聞こえるのか」をことばにしよう</b></p>
+      <details class="pt"><summary>くわしく（ねらい・使う知識・コース）▾</summary>
       <div class="axis"><span class="gk">🧭 学びの軸</span>${AXIS}</div>
       <h3>🔑 使う知識</h3><div>${planKnow().map(k => `<span class="kchip">${k}</span>`).join("")}</div>
       <h3 style="margin-top:.8em">🌱 高まる鑑賞の力</h3>
@@ -2670,6 +2707,7 @@ function renderStep(i){
         : `<div class="chips" id="coursePick">${PRESETS.map(p => `<button class="chip ${pid === p.id && !stuCustomOpen ? "on" : ""}" data-p="${p.id}">${p.label.replace("（50分）","")}コース</button>`).join("")}<button class="chip ${pid === "custom" || stuCustomOpen ? "on" : ""}" data-p="custom">自分で選ぶ</button></div>
            <div class="planck ${pid === "custom" || stuCustomOpen ? "" : "hidden"}" id="customPick"></div>`}
       <p class="tip" style="margin:.6em 0 0"><b>このコースのステップ</b>（全${plan.length}・目安${planMinutes()}分）：${planModules().map((m,k) => `${k+1} ${m.title}`).join(" → ")}</p>
+      </details>
       </div>`;
   } else if (["concerto","instruments","baroque"].includes(s.id)){
     html = `<div class="panel">${H(i)}<div id="contentBox"></div></div>`;
@@ -2715,7 +2753,7 @@ function renderStep(i){
         <div class="apL">
           <div class="btnrow" style="margin:0 0 6px"><button class="smallbtn on" data-asv="scene">🌸 情景</button><button class="smallbtn" data-asv="e3d">🎻 3D合奏</button></div>
           <div id="applyStage"></div>
-          <div class="tip" style="margin-top:8px">${classMode ? "先生が流している場面に合わせて、下の「前の場面・次の場面」や、下の印を押そう。" : "▶で曲を流すと、"}右に<b>いまの場面で使えるコツ</b>が出ます。4つのステップで書こう（3つのコツで「なぜ」まで書けたらクリア）。</div>
+          <div class="tip" style="margin-top:8px">右の問いに、1つずつ答えよう。<b>3つのコツ</b>で「なぜ」まで書けたらクリア。</div>
           <div class="aprog" id="applyProg"></div>
         </div>
         <div class="apR">
@@ -3033,7 +3071,7 @@ const tScene = makeScene(document.getElementById("tStage"), {hideNames:() => tHi
   renderTTip(si);
   document.getElementById("tPoint").innerHTML = tHide ? `<span class="tip">（場面名をかくしています）</span><br>発問例：「いまの音楽は、どんな場面を表していると思う？ 音のどんなところからそう思った？」` : `<b>${KIND[s.kind].emoji} ${s.name}</b><br>${s.point}`;
 }});
-let tPick = {};
+let tPick = {}, tQ = {};
 function renderTTip(si){
   const list = secTips(si), id = tPick[si] && list.includes(tPick[si]) ? tPick[si] : list[0], t = TIP[id], box = document.getElementById("tTip");
   if (typeof lessonStep !== "undefined" && lessonStep === 4){
@@ -3043,11 +3081,16 @@ function renderTTip(si){
     return;
   }
   if (!t){ box.innerHTML = ""; return; }
+  const k = tQ[id] || 0, q = THINK[k];
+  const hint = q.id === "chikaku" ? "例：" + t.kakaku.slice(0,2).join("、") : q.id === "kanju" ? "例：" + t.kanju.slice(0,3).join("、") : q.id === "riyu" ? t.riyu : "ひとことで言うと？";
   box.innerHTML = `${list.length > 1 ? `<div class="aptabs" style="margin-bottom:6px">${list.map(k => `<button class="chip ${k === id ? "on" : ""}" data-tp="${k}">${TIP[k].icon} ${TIP[k].name}</button>`).join("")}</div>` : ""}
-    <div class="ttip"><div class="ttn">${tipPic(t, "tipimg sm")}<div><b>${t.name}</b> <span class="elbadge">${t.el}</span></div></div><div class="tip">${t.tip}</div>
-    <ol class="tq">${THINK.map(q => `<li>${q.icon}<b>${q.name}</b>「${q.q}」<span class="tip">${q.id === "chikaku" ? "例：" + t.kakaku.slice(0,2).join("、") : q.id === "kanju" ? "例：" + t.kanju.slice(0,3).join("、") : q.id === "riyu" ? t.riyu : ""}</span></li>`).join("")}</ol>
+    <div class="ttip"><div class="ttn">${tipPic(t, "tipimg sm")}<div><b>${t.name}</b></div></div>
+    <div class="tqbig"><div class="tqn">${q.icon} ${q.q}</div><div class="tip">${hint}</div></div>
+    <div class="wiznav"><button class="smallbtn" data-tq="-1" ${k ? "" : 'style="visibility:hidden"'}>‹</button><span class="wzdots">${[0,1,2,3].map(i => `<i class="${i === k ? "on" : i < k ? "done" : ""}"></i>`).join("")}</span><button class="smallbtn" data-tq="1" ${k < 3 ? "" : 'style="visibility:hidden"'}>次の問い ›</button></div>
+    <details class="pt"><summary>コツの説明 ▾</summary><div class="tip">${t.tip}</div></details>
     <button class="smallbtn" data-ttplay>▶ このコツの部分を聴く</button></div>`;
   box.querySelectorAll("[data-tp]").forEach(b => b.onclick = () => { tPick[si] = b.dataset.tp; renderTTip(si); });
+  box.querySelectorAll("[data-tq]").forEach(b => b.onclick = () => { tQ[id] = Math.max(0, Math.min(3, k + +b.dataset.tq)); renderTTip(si); });
   box.querySelector("[data-ttplay]").onclick = () => { const [f,l] = t.clip(); loopSec = -1; playClip(f, l); };
 }
 const tPlayer = makePlayer(document.getElementById("tPlayer"), {secButtons:true, legend:true, hideNames:() => tHide});
@@ -3106,10 +3149,10 @@ function showTab(t){
 document.querySelectorAll("#ttabs .tab, #tsub .tab").forEach(b => b.onclick = () => showTab(b.dataset.t));
 // 授業の進行：ボタン1つで、その段階に合った画面にする
 const LESSON = {
-  1:{tab:"show", hide:true,  hint:"① 聴く：場面名をかくしたまま、最初から通して流します。生徒は感じたことばを選んで書きます。発問「どんな景色が見えた？ 気分はどう変わった？」"},
-  2:{tab:"tips",             hint:"② コツを知る：› でコツを1つずつ映し、「▶ 聴いてみる」で確かめます。"},
-  3:{tab:"show", hide:false, hint:"③ コツで聴く：場面ボタンで場面を流すと、右に「いまの場面のコツ」と発問が出ます。生徒は手元で4つのステップを書きます。"},
-  4:{tab:"show", hide:false, sum:true, hint:"④ まとめる：もう一度通して流し、生徒は紹介文を書きます。右に書き方の手順を出しています。"},
+  1:{tab:"show", hide:true,  hint:"場面名をかくして、通して流す。「どんな景色が見えた？」"},
+  2:{tab:"tips",             hint:"› でコツを1つずつ映し、▶で確かめる。"},
+  3:{tab:"show", hide:false, hint:"場面を流すと、右に問いが出る。生徒の画面もついてくる。"},
+  4:{tab:"show", hide:false, sum:true, hint:"もう一度通して流し、紹介文を書く。"},
 };
 let lessonStep = 0;
 function setLesson(n){
@@ -3120,6 +3163,7 @@ function setLesson(n){
   if (L.hide !== undefined && tHide !== L.hide){ tHide = L.hide; applyTHide(); }
   if (n === 1 || n === 4){ stopAt = null; loopSec = -1; seek(0); }
   renderTTip(secAt(au.currentTime));
+  if (typeof Sync !== "undefined") Sync.send();
 }
 document.querySelectorAll("#lessonbar [data-ls]").forEach(b => b.onclick = () => setLesson(+b.dataset.ls));
 document.getElementById("lbLink").onclick = () => {
@@ -3127,7 +3171,7 @@ document.getElementById("lbLink").onclick = () => {
   let d = document.getElementById("linkDlg");
   if (!d){ d = document.createElement("div"); d.id = "linkDlg"; document.body.appendChild(d); d.onclick = e => { if (e.target === d) d.classList.add("hidden"); }; }
   d.className = ""; d.innerHTML = `<div class="ldcard"><h3>🔗 生徒用リンク</h3>
-    <p class="tip">このリンクを配ると、生徒の画面がいまのプラン（${planModules().map(m => m.title).join("・")}）になり、<b>授業中モード</b>（生徒の端末は音を出さない）で始まります。</p>
+    <p class="tip">このリンクを配ると、生徒の画面がいまのプラン（${planModules().map(m => m.title).join("・")}）になり、<b>授業中モード</b>（生徒の端末は音を出さない）で始まります。<br>さらに<b>先生の画面と連動</b>し、先生が流している場面・授業の段階に、生徒の画面が自動でついてきます。</p>
     <input readonly value="${esc(url)}" id="ldUrl"><div class="btnrow"><button class="btn" id="ldCopy">📋 コピー</button><button class="btn sec" id="ldClose">閉じる</button><span class="tip" id="ldMsg"></span></div>
     <p class="tip">※ GitHub Pages など、公開したURLで開いたときに使えます。</p></div>`;
   d.querySelector("#ldClose").onclick = () => d.classList.add("hidden");
@@ -3244,6 +3288,8 @@ function renderKnow(id){
 }
 
 function renderSettings(){
+  const ri = document.getElementById("relayIn"); ri.value = store.get("relay", ""); ri.onchange = () => store.set("relay", ri.value.trim());
+  document.getElementById("newRoom").onclick = () => { if (confirm("新しい部屋を作ります。生徒用リンクを配り直してください。")){ Sync.newRoom(); alert("作り直しました。"); } };
   const so = document.getElementById("scoreOff"); so.value = store.get("scoreOffset", 0);
   so.onchange = () => store.set("scoreOffset", parseFloat(so.value) || 0);
   document.getElementById("scoreOff0").onclick = () => { store.set("scoreOffset", 0); so.value = 0; };
@@ -3324,6 +3370,77 @@ if (location.protocol.startsWith("http")){
     au.addEventListener("loadedmetadata", () => { if (t) au.currentTime = t; if (wasPlaying) play(); }, {once:true});
   }).catch(() => {});
 }
+/* ================= 先生の画面と生徒の画面の連動 ================= */
+// 先生の端末が「いまの場面・再生位置・授業の段階」を中継サーバーに送り、生徒の端末がそれを受け取ってついていく。
+// 送るのは数字だけ（名前や書いた内容は送らない）。中継サーバーは ntfy（https://ntfy.sh）。設定で変えられる。
+const Sync = (() => {
+  const relay = () => (store.get("relay", "") || "https://ntfy.sh").replace(/\/$/, "");
+  const q = new URLSearchParams(location.search);
+  let room = q.get("room");
+  if (room) store.set("room", room); else room = store.get("room", "");
+  // 先生のルーム（クラスごとに変えたいときは設定で作り直す）
+  function teacherRoom(){ let r = store.get("tRoom", ""); if (!r){ r = "vspring-" + Math.random().toString(36).slice(2, 10) + Math.random().toString(36).slice(2, 6); store.set("tRoom", r); } return r; }
+  /* ---------- 先生：送る ---------- */
+  let sendOn = store.get("syncSend", true), lastSent = "", lastAt = 0, timer = null;
+  function state(){ return {s:lessonStep || 0, t:+au.currentTime.toFixed(2), p:!au.paused ? 1 : 0}; }
+  function send(force){
+    if (!sendOn || mode !== "teacher") return;
+    const st = state(), key = st.s + ":" + st.p + ":" + secAt(st.t);
+    const now = Date.now();
+    if (!force && key === lastSent && now - lastAt < 15000) return;
+    lastSent = key; lastAt = now;
+    fetch(relay() + "/" + teacherRoom(), {method:"POST", body:JSON.stringify(st)}).then(r => setStatus(r.ok ? "ok" : "err"), () => setStatus("err"));
+  }
+  function soon(){ clearTimeout(timer); timer = setTimeout(() => send(true), 250); }
+  ["play","pause","seeked"].forEach(ev => au.addEventListener(ev, () => { if (mode === "teacher") soon(); }));
+  setInterval(() => send(false), 2000);     // 場面が変わったとき、15秒ごとの確認
+  /* ---------- 生徒：受け取る ---------- */
+  let es = null, follow = store.get("syncFollow", true), target = null, lastStep = null, status = "off";
+  function connect(){
+    if (es || !room || mode !== "student" || !classMode) return;
+    try{
+      es = new EventSource(relay() + "/" + room + "/sse?since=2m");
+      es.onopen = () => setStatus("ok");
+      es.onerror = () => setStatus("err");
+      es.onmessage = ev => { let m; try{ m = JSON.parse(JSON.parse(ev.data).message); }catch(e){ return; } if (!m) return; setStatus("ok"); apply(m); };
+    }catch(e){ setStatus("err"); }
+  }
+  function disconnect(){ if (es){ es.close(); es = null; } }
+  function apply(m){
+    target = {t:m.t, p:m.p, got:performance.now()};
+    if (!follow) return;
+    // 授業の段階が変わったら、そのステップへ
+    if (m.s && m.s !== lastStep){ lastStep = m.s; const core = STEPS.filter(x => x.core), st = core[m.s - 1]; const idx = STEPS.indexOf(st);
+      if (idx >= 0 && idx !== curStep) renderStep(idx); }
+  }
+  let lastSeek = 0;
+  function tick(){
+    if (mode !== "student" || !classMode){ disconnect(); return; }
+    connect();
+    if (!follow || !target) return;
+    const want = target.t + (target.p ? (performance.now() - target.got) / 1000 : 0), now = performance.now();
+    if (Math.abs(au.currentTime - want) > .3 && now - lastSeek > 180){ lastSeek = now; try{ au.currentTime = Math.min(dur() - .05, want); }catch(e){} }
+  }
+  /* ---------- 表示 ---------- */
+  function setStatus(s){ status = s; paint(); }
+  function paint(){
+    const b = document.getElementById("syncBtn");
+    if (b){ b.classList.toggle("hidden", !(mode === "student" && classMode && room));
+      b.textContent = !follow ? "🔗 連動しない" : status === "ok" ? "🔗 先生と連動中" : status === "err" ? "⚠️ 先生とつながらない" : "🔗 先生につないでいます…";
+      b.classList.toggle("on", follow && status === "ok"); }
+    const t = document.getElementById("lbSync");
+    if (t){ t.textContent = !sendOn ? "📡 生徒の画面を連動：オフ" : status === "err" ? "📡 連動：送れていません" : "📡 生徒の画面を連動：オン";
+      t.classList.toggle("on", sendOn); }
+  }
+  function toggleFollow(){ follow = !follow; store.set("syncFollow", follow); lastStep = null; paint(); }
+  function toggleSend(){ sendOn = !sendOn; store.set("syncSend", sendOn); if (sendOn) send(true); paint(); }
+  function newRoom(){ store.set("tRoom", ""); teacherRoom(); }
+  return {tick, paint, send:() => send(true), toggleFollow, toggleSend, teacherRoom, newRoom, relay, following:() => follow && !!target};
+})();
+tick.push(() => Sync.tick());
+
+document.getElementById("syncBtn").onclick = () => Sync.toggleFollow();
+document.getElementById("lbSync").onclick = () => Sync.toggleSend();
 applyTheme();
 requestAnimationFrame(loop);
 const initMode = new URLSearchParams(location.search).get("mode") || store.get("mode", "home");
