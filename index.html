@@ -41,9 +41,11 @@ header.top .sp{flex:1}
 
 /* ---------- home ---------- */
 .home{max-width:960px;margin:0 auto;padding:28px 16px 60px}
-.hero{text-align:center;padding:16px 0 24px}
-.hero h1{font-size:clamp(26px,5vw,40px);margin-bottom:.2em}
-.hero p{color:var(--sub);margin:0}
+.hero{position:relative;border-radius:22px;overflow:hidden;aspect-ratio:16/7;background:#fdf6ea url(images/hero.jpg) center/cover no-repeat;box-shadow:var(--shadow);display:flex;align-items:center}
+.herotxt{padding:0 4%;max-width:46%;color:#3a2a1c}
+.hero h1{font-size:clamp(24px,4.6vw,46px);margin-bottom:.3em;line-height:1.25;text-shadow:0 1px 0 #fff,0 0 18px rgba(255,250,240,.9)}
+.hero p{margin:0;font-size:clamp(13px,1.6vw,17px);color:#5b4a3a;text-shadow:0 0 12px rgba(255,250,240,.9)}
+@media (max-width:600px){ .hero{aspect-ratio:4/3;background-position:70% center} .herotxt{max-width:62%} }
 .cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:18px;margin-top:18px}
 .card{background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:22px;box-shadow:var(--shadow);text-align:left}
 .bigcard{cursor:pointer;transition:transform .15s}
@@ -513,8 +515,10 @@ details.pt summary{cursor:pointer;font-size:13px;color:var(--sub);margin-top:8px
 <!-- ======================= HOME ======================= -->
 <section id="home" class="home">
   <div class="hero">
-    <h1>🌸 ヴィヴァルディ「春」を聴こう</h1>
-    <p>協奏曲集《四季》より「春」第1楽章（約3分）</p>
+    <div class="herotxt">
+      <h1>ヴィヴァルディ<br>「春」を聴こう</h1>
+      <p>協奏曲集《四季》より「春」第1楽章（約3分）</p>
+    </div>
   </div>
   <div class="cards">
     <div class="card bigcard" data-go="student">
@@ -549,6 +553,7 @@ details.pt summary{cursor:pointer;font-size:13px;color:var(--sub);margin-top:8px
     「春」第1楽章では、<b>春の主題</b>（合奏でくり返し出てくるメロディー）の間に、小鳥・泉・雷などの場面がはさまる <b>リトルネロ形式</b> で作られています。</p>
   </div>
   <p class="credit">音源：ルイス・カウフマン（独奏ヴァイオリン）／ヘンリー・スウォボダ指揮 コンサートホール室内管弦楽団（1947年録音）<br>
+  イラスト：トップ画面と情景の背景は、生成AI（Gemini）で作成したイメージイラストです。<br>
   場面の時間は、この録音に合わせてあります。別の録音を使うときは先生用の「設定」で直せます。<br>
   楽譜：<a href="https://www.mutopiaproject.org/" target="_blank" rel="noopener">Mutopia Project</a>「La Primavera」（1725年の初版をもとに入力・CC BY-SA 3.0）を音符データに変換して表示しています。</p>
 </section>
@@ -913,6 +918,11 @@ function makeScene(stageEl, opts={}){
   scenes.push(S);
   return S;
 }
+// 情景の背景画（Gemini で作ったイラスト）。読みこめないときは手描きの背景を使う
+const BG = {};
+["theme","birds","stream","storm"].forEach(k => { const im = new Image(); im.onload = () => BG[k] = im; im.src = "images/scene-" + k + ".jpg"; });
+function bgFor(kind){ return BG[kind] || (kind === "solo" ? BG.theme : null); }
+function drawCover(g, im, w, h, a){ const r = Math.max(w / im.width, h / im.height), iw = im.width * r, ih = im.height * r; g.globalAlpha = a; g.drawImage(im, (w - iw) / 2, (h - ih) / 2, iw, ih); g.globalAlpha = 1; }
 const SKY = {theme:[150,210,255], birds:[175,225,255], stream:[170,220,235], storm:[60,60,90], solo:[255,205,170]};
 function lerp(a,b,k){ return a + (b-a)*k; }
 function drawScene(S, now){
@@ -925,6 +935,16 @@ function drawScene(S, now){
   sky.addColorStop(0, `rgb(${r},${gg},${b})`); sky.addColorStop(1, `rgb(${Math.min(255,r+50)},${Math.min(255,gg+30)},${Math.min(255,b+10)})`);
   g.fillStyle = sky; g.fillRect(0,0,w,h);
   const stormK = Math.max(0, 1 - (S.mix.sky[0] - 60) / 90);
+  // 背景画：場面が変わったら、前の絵からなめらかに切りかえる
+  const bg = bgFor(kind);
+  if (bg){
+    if (S.bgCur !== bg){ S.bgPrev = S.bgCur; S.bgCur = bg; S.bgT = 0; }
+    S.bgT = Math.min(1, (S.bgT || 0) + .03);
+    if (S.bgPrev && S.bgT < 1) drawCover(g, S.bgPrev, w, h, 1);
+    drawCover(g, bg, w, h, S.bgPrev ? S.bgT : 1);
+    if (kind === "solo"){ g.fillStyle = "rgba(255,170,90,.28)"; g.fillRect(0,0,w,h); }
+  }
+  if (!bg){
   // 太陽
   g.globalAlpha = 1 - stormK;
   g.fillStyle = "#ffd65a"; g.beginPath(); g.arc(w*.85, h*.2, h*(.09 + amp*.03), 0, 7); g.fill();
@@ -961,13 +981,20 @@ function drawScene(S, now){
     for (let k = 0; k < 5; k++){ const a = k/5*6.283; g.beginPath(); g.arc(x + sway + Math.cos(a)*pr, y + Math.sin(a)*pr, pr*.7, 0, 7); g.fill(); }
     g.fillStyle = "#c77d00"; g.beginPath(); g.arc(x + sway, y, pr*.55, 0, 7); g.fill();
   }
+  }   // 手描きの背景ここまで
+  // 泉：背景画の上に、そよ風の線を流す
+  if (bg && kind === "stream"){
+    g.strokeStyle = "rgba(255,255,255,.7)"; g.lineWidth = 2;
+    for (let i = 0; i < 6; i++){ const y = h*(.2 + i*.06), x = ((i*.17 + now/(2500 - amp*1200)) % 1.2 - .1) * w;
+      g.beginPath(); g.moveTo(x, y); g.bezierCurveTo(x+40, y-10, x+80, y+10, x+130, y); g.stroke(); }
+  }
   // 花びら（主題）
   if (kind === "theme" || kind === "solo"){
     for (const p of S.petals){ p.y += p.v*(1 + amp*2); p.x += Math.sin(now/900 + p.ph)*.0008; if (p.y > 1){ p.y = -.05; p.x = Math.random(); }
       g.fillStyle = "rgba(255,170,200,.85)"; g.beginPath(); g.ellipse(p.x*w, p.y*h, 5, 3, now/500 + p.ph, 0, 7); g.fill(); }
   }
   // 小鳥
-  const birdK = kind === "birds" ? 1 : (kind === "theme" ? .4 : 0);
+  const birdK = kind === "birds" ? (bg ? .5 : 1) : (kind === "theme" ? .4 : 0);
   if (birdK > 0){
     S.birds.forEach((bd, i) => {
       if (i >= Math.round(S.birds.length * birdK)) return;

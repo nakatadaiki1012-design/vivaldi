@@ -29,6 +29,10 @@ Style: soft watercolor and gouache illustration for a middle-school music textbo
 
 プロンプト本文はチャットで渡したものと同じです（下に再掲）。
 
+## 組みこみ済み
+- hero.jpg、scene-theme.jpg、scene-birds.jpg、scene-stream.jpg、scene-storm.jpg（幅1600pxに縮小して保存）
+- まだ：scene-solo（いまは主題の絵に夕日の色を重ねて代用）、コツの7枚、concerto、pieta、og-image、sheet-header、badge
+
 ---
 ## プロンプト本文
 
