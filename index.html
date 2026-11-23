@@ -5,6 +5,10 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>「春」鑑賞ノート</title>
 <meta name="description" content="ヴィヴァルディ「春」第1楽章を、先生の授業でも生徒ひとりでも学べる鑑賞教材アプリ">
+<meta property="og:title" content="ヴィヴァルディ「春」を聴こう｜「春」鑑賞ノート">
+<meta property="og:description" content="聴き方が身につく鑑賞アプリ（4つのステップ・3D合奏・流れる楽譜）">
+<meta property="og:image" content="og-image.jpg">
+<meta name="twitter:card" content="summary_large_image">
 <style>
 :root{
   --bg:#fffaf3; --panel:#ffffff; --ink:#2b2622; --sub:#6d635b; --line:#eadfd2;
@@ -316,6 +320,8 @@ body.present .lessonbar,body.present .lbhint{display:none}
 .namebox label{font-weight:700;font-size:15px;display:flex;gap:8px;align-items:center;flex-wrap:wrap}
 .namebox input{border:1px solid var(--line);border-radius:10px;padding:6px 10px;background:var(--bg);min-width:230px}
 .oldwarn{background:#fff4d6;color:#5a4200;border-radius:10px;padding:6px 10px;font-size:14px}
+.donebadge{display:flex;align-items:center;gap:14px;background:#fff8e6;border:1px solid #f0d9a0;border-radius:14px;padding:8px 14px;margin:6px 0}
+.donebadge img{width:84px;height:84px;border-radius:50%}
 .mynotes{background:var(--bg);border:1px solid var(--line);border-radius:12px;padding:6px 10px;margin:6px 0}
 .mn{display:flex;gap:8px;align-items:center;justify-content:space-between;border-top:1px dashed var(--line);padding:4px 0;font-size:13.5px}
 .mn:first-of-type{border-top:none}
@@ -2320,7 +2326,7 @@ const PHOTOS = {
     cap:"人の背たけほどもある、いちばん大きく低い音の弦楽器。立つか、高いいすに座って弾きます。", look:["人と比べた大きさ","いちばん低い音を受けもつ"]},
   harpsichord: {group:"楽器", title:"チェンバロ（ハープシコード）", file:"photos/harpsichord.jpg", credit:"Daderot／CC0（パブリックドメイン）　カルロ・グリマルディ作（1697年・イタリア）", web:"https://commons.wikimedia.org/wiki/Special:FilePath/Harpsichord%2C_Carlo_Grimaldi%2C_Messina%2C_1697_-_Germanisches_Nationalmuseum_-_Nuremberg%2C_Germany_-_DSC03278.jpg?width=1280", page:"https://commons.wikimedia.org/wiki/File:Harpsichord%2C_Carlo_Grimaldi%2C_Messina%2C_1697_-_Germanisches_Nationalmuseum_-_Nuremberg%2C_Germany_-_DSC03278.jpg",
     cap:"鍵盤をおすと、中のつめが弦をはじいて音が出ます。ピアノが広まる前の時代の鍵盤楽器です。", look:["2段の鍵盤があるものも多い","ふたの内側のかざり絵","ピアノより細くて「チャラン」とした音"]},
-  concerto:    {group:"演奏形態", title:"協奏曲の演奏（独奏と合奏）", file:"photos/concerto.jpg", credit:"",
+  concerto:    {group:"演奏形態", title:"協奏曲の演奏（独奏と合奏）", file:"images/concerto.jpg", credit:"", ai:true,
     cap:"独奏者がオーケストラの前に立ち、合奏とかけ合いながら演奏します。", look:["独奏者の立つ位置","独奏者と合奏の人数のちがい"]},
   strings:     {group:"演奏形態", title:"バロック・オーケストラ（弦楽合奏）", file:"photos/strings.jpg", credit:"Mrug／CC BY-SA 4.0", web:"https://commons.wikimedia.org/wiki/Special:FilePath/Venice_Baroque_Orchestra.jpg?width=1280", page:"https://commons.wikimedia.org/wiki/File:Venice_Baroque_Orchestra.jpg",
     cap:"「ヴェニス・バロック・オーケストラ」の演奏会（2009年）。ヴィヴァルディの故郷の名前をもつ楽団で、弦楽器を中心に、チェンバロなどが加わります。", look:["楽器ごとのまとまり（並び方）","高い楽器と低い楽器の位置","立って演奏している人がいるか"]},
@@ -2365,7 +2371,7 @@ async function fillPhotos(root){
     f.onclick = () => openLightbox(id, figs.map(x => x.dataset.ph));
   }
 }
-function creditOf(id){ const r = photoSrc[id]; if (r && r.own) return "先生が用意した写真"; return r && r.src && !r.local ? (PHOTOS[id].credit || "") + "（Wikimedia Commons）" : ""; }
+function creditOf(id){ const r = photoSrc[id]; if (r && r.own) return "先生が用意した写真"; if (r && r.local && PHOTOS[id].ai) return "イメージイラスト（生成AI・Geminiで作成。実際の演奏の写真ではありません）"; return r && r.src && !r.local ? (PHOTOS[id].credit || "") + "（Wikimedia Commons）" : ""; }
 
 /* 大きく見る（授業で映す） */
 let lbList = [], lbIdx = 0;
@@ -2567,7 +2573,7 @@ function planChecks(box, onChange){
 }
 let stuCustomOpen = false;
 let done = store.get("done", {});
-let notes = store.get("notes", {feel1:[], feel1txt:"", feel2:[], fav:"", why:"", intro:"", tips:{}});
+let notes = Object.assign({feel1:[], feel1txt:"", feel2:[], fav:"", why:"", intro:"", tips:{}}, store.get("notes", {}));   // 古い記録に足りない項目があっても動くように
 function saveNotes(){ store.set("notes", notes); }
 function markDone(id){ done[id] = true; store.set("done", done); renderStepNav(); }
 
@@ -2705,6 +2711,7 @@ function renderStep(i){
       </div>
       <div class="pgsec" data-title="ふりかえり・印刷" data-short="🖨">
       <h3>ふりかえり：どのくらいできたかな？</h3>
+      <div id="doneBadge"></div>
       <div id="selfEval"></div>
       <div class="btnrow">
         <button class="btn green" id="printMine">🖨 印刷する／PDFで保存</button>
@@ -2765,6 +2772,8 @@ function renderStep(i){
     const favOpts = ["春の主題","小鳥の歌","泉とそよ風","雷と稲妻","小鳥がふたたび歌う","独奏ヴァイオリン"];
     chipGroup(document.getElementById("favs"), favOpts, notes.fav ? [notes.fav] : [], v => { notes.fav = v[v.length-1] || ""; saveNotes(); }, true);
     bindText("why","why"); bindText("intro","intro");
+    const paintBadge = () => { const ok = done.apply && (notes.intro || "").trim().length >= 20; document.getElementById("doneBadge").innerHTML = ok ? `<div class="donebadge"><img src="images/badge.jpg" alt=""><div><b>🎉 4つのステップ、クリア！</b><br><span class="tip">コツを使って聴き、紹介文まで書けました。</span></div></div>` : `<div class="tip">ステップ③で3つのコツの「なぜ」を書き、紹介文を書くと、ごほうびバッジがもらえます。</div>`; };
+    paintBadge(); document.getElementById("intro").addEventListener("input", paintBadge);
     // ステップ3で書いたことを見ながら書けるように
     const mine = TIPS.filter(t => { const n = (notes.tips || {})[t.id]; return n && ((n.riyu || "").trim() || (n.kakaku || []).length); });
     document.getElementById("myNotes").innerHTML = mine.length ? `<div class="mynotes"><div class="tip"><b>📝 ステップ③で書いたこと</b>（「使う」で下の欄に入ります）</div>${mine.map(t => { const n = notes.tips[t.id];
