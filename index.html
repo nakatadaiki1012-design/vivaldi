@@ -297,6 +297,24 @@ body.present .tch{max-width:none}
 @media (max-width:480px){ .rrow{grid-template-columns:1fr} .rdesc{grid-column:1} .raxis{margin-left:0} }
 
 /* ---------- 3 axes ---------- */
+.trycard{text-align:center;max-width:720px;margin:0 auto}
+.trycard h3{font-size:20px;margin:0 0 6px}
+.tp{font-size:15px;margin:4px 0 8px}
+.tq3{font-size:17px;font-weight:800;margin:10px 0 6px}
+.trylist{display:flex;flex-direction:column;gap:6px;text-align:left}
+.tryrow{display:grid;grid-template-columns:24px 200px 1fr;gap:8px;align-items:center;border:1px solid var(--line);border-radius:10px;padding:6px 10px;background:var(--bg)}
+.tryrow input[type=checkbox]{width:20px;height:20px}
+.trytx{border:1px solid var(--line);border-radius:8px;padding:5px 8px;background:var(--panel);min-width:0}
+.tryans{text-align:left;background:var(--soft);border-radius:12px;padding:8px 12px;margin-top:6px;display:flex;flex-direction:column;gap:4px;font-size:15px}
+.tryans.hidden{display:none}
+.trycard.big h3{font-size:20px}
+.trycard.big .btn{font-size:17px}
+.dynbadge{position:absolute;right:16px;bottom:80px;background:rgba(226,85,122,.92);color:#fff;border-radius:20px;padding:6px 18px;display:flex;align-items:center;gap:10px;z-index:3;transition:all .2s}
+.dynbadge b{font-family:Times,serif;font-style:italic;font-size:64px;line-height:1}
+.dynbadge span{font-size:20px;font-weight:800}
+.dynbadge.pp{background:rgba(79,179,217,.92);transform:scale(.7);transform-origin:right bottom}
+.dynbadge.hidden{display:none}
+@media (max-width:760px){ .tryrow{grid-template-columns:24px 1fr} .trytx{grid-column:1 / span 2} }
 .seg{display:flex;gap:4px;justify-content:center;margin:0 0 8px;flex-wrap:wrap}
 .seg button{border:1px solid var(--line);background:var(--bg);border-radius:999px;padding:3px 12px;font-size:14px}
 .seg button.on{background:var(--ink);color:var(--bg);border-color:var(--ink)}
@@ -723,7 +741,7 @@ details.pt summary{cursor:pointer;font-size:13px;color:var(--sub);margin-top:8px
   <div class="tch">
     <div class="lessonbar" id="lessonbar">
       <span class="lbt">授業の進行</span>
-      <button data-ls="1">① 聴く</button><button data-ls="2">② 詩から想像</button><button data-ls="3">③ もどる主題</button><button data-ls="4">④ かけ合い</button><button data-ls="5">⑤ まとめる</button>
+      <button data-ls="1">① 聴く</button><button data-ls="2">② 詩から想像</button><button data-ls="3">③ もどる主題</button><button data-ls="4">④ かけ合い</button><button data-ls="5">⑤ 力試し</button><button data-ls="6">⑥ まとめる</button>
       <button class="lblink" id="lbSync"></button>
       <button class="lblink" id="lbLink">🔗 生徒用リンク</button>
     </div>
@@ -2200,6 +2218,9 @@ const MODULES = [
   {id:"k3", title:"コツ③ 独奏と全員のかけ合い", mins:13, core:true,
    aim:"協奏曲の演奏形態（独奏とトゥッティ）や、f と p のこだまが、どのように効果的に使われているかを味わう", know:["協奏曲","独奏とトゥッティ","強弱（f と p）","テクスチュア"], tips:["ax_conc"], think:["chikaku","kanju","riyu","hyogen"], ab:["kiku","haikei","kataru"], cs:["イ(ア)","イ(イ)","ア(ア)"],
    act:"3D合奏と楽譜の Solo／Tutti で、だれが弾いているかを見ながら聴く", ask:"「いまは独奏？ 全員？」「交代すると、どんな感じがする？ それはなぜ？」", app:"授業画面の🎻3D合奏"},
+  {id:"try", title:"力試し：第3楽章", mins:8, core:true,
+   aim:"初めて聴く曲（第3楽章）で、3つのコツを自分で使ってみる", know:["これまでの3つのコツ"], tips:[], think:["chikaku","riyu"], ab:["ikasu","kiku"], cs:["イ(ア)","ア(ア)"],
+   act:"第3楽章を聴いて、使えたコツとその場所を見つける", ask:"「3つのコツのどれが使えた？ どこで？」", app:"授業画面の⑤ 力試し（合成音）"},
   {id:"write", title:"まとめる", mins:12, core:true,
    aim:"学んだ知識を根拠にして、曲のよさを紹介し、ふりかえる", know:["これまで使った知識すべて"], tips:[], think:["riyu","hyogen"], ab:["kataru","musubu","ikasu"], cs:["ア(ア)"],
    act:"紹介文を書き、ふりかえる", ask:"「音楽の工夫を根拠に、この曲のよさを紹介しよう」", app:"ワークシート印刷（設定）／生徒用モードの最後のステップ"},
@@ -2218,8 +2239,8 @@ const MODULES = [
 ];
 const MOD = Object.fromEntries(MODULES.map(m => [m.id, m]));
 const PRESETS = [
-  {id:"p1", label:"2時間（3つのコツ）", note:"聴く → コツ①詩 → コツ②主題 → コツ③かけ合い → まとめる", ids:["listen","k1","k2","k3","write"]},
-  {id:"p2", label:"3時間",               note:"もっと知る：協奏曲の歴史・楽器と奏法を追加", ids:["listen","k1","k2","k3","write","concerto","instruments"]},
+  {id:"p1", label:"2時間（3つのコツ）", note:"聴く → コツ①詩 → コツ②主題 → コツ③かけ合い → 力試し → まとめる", ids:["listen","k1","k2","k3","try","write"]},
+  {id:"p2", label:"3時間",               note:"もっと知る：協奏曲の歴史・楽器と奏法を追加", ids:["listen","k1","k2","k3","try","write","concerto","instruments"]},
   {id:"p3", label:"4時間",               note:"時代背景・音楽のしくみまでじっくり", ids:MODULES.map(m => m.id)},
 ];
 const CS_LABEL = {
@@ -2565,6 +2586,38 @@ function openIf(id){
 // ページの中の小さなタブ
 function segHTML(items){ return `<div class="seg">${items.map((x, i) => `<button class="${i ? "" : "on"}" data-seg="${i}">${x[0]}</button>`).join("")}</div>${items.map((x, i) => `<div class="segbody ${i ? "hidden" : ""}" data-segb="${i}">${x[1]}</div>`).join("")}`; }
 function bindSeg(root){ root.querySelectorAll(".seg").forEach(sg => { const par = sg.parentElement; sg.querySelectorAll("[data-seg]").forEach(b => b.onclick = () => { sg.querySelectorAll("[data-seg]").forEach(x => x.classList.toggle("on", x === b)); par.querySelectorAll(":scope > [data-segb]").forEach(x => x.classList.toggle("hidden", x.dataset.segb !== b.dataset.seg)); stopSynth(); }); }); }
+/* ---------- 力試し：第3楽章「田園の踊り」（Mutopia の楽譜から最初の25小節。合成音） ---------- */
+const MOV3 = {"parts":{"solo":[[0,18,80],[18,6,81],[24,12,80],[36,24,80],[60,12,81],[72,36,81],[108,24,83],[132,12,81],[144,18,80],[162,6,81],[168,12,80],[180,24,80],[204,12,81],[216,36,81],[252,24,83],[276,12,81],[288,18,80],[306,6,81],[312,12,83],[324,18,83],[342,6,81],[348,12,80],[360,36,80],[396,36,78],[432,18,80],[450,6,81],[456,12,80],[468,24,80],[492,12,81],[504,36,81],[540,24,83],[564,12,81],[576,18,80],[594,6,81],[600,12,80],[612,24,80],[636,12,81],[648,36,81],[684,24,83],[708,12,81],[720,18,80],[738,6,81],[744,12,83],[756,18,83],[774,6,81],[780,12,80],[792,36,78],[828,24,83],[852,12,78],[864,18,75],[882,6,73],[888,12,71],[900,18,83],[918,6,81],[924,12,80],[936,24,80],[960,12,78],[972,24,83],[996,12,-1],[1008,24,83],[1032,12,-1],[1044,24,83],[1068,12,-1],[1080,24,83],[1104,12,-1],[1116,18,75],[1134,6,76],[1140,12,78],[1152,18,78],[1170,6,80],[1176,12,81],[1188,18,81],[1206,6,80],[1212,12,78],[1224,18,78],[1242,6,76],[1248,12,75],[1260,18,75],[1278,6,76],[1284,12,78],[1296,18,78],[1314,6,80],[1320,12,81],[1332,18,81],[1350,6,80],[1356,12,78],[1368,18,80],[1386,6,81],[1392,12,80],[1404,36,85],[1440,36,83],[1476,36,81],[1512,18,80],[1530,6,81],[1536,12,80],[1548,36,85],[1584,36,83],[1620,36,81],[1656,12,80],[1668,12,76],[1680,12,78],[1692,12,80],[1704,12,78],[1716,12,76],[1728,12,83],[1740,12,85],[1752,12,83],[1764,12,88],[1776,12,87],[1788,12,85],[1800,12,83],[1812,12,80],[1824,12,78],[1836,36,76],[1872,12,83],[1884,12,85],[1896,12,83],[1908,12,88],[1920,12,87],[1932,12,85],[1944,12,83],[1956,12,80],[1968,12,78],[1980,36,76],[2016,6,83],[2022,6,81],[2028,6,80],[2034,6,78],[2040,12,76],[2052,12,86],[2064,12,85],[2076,12,83],[2088,12,85],[2100,12,88],[2112,12,86],[2124,12,85],[2136,12,83],[2148,12,81],[2160,6,85],[2166,6,83],[2172,6,82],[2178,6,80],[2184,12,78],[2196,12,88],[2208,12,87],[2220,12,85],[2232,12,87],[2244,12,90],[2256,12,88],[2268,12,87],[2280,12,85],[2292,12,83],[2304,6,87],[2310,6,85],[2316,6,84],[2322,6,81],[2328,12,80],[2340,12,90],[2352,12,88],[2364,12,87],[2376,12,88],[2388,6,92],[2394,6,90],[2400,12,88],[2412,12,92],[2424,12,90],[2436,12,88],[2448,12,87],[2460,6,90],[2466,6,88],[2472,12,87],[2484,12,90],[2496,12,88],[2508,12,87],[2520,12,85],[2532,6,88],[2538,6,87],[2544,12,85],[2556,12,88],[2568,12,87],[2580,12,85],[2592,12,83],[2604,6,87],[2610,6,85],[2616,12,83],[2628,12,87],[2640,12,85],[2652,12,83],[2664,12,81],[2676,6,85],[2682,6,83],[2688,12,81],[2700,12,85],[2712,12,83],[2724,12,81],[2736,6,80],[2742,6,84],[2748,24,85],[2772,24,85],[2796,12,81],[2808,6,80],[2814,6,84],[2820,24,85],[2844,24,85],[2868,12,81],[2880,12,80],[2892,12,85],[2904,12,83],[2916,12,81],[2928,12,80],[2940,12,78],[2952,12,76],[2964,12,80],[2976,12,85],[2988,12,75],[3000,12,80],[3012,12,84],[3024,36,85],[3060,18,76],[3078,6,78],[3084,12,76],[3096,24,64],[3120,12,66],[3132,36,66],[3168,24,68],[3192,12,66],[3204,18,64],[3222,6,66],[3228,12,64],[3240,24,64],[3264,12,66],[3276,36,66],[3312,24,68],[3336,12,66],[3348,18,64],[3366,6,66],[3372,12,68],[3384,18,68],[3402,6,66],[3408,12,64],[3420,36,64],[3456,36,63],[3492,36,68],[3528,36,69],[3564,36,66],[3600,36,68],[3636,36,64],[3672,36,66],[3708,72,63],[3780,36,68],[3816,36,69],[3852,36,66],[3888,36,68],[3924,36,64],[3960,36,66],[3996,72,63],[4068,12,68],[4080,12,69],[4092,12,71],[4104,12,71],[4116,12,69],[4128,12,68],[4140,72,69],[4212,12,66],[4224,12,68],[4236,12,69],[4248,12,69],[4260,12,68],[4272,12,66],[4284,72,68],[4356,36,71],[4392,36,69],[4428,12,68],[4440,12,66],[4452,12,64],[4464,24,64],[4488,12,68],[4500,36,71],[4536,36,69],[4572,12,68],[4584,12,66],[4596,12,64]],"vn1":[[0,18,80],[18,6,81],[24,12,80],[36,24,80],[60,12,81],[72,36,81],[108,24,83],[132,12,81],[144,18,80],[162,6,81],[168,12,80],[180,24,80],[204,12,81],[216,36,81],[252,24,83],[276,12,81],[288,18,80],[306,6,81],[312,12,83],[324,18,83],[342,6,81],[348,12,80],[360,36,80],[396,36,78],[432,18,80],[450,6,81],[456,12,80],[468,24,80],[492,12,81],[504,36,81],[540,24,83],[564,12,81],[576,18,80],[594,6,81],[600,12,80],[612,24,80],[636,12,81],[648,36,81],[684,24,83],[708,12,81],[720,18,80],[738,6,81],[744,12,83],[756,18,83],[774,6,81],[780,12,80],[792,36,78],[828,24,83],[852,12,78],[864,18,75],[882,6,73],[888,12,71],[900,18,83],[918,6,81],[924,12,80],[936,24,80],[960,12,78],[972,24,83],[996,12,-1],[1008,24,83],[1032,12,-1],[1044,24,83],[1068,12,-1],[1080,24,83],[1104,12,-1],[1116,18,75],[1134,6,76],[1140,12,78],[1152,18,78],[1170,6,80],[1176,12,81],[1188,18,81],[1206,6,80],[1212,12,78],[1224,18,78],[1242,6,76],[1248,12,75],[1260,18,75],[1278,6,76],[1284,12,78],[1296,18,78],[1314,6,80],[1320,12,81],[1332,18,81],[1350,6,80],[1356,12,78],[1368,18,80],[1386,6,81],[1392,12,80],[1404,36,85],[1440,36,83],[1476,36,81],[1512,18,80],[1530,6,81],[1536,12,80],[1548,36,85],[1584,36,83],[1620,36,81],[1656,36,80],[1692,24,-1],[1716,12,-1],[1728,1296,-1],[3024,18,76],[3042,6,78],[3048,12,76],[3060,24,76],[3084,12,78],[3096,36,78],[3132,24,80],[3156,12,78],[3168,18,76],[3186,6,78],[3192,12,76],[3204,24,76],[3228,12,78],[3240,36,78],[3276,24,80],[3300,12,78],[3312,18,76],[3330,6,78],[3336,12,80],[3348,18,80],[3366,6,78],[3372,12,76],[3384,36,76],[3420,36,75],[3456,36,80],[3492,36,81],[3528,36,78],[3564,36,80],[3600,36,76],[3636,36,78],[3672,72,75],[3744,36,80],[3780,36,81],[3816,36,78],[3852,36,80],[3888,36,76],[3924,36,78],[3960,72,75],[4032,12,80],[4044,12,81],[4056,12,83],[4068,12,83],[4080,12,81],[4092,12,80],[4104,72,81],[4176,12,78],[4188,12,80],[4200,12,81],[4212,12,81],[4224,12,80],[4236,12,78],[4248,72,80],[4320,36,83],[4356,36,81],[4392,12,80],[4404,12,78],[4416,12,76],[4428,24,76],[4452,12,80],[4464,36,83],[4500,36,81],[4536,12,80],[4548,12,78],[4560,12,76],[4572,24,76],[4596,12,80]],"vn2":[[0,18,76],[18,6,78],[24,12,76],[36,24,76],[60,12,78],[72,36,78],[108,24,80],[132,12,78],[144,18,76],[162,6,78],[168,12,76],[180,24,76],[204,12,78],[216,36,78],[252,24,80],[276,12,78],[288,18,76],[306,6,78],[312,12,80],[324,18,80],[342,6,78],[348,12,76],[360,36,76],[396,36,75],[432,18,76],[450,6,78],[456,12,76],[468,24,76],[492,12,78],[504,36,78],[540,24,80],[564,12,78],[576,18,76],[594,6,78],[600,12,76],[612,24,76],[636,12,78],[648,36,78],[684,24,80],[708,12,78],[720,18,76],[738,6,78],[744,12,80],[756,18,80],[774,6,78],[780,12,76],[792,24,75],[816,12,-1],[828,24,83],[852,12,-1],[864,24,83],[888,12,-1],[900,24,83],[924,12,-1],[936,24,83],[960,12,-1],[972,24,83],[996,12,78],[1008,18,75],[1026,6,73],[1032,12,71],[1044,18,83],[1062,6,81],[1068,12,80],[1080,24,80],[1104,12,78],[1116,18,71],[1134,6,73],[1140,12,75],[1152,18,75],[1170,6,76],[1176,12,78],[1188,18,78],[1206,6,76],[1212,12,75],[1224,18,75],[1242,6,73],[1248,12,71],[1260,18,71],[1278,6,73],[1284,12,75],[1296,18,75],[1314,6,76],[1320,12,78],[1332,18,78],[1350,6,76],[1356,12,75],[1368,18,76],[1386,6,78],[1392,12,76],[1404,36,81],[1440,36,80],[1476,36,78],[1512,18,76],[1530,6,78],[1536,12,76],[1548,36,81],[1584,36,80],[1620,36,78],[1656,36,76],[1692,24,-1],[1716,12,-1],[1728,1296,-1],[3024,18,73],[3042,6,75],[3048,12,73],[3060,24,73],[3084,12,75],[3096,36,75],[3132,24,76],[3156,12,75],[3168,18,73],[3186,6,75],[3192,12,73],[3204,24,73],[3228,12,75],[3240,36,75],[3276,24,76],[3300,12,75],[3312,18,73],[3330,6,75],[3336,12,76],[3348,18,76],[3366,6,75],[3372,12,73],[3384,36,73],[3420,36,72],[3456,72,76],[3528,36,76],[3564,36,75],[3600,36,75],[3636,72,73],[3708,36,72],[3744,72,76],[3816,36,76],[3852,36,75],[3888,36,75],[3924,72,73],[3996,36,72],[4032,72,76],[4104,72,78],[4176,72,75],[4248,72,76],[4320,72,78],[4392,12,76],[4404,12,71],[4416,12,68],[4428,24,68],[4452,12,76],[4464,72,78],[4536,12,76],[4548,12,71],[4560,12,68],[4572,24,68],[4596,12,76]],"va":[[0,144,71],[144,144,71],[288,144,71],[432,144,71],[576,144,71],[720,72,71],[792,36,71],[828,24,66],[852,12,63],[864,24,66],[888,12,63],[900,18,68],[918,6,66],[924,12,64],[936,24,64],[960,12,63],[972,24,66],[996,12,63],[1008,24,66],[1032,12,63],[1044,18,68],[1062,6,66],[1068,12,64],[1080,24,64],[1104,12,63],[1116,36,71],[1152,144,69],[1296,36,69],[1332,36,63],[1368,36,59],[1404,36,64],[1440,72,64],[1512,36,71],[1548,36,64],[1584,72,64],[1656,36,59],[1692,24,-1],[1716,12,-1],[1728,1296,-1],[3024,144,68],[3168,144,68],[3312,144,68],[3456,36,68],[3492,36,64],[3528,36,71],[3564,36,68],[3600,36,68],[3636,36,69],[3672,72,68],[3744,36,68],[3780,36,64],[3816,36,71],[3852,36,68],[3888,36,68],[3924,36,69],[3960,72,68],[4032,36,68],[4068,36,73],[4104,12,73],[4116,12,71],[4128,12,73],[4140,12,73],[4152,12,71],[4164,12,69],[4176,72,71],[4248,12,71],[4260,12,69],[4272,12,71],[4284,12,71],[4296,12,69],[4308,12,68],[4320,72,63],[4392,72,59],[4464,72,63],[4536,72,59]],"bass":[[0,144,52],[144,144,52],[288,72,52],[360,72,47],[432,144,52],[576,144,52],[720,72,52],[792,72,47],[864,144,47],[1008,144,47],[1152,144,47],[1296,72,47],[1368,72,52],[1440,144,52],[1584,144,52],[1728,144,52],[1872,144,52],[2016,36,56],[2052,36,52],[2088,36,57],[2124,24,-1],[2148,12,-1],[2160,36,58],[2196,36,54],[2232,36,59],[2268,24,-1],[2292,12,-1],[2304,36,60],[2340,36,56],[2376,36,61],[2412,36,61],[2448,36,60],[2484,36,59],[2520,36,58],[2556,36,57],[2592,36,56],[2628,36,56],[2664,36,54],[2700,36,54],[2736,36,49],[2772,36,49],[2808,36,49],[2844,36,49],[2880,36,49],[2916,36,54],[2952,36,56],[2988,36,44],[3024,144,49],[3168,144,49],[3312,72,49],[3384,72,56],[3456,72,49],[3528,36,51],[3564,36,48],[3600,36,49],[3636,36,54],[3672,24,56],[3696,12,54],[3708,24,52],[3732,12,51],[3744,72,49],[3816,36,51],[3852,36,48],[3888,36,49],[3924,36,54],[3960,24,56],[3984,12,54],[3996,24,52],[4020,12,51],[4032,72,49],[4104,12,54],[4116,12,56],[4128,12,57],[4140,12,57],[4152,12,56],[4164,12,54],[4176,72,47],[4248,12,52],[4260,12,54],[4272,12,56],[4284,12,56],[4296,12,54],[4308,12,52],[4320,12,47],[4332,12,49],[4344,12,51],[4356,12,51],[4368,12,49],[4380,12,47],[4392,12,52],[4404,12,54],[4416,12,56],[4428,12,56],[4440,12,54],[4452,12,52],[4464,12,47],[4476,12,49],[4488,12,51],[4500,12,51],[4512,12,49],[4524,12,47],[4536,12,52],[4548,12,54],[4560,12,56],[4572,12,56],[4584,12,54],[4596,12,52]]},"texts":{"solo":[[0,"Allegro Danza Pastorale"],[432,"Piano"],[828,"Forte"],[1656,"Solo"],[3060,"Tutti"],[3780,"Piano"],[4068,"Forte"]],"vn1":[[0,"Allegro con Sordine Danza Pastorale"],[432,"Piano"],[828,"Forte"],[3744,"Piano"],[4032,"Forte"]],"vn2":[[0,"Allegro con Sordine Danza Pastorale"],[432,"Piano"],[828,"Forte"],[3744,"Piano"],[4032,"Forte"]],"va":[[0,"Allegro Danza Pastorale"],[828,"Forte"],[3744,"Piano"],[4032,"Forte"]],"bass":[[0,"Allegro Danza Pastorale"],[432,"Piano"],[3744,"Piano"],[4032,"Forte"]]}};
+const Q3 = .34;   // 12/8 拍子：四分音符の長さ（秒）
+function playMov3(){ pause(); const seq = [], PW3 = {solo:.8, vn1:.7, vn2:.55, va:.45, bass:.75};
+  Object.entries(MOV3.parts).forEach(([pk, ns]) => ns.forEach(([t, d, m]) => { if (m < 0 || t >= 3600) return; let v = PW3[pk];
+    for (const [tt, tx] of MOV3.texts[pk] || []){ if (tt > t) break; if (/Piano/.test(tx)) v = PW3[pk] * .45; else if (/Forte/.test(tx)) v = PW3[pk]; }
+    seq.push([t / 24 * Q3, m, Math.max(.05, d / 24 * Q3 * .95), v]); if (pk === "bass") seq.push([t / 24 * Q3, m - 12, Math.max(.05, d / 24 * Q3 * .95), v * .5]); }));
+  synth(seq, .1); }
+const TRY_ANS = [
+  {ax:"k1", icon:"🐦", name:"コツ① 詩から想像", ans:"低い楽器が<b>同じ音をずっとのばす</b>（ブーン）＝<b>バグパイプ</b>。はねるリズム＝<b>踊り</b>。詩：「バグパイプに合わせて、ニンフと羊飼いが踊る」"},
+  {ax:"k2", icon:"🌸", name:"コツ② もどってくる主題", ans:"はじめのメロディーが、場面のあとに<b>もどってくる</b>（この楽章もリトルネッロ形式）"},
+  {ax:"k3", icon:"🎻", name:"コツ③ 独奏と全員", ans:"12小節目から<b>独奏</b>（Solo）、22小節目で<b>全員</b>（Tutti）。はじめは <b>f → p</b> のこだまも"},
+];
+function tryHTML(big){
+  const n = notes.try || {}, silent = muted() && !big;
+  return `<div class="trycard ${big ? "big" : ""}"><h3>🎯 力試し：初めての曲で、3つのコツを使えるかな？</h3>
+    <p class="tp">《四季》「春」の<b>第3楽章</b>（田園の踊り）。詩：「バグパイプの楽しい音に合わせて、ニンフと羊飼いが踊る」</p>
+    ${silent ? `<p class="tip">🔇 先生の画面で聴こう。</p>` : `<div class="btnrow" style="justify-content:center"><button class="btn" data-m3>▶ 第3楽章を聴く（合成音・約50秒）</button><button class="smallbtn" data-m3stop>■</button></div>`}
+    ${big ? `<p class="tq3">3つのコツのうち、使えたのはどれ？ どこで？</p>` : `<p class="tq3">使えたコツに✓をつけて、「どこで・何が」を書こう</p>
+    <div class="trylist">${TRY_ANS.map(a => `<label class="tryrow"><input type="checkbox" data-tryc="${a.ax}" ${(n[a.ax] || {}).on ? "checked" : ""}><span>${a.icon} ${a.name}</span><input class="trytx" data-tryt="${a.ax}" value="${esc((n[a.ax] || {}).w || "")}" placeholder="どこで・何が？"></label>`).join("")}</div>`}
+    <button class="linkbtn" data-tryans>✅ 答えの例を見る</button>
+    <div class="tryans hidden">${TRY_ANS.map(a => `<div>${a.icon} <b>${a.name}</b>：${a.ans}</div>`).join("")}</div></div>`;
+}
+function bindTry(root){
+  notes.try = notes.try || {};
+  root.querySelectorAll("[data-m3]").forEach(b => b.onclick = playMov3);
+  root.querySelectorAll("[data-m3stop]").forEach(b => b.onclick = stopSynth);
+  root.querySelectorAll("[data-tryans]").forEach(b => b.onclick = () => { b.nextElementSibling.classList.toggle("hidden"); });
+  root.querySelectorAll("[data-tryc]").forEach(c => c.onchange = () => { (notes.try[c.dataset.tryc] = notes.try[c.dataset.tryc] || {}).on = c.checked; saveNotes(); tryDone(); });
+  root.querySelectorAll("[data-tryt]").forEach(c => c.oninput = () => { (notes.try[c.dataset.tryt] = notes.try[c.dataset.tryt] || {}).w = c.value; saveNotes(); tryDone(); });
+}
+function tryDone(){ if (Object.values(notes.try || {}).some(x => x.on && (x.w || "").trim())) markDone("try"); }
 /* ---------- コツ①：絵とソネットの並べかえ ---------- */
 const SORT = [{k:"theme", img:"scene-theme", line:"春がやってきた"}, {k:"birds", img:"scene-birds", line:"小鳥たちは楽しい歌で春にあいさつする"}, {k:"stream", img:"scene-stream", line:"泉はそよ風にふかれ、ささやきながら流れ出す"}, {k:"storm", img:"scene-storm", line:"空は黒い雲におおわれ、稲妻と雷鳴"}];
 function renderSort(box){
@@ -3067,6 +3120,8 @@ function renderStep(i){
       <div class="pgsec" data-title="考える" data-short="🔍"><div class="thinkrow"><div class="ritmini" id="ritMini"></div><div>${tipCard(TIP.ax_rit, {compact:true})}</div></div></div>
       <div class="pgsec" data-title="もし〜だったら？" data-short="🤔">${segHTML([["🌸 主題がなかったら？", ifCard("ritcut")], ["🌥 長調だったら？", ifCard("major")]])}</div>
       </div></div>`;
+  } else if (s.id === "try"){
+    html = `<div class="panel">${H(i)}<div id="tryBox">${tryHTML(false)}</div></div>`;
   } else if (s.id === "k3"){
     html = `<div class="panel">${H(i)}<div id="axPages">
       <div class="pgsec" data-title="知る" data-short="📘"><div class="know1">
@@ -3171,6 +3226,7 @@ function renderStep(i){
   if (s.id === "which") startQuiz(document.getElementById("quizBox"), false);
   if (s.id === "form") startTap(document.getElementById("tapBox"), false);
   if (s.id === "elem"){ const box = document.getElementById("elemBox"); renderElements(box); box.querySelectorAll(".card").forEach(c => c.style.marginTop = 0); pageBySelector(box, ".card", "elem", ["theme","birds","stream","storm"].map(k => KIND[k].emoji)); }
+  if (s.id === "try") bindTry(document.getElementById("tryBox"));
   if (["k1","k2","k3"].includes(s.id)){
     const box = document.getElementById("axPages");
     bindTipCards(box, false); bindWiz(box);
@@ -3415,6 +3471,15 @@ const tScene = makeScene(document.getElementById("tStage"), {hideNames:() => tHi
   document.getElementById("tPoint").innerHTML = tHide ? `<span class="tip">（場面名をかくしています）</span><br>発問例：「いまの音楽は、どんな場面を表していると思う？ 音のどんなところからそう思った？」` : `<b>${KIND[s.kind].emoji} ${s.name}</b><br>${s.point}`;
 }});
 let tPick = {}, tQ = {};
+// ④ かけ合い：いまの強弱を大きく出す（f で大きく、p で小さく手を動かす）
+tick.push(() => {
+  const st = document.getElementById("tStage"); if (!st) return;
+  let b = st.querySelector(".dynbadge"); if (!b){ b = document.createElement("div"); b.className = "dynbadge hidden"; st.appendChild(b); }
+  const on = mode === "teacher" && typeof lessonStep !== "undefined" && lessonStep === 4 && typeof ScoreView !== "undefined";
+  b.classList.toggle("hidden", !on); if (!on) return;
+  const d = dynAt("vn1", ScoreView.qAt(au.currentTime)) < 1 ? "p" : "f";
+  if (b.dataset.d !== d){ b.dataset.d = d; b.innerHTML = d === "f" ? `<b>f</b><span>🙌 大きく</span>` : `<b>p</b><span>🤏 小さく</span>`; b.classList.toggle("pp", d === "p"); }
+});
 function openVoices(id){
   let d = document.getElementById("knowDlg");
   if (!d){ d = document.createElement("div"); d.id = "knowDlg"; document.body.appendChild(d); d.onclick = e => { if (e.target === d) d.classList.add("hidden"); }; }
@@ -3433,8 +3498,9 @@ function renderTTip(si){
   if (ls === 3){ id = "ax_rit"; list = [id];
     extra = `<div class="tritlist">${RITS.map((r, k) => `<button class="${secAt(au.currentTime) === r.si ? "on" : ""} ${/短調/.test(r.key) ? "minor" : ""}" data-rit="${r.si}"><b>${k+1}</b>${r.key}<small>${r.len.replace(/（.*）/, "")}</small></button>`).join("")}</div><button class="smallbtn" data-go-tab="tap">🌸 主題さがしゲーム</button>`; }
   if (ls === 4){ id = "ax_conc"; list = [id]; }
+  if (ls === 5){ box.innerHTML = tryHTML(true); bindTry(box); return; }
   const t = TIP[id];
-  if (typeof lessonStep !== "undefined" && lessonStep === 5){
+  if (typeof lessonStep !== "undefined" && lessonStep === 6){
     box.innerHTML = `<div class="ttip"><div class="ttn">✍️ <b>紹介文の書き方</b></div>
       <ol class="tq"><li>いちばん好きな場面を決める</li><li>👂 その場面で<b>聞こえた音</b>（コツで聴いたこと）</li><li>💗 どんな<b>感じ</b>がしたか</li><li>🔍 <b>なぜ</b>そう感じたか（音楽のしくみ）</li><li>この曲を知らない人に<b>おすすめ</b>する一文</li></ol>
       <p class="tip">コツ①〜③で書いたことが、生徒の画面に並んで出ます。</p></div>`;
@@ -3524,7 +3590,8 @@ const LESSON = {
   2:{tab:"show", hide:true,  view:"scene", hint:"場面名をかくして「どの場面？」→ 生徒は絵の並べかえ → 小鳥と川を細かく聴く。"},
   3:{tab:"show", hide:false, view:"scene", hint:"右の表から主題を1回ずつ流し、「さっきとどこがちがう？」"},
   4:{tab:"show", hide:false, view:"e3d",   hint:"3D合奏で、だれが弾いているかを見ながら聴く。f と p のこだまも。"},
-  5:{tab:"show", hide:false, sum:true, hint:"もう一度通して流し、紹介文を書く。"},
+  5:{tab:"show", hide:false, view:"scene", hint:"初めての第3楽章を流し「どのコツが使えた？ どこで？」→ 答えの例。"},
+  6:{tab:"show", hide:false, sum:true, hint:"もう一度通して流し、紹介文を書く。"},
 };
 let lessonStep = 0;
 function setLesson(n){
@@ -3534,7 +3601,7 @@ function setLesson(n){
   showTab(L.tab);
   if (L.hide !== undefined && tHide !== L.hide){ tHide = L.hide; applyTHide(); }
   if (L.view) setStageView(L.view);
-  if (n === 1 || n === 5){ stopAt = null; loopSec = -1; seek(0); }
+  if (n === 1 || n === 6){ stopAt = null; loopSec = -1; seek(0); }
   renderTTip(secAt(au.currentTime));
   if (typeof Sync !== "undefined") Sync.send();
 }
