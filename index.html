@@ -297,6 +297,25 @@ body.present .tch{max-width:none}
 @media (max-width:480px){ .rrow{grid-template-columns:1fr} .rdesc{grid-column:1} .raxis{margin-left:0} }
 
 /* ---------- 3 axes ---------- */
+.knowcard{text-align:center;padding:4px 6px}
+.knowcard h3{font-size:20px;margin:0 0 6px}
+.kv{display:flex;justify-content:center;margin:4px 0 8px}
+.kvrow{gap:18px;flex-wrap:wrap}
+.kvsvg{width:min(100%,340px);height:auto;max-height:150px}
+.kvrow .kvsvg{width:min(46%,200px)}
+.kp{font-size:16px;margin:.3em 0}
+.kdemo{justify-content:center}
+.trn{animation:trn .9s ease-in-out infinite alternate}
+@keyframes trn{from{opacity:.25}to{opacity:1}}
+#knowDlg{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:110;display:flex;align-items:center;justify-content:center;padding:16px}
+#knowDlg.hidden{display:none}
+.kdcard{position:relative;background:var(--panel);color:var(--ink);border-radius:20px;padding:24px 28px;max-width:900px;width:100%}
+.kdclose{position:absolute;top:10px;right:10px;background:var(--bg)!important;color:var(--ink)!important;border:1px solid var(--line)!important;width:40px!important;height:40px!important;font-size:18px!important;border-radius:50%}
+.knowcard.big h3{font-size:32px}
+.knowcard.big .kp{font-size:24px}
+.knowcard.big .kvsvg{max-height:260px;width:min(100%,560px)}
+.knowcard.big .kvrow .kvsvg{width:min(46%,320px)}
+.knowcard.big .smallbtn{font-size:18px;padding:6px 16px}
 .know1{padding:10px 4px;text-align:center}
 .know1 p{font-size:17px;margin:.4em 0}
 .know1 .big1{font-size:22px;line-height:1.6}
@@ -2152,7 +2171,7 @@ const MODULES = [
    aim:"何も知らないまま聴いて、感じたことをことばにする", know:[], tips:[], think:["kanju","hyogen"], ab:["kataru"], cs:["共通事項"],
    act:"通して聴き、感じたことを書く", ask:"「どんな景色が見えた？ 気分はどう変わった？」", app:"提示画面で🙈場面名をかくす → 通して再生"},
   {id:"k1", title:"コツ① 詩から想像する", mins:15, core:true,
-   aim:"ソネット（詩）をもとに、音が表している情景を想像し、音の動きや重なりを細かく聴く", know:["ソネット","旋律","音色","テクスチュア","トリル"], tips:["ax_bird","ax_stream"], think:["chikaku","kanju","riyu","hyogen"], ab:["musubu","kiku","kataru"], cs:["イ(ア)","イ(イ)","ア(ア)"],
+   aim:"ソネット（詩）をもとに、音が表している情景を想像し、音の動きや重なりを細かく聴く", know:["ソネット","トリル","音の高さ（弦・指・楽器の大きさ）","細かいくり返しと重なり","旋律","音色","テクスチュア"], tips:["ax_bird","ax_stream"], think:["chikaku","kanju","riyu","hyogen"], ab:["musubu","kiku","kataru"], cs:["イ(ア)","イ(イ)","ア(ア)"],
    act:"絵とソネットを並べ、場面を当て、鳥や川の音を細かく聴く", ask:"「この音は、詩のどの場面？」「鳥の声や川の音は、どんな音の動き・重なりでできている？」", app:"生徒：並べかえ・考える／先生：❓みんなでクイズ"},
   {id:"k2", title:"コツ② もどってくる主題", mins:13, core:true,
    aim:"リトルネッロ形式を理解し、何度ももどる春の主題の変化（調・長さ・長調と短調）を味わう", know:["形式","リトルネッロ形式","調","長調と短調"], tips:["ax_rit"], think:["chikaku","kanju","riyu","hyogen"], ab:["kiku","musubu","kataru"], cs:["イ(ア)","ア(ア)"],
@@ -2381,6 +2400,79 @@ function bindTipCards(root, teacher){
     chipGroup(card.querySelector('[data-k="kanju"]'), t.kanju, n.kanju, v => { n.kanju = v; saveNotes(); });
     card.querySelectorAll("textarea").forEach(ta => ta.oninput = () => { n[ta.dataset.k] = ta.value; saveNotes(); checkTipsDone(); });
   });
+}
+/* ---------- コツ①の「知る」：トリル・高い音と低い音・細かいくり返し ---------- */
+// ヴァイオリンらしい合成音（のこぎり波＋ビブラート＋やわらかいフィルター）
+let synthCtx = null;
+function synth(seq){   // seq: [開始(秒), MIDI番号, 長さ(秒), 音量]
+  try{ synthCtx = synthCtx || new (window.AudioContext || window.webkitAudioContext)(); }catch(e){ return; }
+  const ctx = synthCtx, t0 = ctx.currentTime + .06, out = ctx.createGain(); out.gain.value = .22; out.connect(ctx.destination);
+  const lp = ctx.createBiquadFilter(); lp.type = "lowpass"; lp.frequency.value = 2600; lp.Q.value = .7; lp.connect(out);
+  seq.forEach(([st, m, d, v]) => {
+    const f = 440 * Math.pow(2, (m - 69) / 12), o = ctx.createOscillator(), g = ctx.createGain(), lfo = ctx.createOscillator(), lg = ctx.createGain();
+    o.type = "sawtooth"; o.frequency.value = f; lfo.frequency.value = 5.6; lg.gain.value = f * .004; lfo.connect(lg); lg.connect(o.frequency);
+    const a = t0 + st, e = a + d, vol = v == null ? 1 : v;
+    g.gain.setValueAtTime(0, a); g.gain.linearRampToValueAtTime(vol, a + Math.min(.03, d / 3)); g.gain.setValueAtTime(vol, Math.max(a + .03, e - .04)); g.gain.linearRampToValueAtTime(0, e);
+    o.connect(g); g.connect(lp); o.start(a); lfo.start(a); o.stop(e + .05); lfo.stop(e + .05);
+  });
+}
+const DEMO = {
+  plain:  () => synth([[0, 76, 1.2]]),
+  trill:  () => { const q = []; for (let k = 0; k < 18; k++) q.push([k * .067, k % 2 ? 78 : 76, .07]); synth(q); },
+  low:    () => synth([[0, 55, 1.1]]),
+  high:   () => synth([[0, 88, 1.1]]),
+  steps:  () => synth([[0, 55, .5], [.55, 62, .5], [1.1, 69, .5], [1.65, 76, .5], [2.2, 83, .5], [2.75, 88, .7]]),
+  rep1:   () => { const q = []; for (let k = 0; k < 16; k++) q.push([k * .13, k % 2 ? 69 : 68, .13, .9]); synth(q); },
+  rep2:   () => { const q = []; for (let k = 0; k < 16; k++){ q.push([k * .13, k % 2 ? 69 : 68, .13, .7]); q.push([k * .13, k % 2 ? 73 : 71, .13, .55]); q.push([k * .13, k % 2 ? 76 : 75, .13, .45]); } q.push([0, 52, 2.1, .5]); synth(q); },
+};
+const KNOW = {
+  trill: {title:"トリルってなに？", short:"🎶", html:`
+    <div class="kv"><svg viewBox="0 0 320 110" class="kvsvg" aria-hidden="true">
+      ${[0,1,2,3,4].map(i => `<line x1="10" x2="310" y1="${30+i*12}" y2="${30+i*12}" stroke="#999" stroke-width="1"/>`).join("")}
+      <text x="40" y="22" font-family="serif" font-style="italic" font-weight="bold" font-size="20">tr</text>
+      <ellipse cx="52" cy="54" rx="8" ry="6" fill="#222"/><line x1="59" y1="54" x2="59" y2="20" stroke="#222" stroke-width="2"/>
+      <text x="92" y="62" font-size="24">＝</text>
+      ${Array.from({length:10}, (_, k) => `<ellipse class="trn" style="animation-delay:${k*.07}s" cx="${140+k*16}" cy="${k%2?48:54}" rx="6" ry="4.5" fill="#e2557a"/>`).join("")}
+    </svg></div>
+    <p class="kp"><b>となり合う2つの音</b>を、すばやく<b>行ったり来たり</b>する弾き方。</p>
+    <p class="kp">音がふるえて、<b>小鳥のさえずり</b>のように聞こえます。</p>`,
+    demo:[["ふつうの音","plain"],["トリル","trill"]], clip:() => [secT("birds",0) + 2, 6]},
+  pitch: {title:"ヴァイオリンの高い音・低い音", short:"↕", html:`
+    <div class="kv kvrow"><svg viewBox="0 0 170 150" class="kvsvg" aria-hidden="true">
+      ${[["ソ",4.2,"#7a5230"],["レ",3.2,"#8a6a40"],["ラ",2.2,"#a08050"],["ミ",1.2,"#b8a070"]].map(([n,w,c],i) => `<line x1="${35+i*32}" y1="18" x2="${35+i*32}" y2="128" stroke="${c}" stroke-width="${w}"/><text x="${35+i*32}" y="146" font-size="14" text-anchor="middle">${n}</text>`).join("")}
+      <text x="20" y="12" font-size="11">太い（低い）</text><text x="108" y="12" font-size="11">細い（高い）</text>
+    </svg>
+    <svg viewBox="0 0 170 150" class="kvsvg" aria-hidden="true">
+      <line x1="20" y1="80" x2="160" y2="80" stroke="#8a6a40" stroke-width="3"/>
+      <circle cx="60" cy="80" r="7" fill="#e2557a"/><text x="60" y="66" font-size="11" text-anchor="middle">指</text>
+      <line x1="60" y1="96" x2="160" y2="96" stroke="#e2557a" stroke-width="2"/><text x="110" y="112" font-size="11" text-anchor="middle">ふるえる長さ</text>
+      <text x="90" y="135" font-size="12" text-anchor="middle">短くするほど 高い音</text>
+    </svg></div>
+    <p class="kp"><b>細い弦</b>ほど、<b>指でおさえて弦を短く</b>するほど、高い音になります。</p>
+    <p class="kp">楽器も、<b>小さいほど高い</b>（ヴァイオリン ＞ ヴィオラ ＞ チェロ ＞ コントラバス）。</p>`,
+    demo:[["低い音","low"],["高い音","high"],["低い→高い","steps"]], clip:() => [secT("birds",0) + 2, 6]},
+  repeat: {title:"細かい音のくり返しと重なり", short:"〰", html:`
+    <div class="kv"><svg viewBox="0 0 320 90" class="kvsvg" aria-hidden="true">
+      ${[0,1,2].map(r => Array.from({length:12}, (_, k) => `<circle class="trn" style="animation-delay:${k*.09+r*.03}s" cx="${20+k*25}" cy="${22+r*24+(k%2?-4:4)}" r="5" fill="${["#3d9a6a","#4fb3d9","#6fa8ff"][r]}"/>`).join("")).join("")}
+    </svg></div>
+    <p class="kp">2つの音を<b>細かく行ったり来たり</b>。それを<b>いくつものパートが重ねる</b>と…</p>
+    <p class="kp">さらさら流れる<b>川のせせらぎ</b>に聞こえます。</p>`,
+    demo:[["1つのパート","rep1"],["重ねると","rep2"]], clip:() => [secT("stream",0) + 2, 6]},
+};
+function knowHTML(id, big){
+  const K = KNOW[id], silent = muted();
+  return `<div class="knowcard ${big ? "big" : ""}"><h3>${K.short} ${K.title}</h3>${K.html}
+    ${silent ? `<p class="tip">🔇 音は先生の画面で聴こう。</p>` : `<div class="btnrow kdemo">${K.demo.map(([l, k]) => `<button class="smallbtn" data-demo="${k}">▶ ${l}</button>`).join("")}<button class="smallbtn" data-kclip="${id}">▶ 曲の中で聴く</button></div>`}</div>`;
+}
+function bindKnow(root){
+  root.querySelectorAll("[data-demo]").forEach(b => b.onclick = () => { pause(); DEMO[b.dataset.demo](); });
+  root.querySelectorAll("[data-kclip]").forEach(b => b.onclick = () => { const [f, l] = KNOW[b.dataset.kclip].clip(); loopSec = -1; playClip(f, l); });
+}
+function openKnow(id){
+  let d = document.getElementById("knowDlg");
+  if (!d){ d = document.createElement("div"); d.id = "knowDlg"; document.body.appendChild(d); d.onclick = e => { if (e.target === d) d.classList.add("hidden"); }; }
+  d.className = ""; d.innerHTML = `<div class="kdcard"><button class="lbclose kdclose" aria-label="閉じる">✕</button>${knowHTML(id, true)}</div>`;
+  d.querySelector(".kdclose").onclick = () => d.classList.add("hidden"); bindKnow(d);
 }
 /* ---------- コツ①：絵とソネットの並べかえ ---------- */
 const SORT = [{k:"theme", img:"scene-theme", line:"春がやってきた"}, {k:"birds", img:"scene-birds", line:"小鳥たちは楽しい歌で春にあいさつする"}, {k:"stream", img:"scene-stream", line:"泉はそよ風にふかれ、ささやきながら流れ出す"}, {k:"storm", img:"scene-storm", line:"空は黒い雲におおわれ、稲妻と雷鳴"}];
@@ -2868,6 +2960,9 @@ function renderStep(i){
         <p class="big1">ヴィヴァルディは、<b>詩（ソネット）</b>の場面を、音で表しました。</p>
         <p>楽譜にも「小鳥の歌」「泉が流れる」「雷」と書きこんであります。</p>
         <p class="ask1">🤔 音は、どんな景色を表しているのかな？</p></div></div>
+      <div class="pgsec" data-title="トリル" data-short="🎶">${knowHTML("trill")}</div>
+      <div class="pgsec" data-title="高い音・低い音" data-short="↕">${knowHTML("pitch")}</div>
+      <div class="pgsec" data-title="くり返しと重なり" data-short="〰">${knowHTML("repeat")}</div>
       <div class="pgsec" data-title="並べかえ" data-short="🧩"><h3>🧩 詩の順に、絵を並べよう</h3><div id="sortBox"></div></div>
       <div class="pgsec" data-title="場面当て" data-short="❓"><h3>❓ どの場面かな？</h3><div id="axQuiz"></div></div>
       <div class="pgsec" data-title="考える：小鳥" data-short="🐦"><div class="thinkrow"><img class="thinkimg" src="images/scene-birds.jpg" alt=""><div>${tipCard(TIP.ax_bird, {compact:true})}</div></div></div>
@@ -2989,7 +3084,7 @@ function renderStep(i){
   if (["k1","k2","k3"].includes(s.id)){
     const box = document.getElementById("axPages");
     bindTipCards(box, false); bindWiz(box);
-    if (s.id === "k1"){ renderSort(document.getElementById("sortBox")); if (muted()) document.getElementById("axQuiz").innerHTML = `<div class="note">先生の画面のクイズを見て、考えよう。<br>決め手になった音を、となりの人と話そう。</div>`; else startQuiz(document.getElementById("axQuiz"), false); }
+    if (s.id === "k1"){ bindKnow(box); renderSort(document.getElementById("sortBox")); if (muted()) document.getElementById("axQuiz").innerHTML = `<div class="note">先生の画面のクイズを見て、考えよう。<br>決め手になった音を、となりの人と話そう。</div>`; else startQuiz(document.getElementById("axQuiz"), false); }
     if (s.id === "k2"){ renderRits(document.getElementById("ritBox")); document.getElementById("ritMini").innerHTML = RITS.map((r,k) => `<div><b>${k+1}</b> ${r.key}<span>${r.len.replace(/（.*）/, "")}</span></div>`).join(""); }
     if (s.id === "k3"){ renderSoloBand(document.getElementById("soloBand")); box.querySelectorAll(".e3box").forEach(h => Ens3D.attach(h)); }
     pageBySelector(box, ".pgsec", "ax:" + s.id);
@@ -3233,7 +3328,7 @@ function renderTTip(si){
   let list = secTips(si), id = tPick[si] && list.includes(tPick[si]) ? tPick[si] : list[0], box = document.getElementById("tTip"), extra = "";
   const ls = typeof lessonStep !== "undefined" ? lessonStep : 0;
   if (ls === 2){ id = SECTIONS[si].kind === "stream" ? "ax_stream" : "ax_bird"; list = ["ax_bird","ax_stream"]; if (tPick.k1) id = tPick.k1;
-    extra = `<button class="smallbtn" data-go-tab="quiz">❓ みんなで場面当て</button>`; }
+    extra = `${Object.keys(KNOW).map(k => `<button class="smallbtn" data-know="${k}">${KNOW[k].short} ${KNOW[k].title.replace(/ってなに？|の高い音・低い音/, m => m.includes("高い") ? "：高い・低い" : "")}</button>`).join("")}<button class="smallbtn" data-go-tab="quiz">❓ みんなで場面当て</button>`; }
   if (ls === 3){ id = "ax_rit"; list = [id];
     extra = `<div class="tritlist">${RITS.map((r, k) => `<button class="${secAt(au.currentTime) === r.si ? "on" : ""} ${/短調/.test(r.key) ? "minor" : ""}" data-rit="${r.si}"><b>${k+1}</b>${r.key}<small>${r.len.replace(/（.*）/, "")}</small></button>`).join("")}</div><button class="smallbtn" data-go-tab="tap">🌸 主題さがしゲーム</button>`; }
   if (ls === 4){ id = "ax_conc"; list = [id]; }
@@ -3255,6 +3350,7 @@ function renderTTip(si){
     <button class="smallbtn" data-ttplay>▶ このコツの部分を聴く</button></div>`;
   if (extra) box.insertAdjacentHTML("afterbegin", `<div class="textra">${extra}</div>`);
   box.querySelectorAll("[data-go-tab]").forEach(b => b.onclick = () => showTab(b.dataset.goTab));
+  box.querySelectorAll("[data-know]").forEach(b => b.onclick = () => openKnow(b.dataset.know));
   box.querySelectorAll("[data-rit]").forEach(b => b.onclick = () => { const i = +b.dataset.rit; loopSec = -1; playClip(SECTIONS[i].t, Math.min(9, secEnd(i) - SECTIONS[i].t)); });
   box.querySelectorAll("[data-tp]").forEach(b => b.onclick = () => { if (ls === 2) tPick.k1 = b.dataset.tp; else tPick[si] = b.dataset.tp; renderTTip(si); });
   box.querySelectorAll("[data-tq]").forEach(b => b.onclick = () => { tQ[id] = Math.max(0, Math.min(3, k + +b.dataset.tq)); renderTTip(si); });
