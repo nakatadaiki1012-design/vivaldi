@@ -30,6 +30,8 @@ Style: soft watercolor and gouache illustration for a middle-school music textbo
 プロンプト本文はチャットで渡したものと同じです（下に再掲）。
 
 ## 組みこみ済み
+- pieta.jpg（バロック時代のページと写真タブ。イメージイラストと表示）、scene-solo.jpg（独奏の見せ場の背景）、tip-echo・tip-kage（コツの絵）、sheet-header.png（ワークシート印刷の飾り）
+- まだ：tip-kakeai（かけ合い）。作り直し候補：concerto（エンドピン）
 - concerto.jpg（写真タブ・協奏曲ページ。「イメージイラスト」と表示）、badge.jpg（まとめの完了バッジ）、og-image.jpg（リポジトリ直下。タイトル文字を重ねた）
 - hero.jpg、scene-theme.jpg、scene-birds.jpg、scene-stream.jpg、scene-storm.jpg（幅1600pxに縮小して保存）
 - tip-okaeri、tip-atsumi（上のにじみを切り取り）、tip-oto_e、tip-ugoki（余白を切りそろえて512pxの正方形に）

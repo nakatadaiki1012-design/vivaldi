@@ -938,7 +938,7 @@ function makeScene(stageEl, opts={}){
 }
 // 情景の背景画（Gemini で作ったイラスト）。読みこめないときは手描きの背景を使う
 const BG = {};
-["theme","birds","stream","storm"].forEach(k => { const im = new Image(); im.onload = () => BG[k] = im; im.src = "images/scene-" + k + ".jpg"; });
+["theme","birds","stream","storm","solo"].forEach(k => { const im = new Image(); im.onload = () => BG[k] = im; im.src = "images/scene-" + k + ".jpg"; });
 function bgFor(kind){ return BG[kind] || (kind === "solo" ? BG.theme : null); }
 function drawCover(g, im, w, h, a){ const r = Math.max(w / im.width, h / im.height), iw = im.width * r, ih = im.height * r; g.globalAlpha = a; g.drawImage(im, (w - iw) / 2, (h - ih) / 2, iw, ih); g.globalAlpha = 1; }
 const SKY = {theme:[150,210,255], birds:[175,225,255], stream:[170,220,235], storm:[60,60,90], solo:[255,205,170]};
@@ -960,7 +960,7 @@ function drawScene(S, now){
     S.bgT = Math.min(1, (S.bgT || 0) + .03);
     if (S.bgPrev && S.bgT < 1) drawCover(g, S.bgPrev, w, h, 1);
     drawCover(g, bg, w, h, S.bgPrev ? S.bgT : 1);
-    if (kind === "solo"){ g.fillStyle = "rgba(255,170,90,.28)"; g.fillRect(0,0,w,h); }
+    if (kind === "solo" && !BG.solo){ g.fillStyle = "rgba(255,170,90,.28)"; g.fillRect(0,0,w,h); }
   }
   if (!bg){
   // 太陽
@@ -1039,7 +1039,7 @@ function drawScene(S, now){
     const sp = g.createRadialGradient(w*.5, h*.62, 5, w*.5, h*.62, h*.45);
     sp.addColorStop(0, "rgba(255,255,220,.55)"); sp.addColorStop(1, "rgba(255,255,220,0)");
     g.fillStyle = sp; g.fillRect(0,0,w,h);
-    g.font = `${Math.round(h*.22)}px sans-serif`; g.textAlign = "center"; g.fillText("🎻", w*.5, h*.72 + Math.sin(now/300)*4); g.textAlign = "left";
+    if (!BG.solo){ g.font = `${Math.round(h*.22)}px sans-serif`; g.textAlign = "center"; g.fillText("🎻", w*.5, h*.72 + Math.sin(now/300)*4); g.textAlign = "left"; }
   }
   // 雨と稲妻
   if (stormK > .3){
@@ -2203,7 +2203,7 @@ const TIPS = [
 ];
 const TIP = Object.fromEntries(TIPS.map(t => [t.id, t]));
 // コツの絵（Gemini で作ったイラスト）。絵のないコツは絵文字のまま
-const TIP_IMG = {okaeri:1, atsumi:1, oto_e:1, ugoki:1};
+const TIP_IMG = {echo:1, okaeri:1, atsumi:1, oto_e:1, ugoki:1, kage:1};
 function tipPic(t, cls){ return TIP_IMG[t.id] ? `<img class="${cls || "tipimg"}" src="images/tip-${t.id}.jpg" alt="" loading="lazy">` : `<span class="${(cls || "tipimg") + " emo"}">${t.icon}</span>`; }
 
 // 思考・判断・表現 ＝ 4つのステップ
@@ -2336,6 +2336,8 @@ const PHOTOS = {
     cap:"1678年ヴェネツィア生まれ。教会の司祭で、「赤毛の司祭」とよばれました。（この肖像画は、ヴィヴァルディを描いたものと考えられています）", look:["バロック時代の服装","手にしている楽器や楽譜"]},
   venice:      {group:"作曲者と時代", title:"ヴィヴァルディのころのヴェネツィア", file:"photos/venice.jpg", credit:"カナレット《リーヴァ・デッリ・スキアヴォーニの眺め》（18世紀）／トレド美術館／パブリックドメイン", web:"https://commons.wikimedia.org/wiki/Special:FilePath/Giovanni_Antonio_Canal%2C_called_Canaletto_-_View_of_the_Riva_degli_Schiavoni%2C_Venice_-_Google_Art_Project.jpg?width=1280", page:"https://commons.wikimedia.org/wiki/File:Giovanni_Antonio_Canal%2C_called_Canaletto_-_View_of_the_Riva_degli_Schiavoni%2C_Venice_-_Google_Art_Project.jpg",
     cap:"ヴィヴァルディと同じ時代の画家カナレットが描いた、ヴェネツィアの海沿いの通り。ヴィヴァルディが音楽を教えたピエタ慈善院は、この通りに面していました。", look:["運河と小舟（ゴンドラ）","海沿いに並ぶ建物","18世紀の人々のようす"]},
+  pieta:       {group:"作曲者と時代", title:"ピエタ慈善院の少女たちの合奏", file:"images/pieta.jpg", credit:"", ai:true,
+    cap:"ヴィヴァルディが音楽を教えたピエタ慈善院では、親のいない少女たちが教会の高い演奏席で、格子の向こうから演奏したと伝えられています。", look:["格子のついた演奏席","演奏しているのはだれ？","ヴァイオリンとチェロ"]},
 };
 const PHOTO_IDS = Object.keys(PHOTOS);
 
@@ -2371,7 +2373,7 @@ async function fillPhotos(root){
     f.onclick = () => openLightbox(id, figs.map(x => x.dataset.ph));
   }
 }
-function creditOf(id){ const r = photoSrc[id]; if (r && r.own) return "先生が用意した写真"; if (r && r.local && PHOTOS[id].ai) return "イメージイラスト（生成AI・Geminiで作成。実際の演奏の写真ではありません）"; return r && r.src && !r.local ? (PHOTOS[id].credit || "") + "（Wikimedia Commons）" : ""; }
+function creditOf(id){ const r = photoSrc[id]; if (r && r.own) return "先生が用意した写真"; if (r && r.local && PHOTOS[id].ai) return "イメージイラスト（生成AI・Geminiで作成。当時の写真や記録ではありません）"; return r && r.src && !r.local ? (PHOTOS[id].credit || "") + "（Wikimedia Commons）" : ""; }
 
 /* 大きく見る（授業で映す） */
 let lbList = [], lbIdx = 0;
@@ -2516,7 +2518,7 @@ const CONTENT = {
         <div class="kcard"><p><b>ピエタ慈善院</b>（親のいない子どもたちが暮らす施設）で少女たちに音楽を教え、彼女たちの演奏会のために多くの曲を作りました。</p></div>
         <div class="kcard"><p>生涯で<b>500曲以上の協奏曲</b>を作ったといわれます。バッハもヴィヴァルディの協奏曲を研究し、編曲しました。</p></div>
       </div>
-      ${photoGrid(["vivaldi","venice"])}
+      ${photoGrid(["vivaldi","venice","pieta"])}
       <h3>いつごろの音楽？</h3>
       <div class="era">
         <div style="flex:150;background:#f2a93b">バロック<br><small>1600〜1750ごろ</small></div>
@@ -2958,6 +2960,7 @@ function esc(s){ return String(s || "").replace(/[&<>"]/g, c => ({"&":"&amp;","<
 function printSheet(filled){
   const N = filled ? notes : {feel1:[], feel1txt:"", feel2:[], fav:"", why:"", intro:"", tips:{}};
   document.getElementById("printsheet").innerHTML = `
+    <img src="images/sheet-header.png" alt="" style="width:100%;max-height:34mm;object-fit:contain;display:block;margin-bottom:2mm">
     <h1>ヴィヴァルディ「春」第1楽章 鑑賞ワークシート</h1>
     <p>${N.name ? "名前：" + esc(N.name) : "　年　　組　　番　名前（　　　　　　　　　　　　）"}</p>
     <h3>1. はじめに聴いて感じたこと</h3>
