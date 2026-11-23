@@ -373,7 +373,19 @@ details.pt summary{cursor:pointer;font-size:13px;color:var(--sub);margin-top:8px
 .tchip,.thchip{display:inline-block;border-radius:999px;padding:1px 10px;margin:2px 4px 2px 0;font-size:13px;background:color-mix(in srgb,var(--birds) 22%,var(--panel));border:1px solid color-mix(in srgb,var(--birds) 45%,var(--line))}
 .thchip{background:color-mix(in srgb,var(--solo) 18%,var(--panel));border-color:color-mix(in srgb,var(--solo) 45%,var(--line))}
 .tipcard{margin-top:0;border-left:8px solid var(--birds)}
-.tiphead{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.tiphead{display:flex;align-items:center;gap:12px}
+.tiphead > div{display:flex;flex-direction:column;align-items:flex-start;gap:4px}
+.tipimg{width:84px;height:84px;border-radius:16px;object-fit:cover;flex:none;background:#fdf7ea;box-shadow:0 1px 4px rgba(0,0,0,.08)}
+.tipimg.emo{display:flex;align-items:center;justify-content:center;font-size:42px}
+.tipimg.sm{width:56px;height:56px;border-radius:12px}
+.tipimg.sm.emo{font-size:28px}
+.ttn{display:flex;align-items:center;gap:10px}
+.apR .tipimg{width:60px;height:60px}
+.tipcard.big .tipimg{width:150px;height:150px;border-radius:20px}
+.tipcard.big .tipimg.emo{font-size:72px}
+.tipcard.big .tiphead h3{font-size:22px}
+.ttn .elbadge{white-space:nowrap;font-size:11px}
+@media (max-width:600px){ .tipimg{width:60px;height:60px} }
 .tiphead h3{margin:0;font-size:20px}
 .elbadge{background:var(--ink);color:var(--bg);border-radius:8px;padding:2px 10px;font-size:13px;font-weight:700}
 .tipbody{margin-top:8px;font-size:16px}
@@ -2184,6 +2196,9 @@ const TIPS = [
    riyu:"独奏が目立つところは、なぜ「見せ場」に感じるのだろう？ 合奏はそのとき何をしている？"},
 ];
 const TIP = Object.fromEntries(TIPS.map(t => [t.id, t]));
+// コツの絵（Gemini で作ったイラスト）。絵のないコツは絵文字のまま
+const TIP_IMG = {okaeri:1, atsumi:1, oto_e:1, ugoki:1};
+function tipPic(t, cls){ return TIP_IMG[t.id] ? `<img class="${cls || "tipimg"}" src="images/tip-${t.id}.jpg" alt="" loading="lazy">` : `<span class="${(cls || "tipimg") + " emo"}">${t.icon}</span>`; }
 
 // 思考・判断・表現 ＝ 4つのステップ
 const THINK = [
@@ -2201,8 +2216,8 @@ function thinkChip(id){ const t = THINK.find(x => x.id === id); return `<span cl
 /* ---------- コツのカード（生徒・先生共通） ---------- */
 function tipCard(t, opts={}){
   const n = (notes.tips || {})[t.id] || {};
-  return `<div class="card tipcard" data-tip="${t.id}">
-    <div class="tiphead"><span class="elbadge">${t.el}</span><h3>${t.icon} ${t.name}</h3></div>
+  return `<div class="card tipcard ${opts.learn || opts.teacher ? "big" : ""}" data-tip="${t.id}">
+    <div class="tiphead">${tipPic(t)}<div><span class="elbadge">${t.el}</span><h3>${t.name}</h3></div></div>
     <div class="tipbody">💡 <b>コツ</b>：${t.tip}</div>
     <div class="btnrow" style="margin-top:6px"><button class="smallbtn" data-tipplay="${t.id}">▶ 聴いてみる（${t.where}）</button></div>
     ${opts.learn ? `<div class="tip" style="margin-top:8px">💭 このコツで聴いたら：👂何が聞こえる？ → 💗どんな感じ？ → 🔍なぜ？ → ✍️ひとことで</div>` : opts.teacher ? `
@@ -2978,7 +2993,7 @@ function renderTTip(si){
   }
   if (!t){ box.innerHTML = ""; return; }
   box.innerHTML = `${list.length > 1 ? `<div class="aptabs" style="margin-bottom:6px">${list.map(k => `<button class="chip ${k === id ? "on" : ""}" data-tp="${k}">${TIP[k].icon} ${TIP[k].name}</button>`).join("")}</div>` : ""}
-    <div class="ttip"><div class="ttn">${t.icon} <b>${t.name}</b> <span class="elbadge">${t.el}</span></div><div class="tip">${t.tip}</div>
+    <div class="ttip"><div class="ttn">${tipPic(t, "tipimg sm")}<div><b>${t.name}</b> <span class="elbadge">${t.el}</span></div></div><div class="tip">${t.tip}</div>
     <ol class="tq">${THINK.map(q => `<li>${q.icon}<b>${q.name}</b>「${q.q}」<span class="tip">${q.id === "chikaku" ? "例：" + t.kakaku.slice(0,2).join("、") : q.id === "kanju" ? "例：" + t.kanju.slice(0,3).join("、") : q.id === "riyu" ? t.riyu : ""}</span></li>`).join("")}</ol>
     <button class="smallbtn" data-ttplay>▶ このコツの部分を聴く</button></div>`;
   box.querySelectorAll("[data-tp]").forEach(b => b.onclick = () => { tPick[si] = b.dataset.tp; renderTTip(si); });

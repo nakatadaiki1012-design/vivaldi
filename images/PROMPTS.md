@@ -31,7 +31,8 @@ Style: soft watercolor and gouache illustration for a middle-school music textbo
 
 ## 組みこみ済み
 - hero.jpg、scene-theme.jpg、scene-birds.jpg、scene-stream.jpg、scene-storm.jpg（幅1600pxに縮小して保存）
-- まだ：scene-solo（いまは主題の絵に夕日の色を重ねて代用）、コツの7枚、concerto、pieta、og-image、sheet-header、badge
+- tip-okaeri、tip-atsumi（上のにじみを切り取り）、tip-oto_e、tip-ugoki（余白を切りそろえて512pxの正方形に）
+- まだ：scene-solo（いまは主題の絵に夕日の色を重ねて代用）、tip-echo・tip-kage・tip-kakeai（いまは絵文字）、concerto、pieta、og-image、sheet-header、badge
 
 ---
 ## プロンプト本文
