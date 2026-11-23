@@ -311,6 +311,8 @@ body.present .tch{max-width:none}
 .wzdots i.on{background:var(--accent);transform:scale(1.25)}
 .wzdots i.done{background:var(--accent2)}
 .tipcard.wizdone{box-shadow:0 0 0 3px var(--accent2)}
+.apnext{display:block;width:100%;margin-bottom:6px;border:none;border-radius:10px;background:var(--accent);color:#fff;font-weight:700;padding:6px 10px;font-size:14px;animation:apblink 1.2s ease-in-out infinite alternate}
+@keyframes apblink{from{opacity:.75}to{opacity:1}}
 .tqbig{background:var(--soft);border-radius:12px;padding:10px 12px;margin:8px 0 4px}
 .tqn{font-size:22px;font-weight:800;line-height:1.4}
 .goalsteps{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:12px 0}
@@ -2189,6 +2191,7 @@ function makePager(container, groups, opts={}){
     nav.querySelectorAll("[data-i]").forEach(b => b.onclick = () => show(+b.dataset.i));
     const sc = container.closest(".main,.tch"); if (sc) sc.scrollTop = 0;
     if (opts.onShow) opts.onShow(i);
+    if (key === "ttips" && typeof Sync !== "undefined") Sync.send();
   };
   show(i); return {show, get index(){ return i; }};
 }
@@ -2280,8 +2283,8 @@ function tipCard(t, opts={}){
   return `<div class="card tipcard ${opts.learn || opts.teacher ? "big" : ""}" data-tip="${t.id}">
     <div class="tiphead">${tipPic(t)}<div><span class="elbadge">${t.el}</span><h3>${t.name}</h3></div></div>
     ${opts.compact ? "" : `<div class="tipbody">💡 <b>コツ</b>：${t.tip}</div>`}
-    ${opts.compact && muted() ? "" : `<div class="btnrow" style="margin-top:6px"><button class="smallbtn" data-tipplay="${t.id}">▶ 聴いてみる（${t.where}）</button></div>`}
-    ${opts.learn ? `<div class="tip" style="margin-top:8px">💭 このコツで聴いたら：👂何が聞こえる？ → 💗どんな感じ？ → 🔍なぜ？ → ✍️ひとことで</div>` : opts.teacher ? `
+    ${(opts.compact || opts.learn) && muted() ? "" : `<div class="btnrow" style="margin-top:6px"><button class="smallbtn" data-tipplay="${t.id}">▶ 聴いてみる（${t.where}）</button></div>`}
+    ${opts.learn ? "" : opts.teacher ? `
     <div class="think4">${THINK.map(s => `<div class="th"><div class="thq">${s.icon} ${s.name}「${s.q}」</div><div class="tip">${
       s.id === "chikaku" ? "例：" + t.kakaku.slice(0,2).join("、") :
       s.id === "kanju" ? "例：" + t.kanju.slice(0,3).join("、") :
@@ -2308,7 +2311,7 @@ function bindTipCards(root, teacher){
   });
 }
 // 「コツで聴く」は 1つの問いずつ
-let wizStage = {};
+let wizStage = {}, stuTipPager = null;
 function bindWiz(root){
   root.querySelectorAll(".tipcard").forEach(card => {
     const w = card.querySelector(".wiz"); if (!w) return;
@@ -2341,7 +2344,14 @@ function secTips(si){
 let applySi = -1, applyPick = {};
 function renderApplyTip(si){
   const box = document.getElementById("applyTip"); if (!box) return;
-  if (box.contains(document.activeElement) && document.activeElement.tagName === "TEXTAREA"){ document.activeElement.onblur = () => renderApplyTip(secAt(au.currentTime)); return; }
+  // 書いている最中は、すぐには切りかえず「次の場面へ」のボタンを出す（書いた内容は保存ずみ）
+  if (box.contains(document.activeElement) && document.activeElement.tagName === "TEXTAREA" && si !== applySi){
+    let nb = box.querySelector(".apnext");
+    if (!nb){ nb = document.createElement("button"); nb.className = "apnext"; box.prepend(nb); nb.onclick = () => { document.activeElement.blur(); renderApplyTip(secAt(au.currentTime)); }; }
+    nb.textContent = `▶ ${SECTIONS[si].name}（場面${si + 1}）へ`;
+    document.activeElement.onblur = () => setTimeout(() => renderApplyTip(secAt(au.currentTime)), 150);
+    return;
+  }
   applySi = si;
   const list = secTips(si), id = applyPick[si] && list.includes(applyPick[si]) ? applyPick[si] : list[0], s = SECTIONS[si];
   box.innerHTML = `<div class="apsec">${KIND[s.kind].emoji} 場面${si + 1}：${s.name}${list.length > 1 ? `　<span class="aptabs">${list.map(k => `<button class="chip ${k === id ? "on" : ""}" data-pick="${k}">${TIP[k].icon} ${TIP[k].name}</button>`).join("")}</span>` : ""}</div>${id ? tipCard(TIP[id], {compact:true}) : ""}`;
@@ -2353,6 +2363,7 @@ function renderApplyTip(si){
   prog.querySelectorAll("[data-go]").forEach(b => b.onclick = () => { applyPick[+b.dataset.go] = TIPS.find(t => b.title.startsWith(t.name)).id; jump(+b.dataset.go); renderApplyTip(+b.dataset.go); });
 }
 
+let tTipPager = null;
 function renderTipsTab(){
   document.getElementById("tTips").innerHTML = `
     <h2>🎧 鑑賞のコツ（こう聴くと、曲の楽しみ方がよくわかる）</h2>
@@ -2365,7 +2376,7 @@ function renderTipsTab(){
     ${TIPS.map(t => `<div class="pgsec" data-title="${t.name}" data-short="${t.icon}" style="position:relative">${planTips().includes(t.id) ? '<span class="star">★ このプランで使う</span>' : ""}${tipCard(t, {teacher:true})}</div>`).join("")}
     </div>`;
   bindTipCards(document.getElementById("tTips"), true);
-  pageBySelector(document.getElementById("tipPages"), ".pgsec", "ttips");
+  tTipPager = pageBySelector(document.getElementById("tipPages"), ".pgsec", "ttips");
 }
 /* ---------- 小さな確認クイズ ---------- */
 function miniQuiz(box, qs, doneId){
@@ -2744,7 +2755,6 @@ function renderStep(i){
       </div>`;
   } else if (s.id === "tips"){
     html = `<div class="panel">${H(i)}
-      <p class="tip" style="margin-top:0">音楽には「こう聴くと楽しみ方がよくわかる」<b>コツ</b>があります。7つのコツを、▶で聴いて確かめよう。次のステップでは、このコツを使って曲を聴きます。</p>
       <div id="tipsBox"></div>
       </div>`;
   } else if (s.id === "apply"){
@@ -2837,7 +2847,7 @@ function renderStep(i){
   if (s.id === "which") startQuiz(document.getElementById("quizBox"), false);
   if (s.id === "form") startTap(document.getElementById("tapBox"), false);
   if (s.id === "elem"){ const box = document.getElementById("elemBox"); renderElements(box); box.querySelectorAll(".card").forEach(c => c.style.marginTop = 0); pageBySelector(box, ".card", "elem", ["theme","birds","stream","storm"].map(k => KIND[k].emoji)); }
-  if (s.id === "tips"){ const box = document.getElementById("tipsBox"); box.innerHTML = TIPS.map(t => tipCard(t, {learn:true})).join(""); bindTipCards(box, true); pageBySelector(box, ".tipcard", "tips", TIPS.map(t => t.icon)); markDone("tips"); }
+  if (s.id === "tips"){ const box = document.getElementById("tipsBox"); box.innerHTML = TIPS.map(t => tipCard(t, {learn:true})).join(""); bindTipCards(box, true); stuTipPager = pageBySelector(box, ".tipcard", "tips", TIPS.map(t => t.icon)); markDone("tips"); }
   if (s.id === "apply"){
     attachStuScene(document.getElementById("applyStage"), {onSection: si => renderApplyTip(si)});
     const v = store.get("stuStageView", "scene"), st = document.querySelector("#applyStage .stage");
@@ -3382,10 +3392,10 @@ const Sync = (() => {
   function teacherRoom(){ let r = store.get("tRoom", ""); if (!r){ r = "vspring-" + Math.random().toString(36).slice(2, 10) + Math.random().toString(36).slice(2, 6); store.set("tRoom", r); } return r; }
   /* ---------- 先生：送る ---------- */
   let sendOn = store.get("syncSend", true), lastSent = "", lastAt = 0, timer = null;
-  function state(){ return {s:lessonStep || 0, t:+au.currentTime.toFixed(2), p:!au.paused ? 1 : 0}; }
+  function state(){ return {s:lessonStep || 0, t:+au.currentTime.toFixed(2), p:!au.paused ? 1 : 0, k:tTipPager && curTab === "tips" ? tTipPager.index : -1}; }
   function send(force){
     if (!sendOn || mode !== "teacher") return;
-    const st = state(), key = st.s + ":" + st.p + ":" + secAt(st.t);
+    const st = state(), key = st.s + ":" + st.p + ":" + secAt(st.t) + ":" + st.k;
     const now = Date.now();
     if (!force && key === lastSent && now - lastAt < 15000) return;
     lastSent = key; lastAt = now;
@@ -3412,6 +3422,8 @@ const Sync = (() => {
     // 授業の段階が変わったら、そのステップへ
     if (m.s && m.s !== lastStep){ lastStep = m.s; const core = STEPS.filter(x => x.core), st = core[m.s - 1]; const idx = STEPS.indexOf(st);
       if (idx >= 0 && idx !== curStep) renderStep(idx); }
+    // ② コツを知る：先生が映しているコツのページへ（先生の0ページ目は「4つのステップ」）
+    if (m.k > 0 && stuTipPager && document.getElementById("tipsBox")) stuTipPager.show(m.k - 1);
   }
   let lastSeek = 0;
   function tick(){
