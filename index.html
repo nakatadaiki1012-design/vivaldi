@@ -2203,7 +2203,7 @@ const TIPS = [
 ];
 const TIP = Object.fromEntries(TIPS.map(t => [t.id, t]));
 // コツの絵（Gemini で作ったイラスト）。絵のないコツは絵文字のまま
-const TIP_IMG = {echo:1, okaeri:1, atsumi:1, oto_e:1, ugoki:1, kage:1};
+const TIP_IMG = {echo:1, okaeri:1, atsumi:1, oto_e:1, ugoki:1, kage:1, kakeai:1};
 function tipPic(t, cls){ return TIP_IMG[t.id] ? `<img class="${cls || "tipimg"}" src="images/tip-${t.id}.jpg" alt="" loading="lazy">` : `<span class="${(cls || "tipimg") + " emo"}">${t.icon}</span>`; }
 
 // 思考・判断・表現 ＝ 4つのステップ
