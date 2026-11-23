@@ -60,8 +60,11 @@
 - ヴィヴァルディが楽譜に書きこんだことば（Canto de gl'uccelli＝小鳥の歌、Scorrono i fonti＝泉が流れる、Tuoni＝雷、Solo／Tutti）と日本語訳を表示
 - 楽譜データ：Mutopia Project「La Primavera」（Performers' Facsimiles の1725年初版をもとに LilyPond で入力、**CC BY-SA 3.0**）を、アプリ用の音符データ（`SCORE`）に変換。このデータ部分も CC BY-SA 3.0 です
 - 録音との対応：楽譜から作った音と録音を照らし合わせ（クロマ特徴量＋DTW）、0.5拍ごとの時刻を求めた。ずれは先生用「設定」で全体を前後にずらせる
-- 楽譜の描画に VexFlow（ネットから読み込み）を使うため、表示にはネット接続が必要
+- 楽譜の描画に VexFlow を使う（`lib/` に同梱。なければネットから）
 
 ## 音源
 ルイス・カウフマン（独奏ヴァイオリン）、ヘンリー・スウォボダ指揮 コンサートホール室内管弦楽団（1947年録音）。
 場面の時間はこの録音に合わせています。
+
+## 同梱ライブラリ（lib/）
+- three.js r128（MIT License）、OrbitControls（MIT License）、VexFlow 4.2.2（MIT License）

@@ -327,7 +327,41 @@ body.present .lessonbar,body.present .lbhint{display:none}
 .mynotes{background:var(--bg);border:1px solid var(--line);border-radius:12px;padding:6px 10px;margin:6px 0}
 .mn{display:flex;gap:8px;align-items:center;justify-content:space-between;border-top:1px dashed var(--line);padding:4px 0;font-size:13.5px}
 .mn:first-of-type{border-top:none}
+/* 「コツで聴く」：右の書く欄を広く */
+.apply{grid-template-columns:minmax(0,.92fr) minmax(0,1.08fr)}
+.apR .think4 textarea{height:46px}
 /* iPad 横向きなど、高さが低い画面 */
+@media (max-height:860px) and (min-width:861px){
+  #student .writepanel .goalcard{display:none}
+  #student .writepanel .think4{grid-template-columns:repeat(4,1fr);gap:4px;margin-top:4px}
+  #student .writepanel .think4 .th{padding:3px 8px;font-size:12px}
+  #student .writepanel .think4 .thq{margin:0}
+  #student .writepanel p.tip{font-size:12.5px;margin:4px 0}
+  #student .writepanel #why{min-height:90px}
+}
+@media (max-height:860px) and (min-width:861px){
+  #student .applypanel .goalcard{display:none}
+  #student .applypanel{padding-top:10px;padding-bottom:10px}
+  #student .applypanel .h2row h2{font-size:19px}
+  #student .applypanel .apply{gap:10px;margin-top:6px}
+  #student .applypanel .apsec{margin-bottom:4px;font-size:13px;gap:4px 6px}
+  #student .applypanel .aptabs{gap:3px}
+  #student .applypanel .aptabs .chip{white-space:nowrap;font-size:11.5px;padding:1px 7px}
+  #student .applypanel .apR .tipcard{padding:6px 8px}
+  #student .applypanel .apR .tipimg{width:40px;height:40px;border-radius:10px}
+  #student .applypanel .apR .tiphead{gap:8px}
+  #student .applypanel .apR .tiphead > div{flex-direction:row;align-items:center;gap:6px;flex-wrap:wrap}
+  #student .applypanel .apR .tiphead h3{font-size:15px}
+  #student .applypanel .apR .tipcard .btnrow{margin-top:2px!important}
+  #student .applypanel .apR .tipcard .btnrow .smallbtn{padding:2px 8px;font-size:12px}
+  #student .applypanel .apR .tipmore summary{margin-top:2px;font-size:12px}
+  #student .applypanel .apR .think4{gap:4px;margin-top:4px}
+  #student .applypanel .apR .think4 .th{padding:3px 6px}
+  #student .applypanel .apR .think4 .thq{font-size:11.5px;margin-bottom:1px}
+  #student .applypanel .apR .chips.sm .chip{font-size:11px;padding:0 6px;line-height:1.7}
+  #student .applypanel .apR .think4 textarea{height:64px}
+  #student .applypanel .apL .tip{font-size:12.5px;margin-top:4px!important;line-height:1.5}
+}
 @media (max-height:820px) and (min-width:861px){
   #student .split .stage{aspect-ratio:16/9.5}
   #student .chips{gap:4px;margin:4px 0}
@@ -1183,14 +1217,16 @@ const Ens3D = (() => {
   let M = {};
 
   function load(src){ return new Promise((res, rej) => { const s = document.createElement("script"); s.src = src; s.onload = res; s.onerror = rej; document.head.appendChild(s); }); }
+  // アプリの lib フォルダから読む（学校のネットワークで外部サイトが止められていても動くように）。なければネットから
+  const loadLocal = (local, url) => load(local).catch(() => load(url));
   function ensure(){
-    if (!loading) loading = (window.THREE ? Promise.resolve() : load(THREE_URL))
-      .then(() => THREE.OrbitControls ? 0 : load(ORBIT_URL))
+    if (!loading) loading = (window.THREE ? Promise.resolve() : loadLocal("lib/three.min.js", THREE_URL))
+      .then(() => THREE.OrbitControls ? 0 : loadLocal("lib/OrbitControls.js", ORBIT_URL))
       .then(() => { build(); ready = true; })
       .catch(e => { failed = true; hosts.forEach(msg); throw e; });
     return loading;
   }
-  function msg(h){ const m = h.querySelector(".e3msg"); if (m) m.textContent = failed ? "3Dの表示にはインターネット接続が必要です（音と他の機能はそのまま使えます）" : "🎻 3Dを読み込み中…"; }
+  function msg(h){ const m = h.querySelector(".e3msg"); if (m) m.textContent = failed ? "3Dを表示できませんでした（音と他の機能はそのまま使えます）" : "🎻 3Dを読み込み中…"; }
   function attach(host){
     host.classList.add("e3host");
     if (!host.querySelector(".e3msg")) host.insertAdjacentHTML("beforeend", `<div class="e3msg"></div>`);
@@ -1793,9 +1829,9 @@ const ScoreView = (() => {
 
   let loading = null, ready = false, failed = false, hosts = [], part = "auto", lastKey = "", lastHost = null;
   function ensure(){
-    if (!loading) loading = (window.Vex ? Promise.resolve() : new Promise((res, rej) => { const s = document.createElement("script"); s.src = VF_URL; s.onload = res; s.onerror = rej; document.head.appendChild(s); }))
+    if (!loading) loading = (window.Vex ? Promise.resolve() : new Promise((res, rej) => { const s = document.createElement("script"); s.src = "lib/vexflow.js"; s.onload = res; s.onerror = () => { const t = document.createElement("script"); t.src = VF_URL; t.onload = res; t.onerror = rej; document.head.appendChild(t); }; document.head.appendChild(s); }))
       .then(() => { ready = true; lastKey = ""; })
-      .catch(() => { failed = true; hosts.forEach(h => { const st = h.querySelector(".scv-staff"); if (st) st.innerHTML = `<div class="scv-msg">楽譜の表示にはインターネット接続が必要です</div>`; }); });
+      .catch(() => { failed = true; hosts.forEach(h => { const st = h.querySelector(".scv-staff"); if (st) st.innerHTML = `<div class="scv-msg">楽譜を表示できませんでした</div>`; }); });
     return loading;
   }
   function attach(host, opts={}){
@@ -2674,7 +2710,7 @@ function renderStep(i){
       <div id="tipsBox"></div>
       </div>`;
   } else if (s.id === "apply"){
-    html = `<div class="panel">${H(i)}
+    html = `<div class="panel applypanel">${H(i)}
       <div class="apply">
         <div class="apL">
           <div class="btnrow" style="margin:0 0 6px"><button class="smallbtn on" data-asv="scene">🌸 情景</button><button class="smallbtn" data-asv="e3d">🎻 3D合奏</button></div>
@@ -2693,7 +2729,7 @@ function renderStep(i){
       <div id="elemBox"></div>
       </div>`;
   } else if (s.id === "write"){
-    html = `<div class="panel">${H(i)}
+    html = `<div class="panel writepanel">${H(i)}
       <div id="writePages">
       <div class="pgsec" data-title="感じたこと・好きな場面" data-short="💗">
       <h3>もう一度、最後まで聴いて感じたことば</h3>
