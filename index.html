@@ -99,7 +99,8 @@ body.present #teacher .stage{aspect-ratio:auto;height:calc(100dvh - 190px)}
 .main{min-width:0;overflow:auto;padding-bottom:130px;scrollbar-width:thin}
 #student .stage{aspect-ratio:16/7}
 .split{display:grid;grid-template-columns:1fr;gap:12px}
-@media (min-width:1000px){ .split{grid-template-columns:1fr 1fr;align-items:start} .split .stage{aspect-ratio:16/10} .split h3:first-child{margin-top:0} }
+.split > *{min-width:0}
+@media (min-width:1000px){ .split{grid-template-columns:minmax(0,1fr) minmax(0,1fr);align-items:start} .split .stage{aspect-ratio:16/10} .split h3:first-child{margin-top:0} }
 .tapbig{padding:14px;font-size:22px}
 .elopt{padding:6px 8px;font-size:14px}
 .elgrid{gap:6px}
@@ -1032,7 +1033,7 @@ function makePlayer(el, opts={}){
 function buildSecButtons(P){
   if (!P.secs) return;
   const hide = P.hideNames();
-  P.secs.innerHTML = SECTIONS.map((s,i) => `<button class="secbtn" data-i="${i}" style="border-left:8px solid ${KIND[s.kind].color}"><span class="n">${(i+1)%10 === 0 && i === 9 ? "0" : i+1}</span>${hide ? "場面" + (i+1) : s.name}</button>`).join("");
+  P.secs.innerHTML = SECTIONS.map((s,i) => `<button class="secbtn" data-i="${i}" style="border-left:8px solid ${KIND[s.kind].color}"><span class="n">${i+1}</span>${hide ? "場面" + (i+1) : s.name}</button>`).join("");
   P.secs.querySelectorAll(".secbtn").forEach(b => b.onclick = () => jump(+b.dataset.i));
   P.lastSec = -2;
 }
@@ -2085,19 +2086,49 @@ const ScoreView = (() => {
     return res;
   }
   // スラー・フレーズのスラー・タイ（パート全体で対応をとる）
+  // スラー：符頭の側（符尾と反対側）に、なだらかな弧を手で描く。間の音や記号をよけて高さを決める
+  function headX(sn, end){ try{ return end ? sn.getNoteHeadEndX() : sn.getNoteHeadBeginX(); }catch(e){ return sn.getAbsoluteX() + (end ? 10 : 0); } }
+  function drawSlur(ctx, list, phrase){
+    const a = list[0], b = list[list.length - 1];
+    const dirs = list.map(n => n.sn.getStemDirection());
+    const side = dirs.every(d => d === 1) ? 1 : -1;                 // 1 = 下に描く（符尾が上）、-1 = 上に描く
+    const hy = n => side < 0 ? Math.min(...n.sn.getYs()) : Math.max(...n.sn.getYs());
+    const gap = (phrase ? 14 : 7);
+    const x1 = (headX(a.sn) + headX(a.sn, true)) / 2 + 1, x2 = (headX(b.sn) + headX(b.sn, true)) / 2 - 1;
+    const pad = n => (n.fl & 512) ? 13 : (n.fl & 256) ? 6 : 0;                  // スタッカートの点は弧の内側に入れる
+    let y1 = hy(a) + side * (gap + pad(a)), y2 = hy(b) + side * (gap + pad(b));
+    const dx = Math.max(8, x2 - x1);
+    let hgt = Math.min(phrase ? 22 : 14, 3 + dx * (phrase ? .1 : .14));
+    // 間の音が弧にぶつからないように高さを足す
+    list.slice(1, -1).forEach(n => { const x = (headX(n.sn) + headX(n.sn, true)) / 2, f = (x - x1) / dx;
+      const base = y1 + (y2 - y1) * f, need = hy(n) + side * (gap + pad(n)), arc = hgt * 4 * f * (1 - f);
+      const over = side < 0 ? (base - arc) - need : need - (base + arc);
+      if (over > 0) hgt += over / Math.max(.4, 4 * f * (1 - f)); });
+    // 「tr」と重なるときは弧を記号の下におさえる（上向きのとき）
+    // 上向きの弧の中に「tr」があるときは、記号の上を通す
+    if (side < 0 && list.some(n => n.fl & 6)){
+      const top = Math.min(...list.map(n => Math.min(hy(n), n.sn.getStave().getYForLine(0)))) - 34;
+      y1 = Math.min(y1, top); y2 = Math.min(y2, top); hgt = Math.min(hgt, 8); }
+    const th = phrase ? 1.6 : 1.9, c = .28;
+    const cx1 = x1 + dx * c, cx2 = x2 - dx * c, k = side * hgt * 1.33;
+    ctx.beginPath(); ctx.moveTo(x1, y1);
+    ctx.bezierCurveTo(cx1, y1 + (y2 - y1) * c + k, cx2, y2 - (y2 - y1) * c + k, x2, y2);
+    ctx.bezierCurveTo(cx2, y2 - (y2 - y1) * c + k - side * th, cx1, y1 + (y2 - y1) * c + k - side * th, x1, y1);
+    ctx.closePath(); ctx.fill();
+  }
   function drawCurves(VF, ctx, res){
     const notes = res.filter(r => !r.rest), curves = [];
-    [[16, 32, {thickness:2, y_shift:8}], [64, 128, {thickness:1.5, y_shift:20, cps:[{x:0, y:22}, {x:0, y:22}]}]].forEach(([S0, E0, opt]) => {
+    notes.forEach((n, i) => n.i = i);
+    [[16, 32, false], [64, 128, true]].forEach(([S0, E0, phrase]) => {
       const stack = [];
-      notes.forEach((n, i) => { n.i = i;
-        if ((n.fl & E0) && !(n.fl & S0)){ const a = stack.pop();
-          // スラーの中に「tr」があるときは、記号と重ならないようにスラーを高くする
-          if (a){ const orn = notes.slice(a.i, i + 1).some(x => x.fl & 6); curves.push(new VF.Curve(a.sn, n.sn, orn ? {...opt, y_shift:opt.y_shift + 12, cps:[{x:0, y:24}, {x:0, y:24}]} : opt)); } }
+      notes.forEach((n, i) => {
+        if ((n.fl & E0) && !(n.fl & S0)){ const a = stack.pop(); if (a){ try{ drawSlur(ctx, notes.slice(a.i, i + 1), phrase); }catch(e){} } }
         if (n.fl & S0) stack.push(n); });
     });
     notes.forEach((n, i) => { if (n.fl & 1){ const nx = notes[i + 1]; if (nx) curves.push(new VF.StaveTie({first_note:n.sn, last_note:nx.sn, first_indices:[0], last_indices:[0]})); } });
     curves.forEach(c => { try{ c.setContext(ctx).draw(); }catch(e){} });
   }
+
   function dims(pk, W){
     const keys = pk === "all" ? ALL : [pk], sc = pk === "all" ? .7 : (W < 520 ? .74 : 1);
     const rowH = pk === "all" ? 92 : 122, top = pk === "all" ? 20 : 50;
@@ -2128,8 +2159,9 @@ const ScoreView = (() => {
     return {el, fix, rows, T, X, sc:D.sc, H:D.H, on:[]};
   }
   function textAt(pk, q24){
-    const k = pk === "all" ? "solo" : pk, T = SCORE.texts[k] || [];
-    let best = null; for (const [t, tx] of T){ if (t <= q24 && /Canto|Scorrono|Tuoni|Solo|Tutti/.test(tx)) best = tx; }
+    // 場面の書きこみは、Solo／Tutti がいちばんそろっている独奏パートの楽譜から読む。Forte（主題がもどる）で泉の書きこみは終わり
+    const T = SCORE.texts.solo || [];
+    let best = null; for (const [t, tx] of T){ if (t > q24) break; if (/Canto|Scorrono|Tuoni|Solo|Tutti/.test(tx)) best = tx; else if (/Forte/.test(tx)) best = null; }
     return best;
   }
   function xAt(S, q){
