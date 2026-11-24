@@ -75,7 +75,8 @@
 - 楽譜の描画に VexFlow を使う（`lib/` に同梱。なければネットから）
 
 ## 音源
-ルイス・カウフマン（独奏ヴァイオリン）、ヘンリー・スウォボダ指揮 コンサートホール室内管弦楽団（1947年録音）。
+ジョン・ハリソン（独奏ヴァイオリン）、ロバート・トゥリッツィアーニ指揮 ウィチタ州立大学室内合奏団（Wichita State University Chamber Players、2000年録音）。
+[Wikimedia Commons](https://commons.wikimedia.org/wiki/File:Vivaldi_-_Four_Seasons_1_Spring_mvt_1_Allegro_-_John_Harrison_violin.oga) の Ogg Vorbis ファイルを mp3（128kbps）に変換して `spring.mp3` として同梱。ライセンスは **CC BY-SA 4.0**（変換後のファイルも同じ条件）。
 場面の時間はこの録音に合わせています。
 
 ## 同梱ライブラリ（lib/）
