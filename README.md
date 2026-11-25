@@ -81,3 +81,9 @@
 
 ## 同梱ライブラリ（lib/）
 - three.js r128（MIT License）、OrbitControls（MIT License）、VexFlow 4.2.2（MIT License）
+
+## 3D合奏のテクスチャ（textures/）
+生成AI（Gemini）で作成した画像を、アプリ用に縮小・切り抜きして使用。読みこめないときは手描きの模様で表示する。
+- floor-marble.jpg（床の大理石）、hall-wall.jpg（左右の壁）、window-garden.jpg（窓の外の春の庭）
+- wood-spruce.jpg（弦楽器の表板）、wood-maple.jpg（横板・ネック）、fabric-brocade.jpg（衣装の布。白黒にして各パートの色を重ねる）
+- lid-painting.jpg（チェンバロのふたの内側の風景画）、soundboard.jpg（チェンバロの響板の花の絵）

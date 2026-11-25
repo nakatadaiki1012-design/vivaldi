@@ -723,7 +723,7 @@ details.pt summary{cursor:pointer;font-size:13px;color:var(--sub);margin-top:8px
     <p style="margin:0">ヴィヴァルディ（1678〜1741）が、<b>詩</b>の場面を音で表した協奏曲。小鳥・泉・雷が聞こえてきます。</p>
   </div>
   <p class="credit">音源：ジョン・ハリソン（独奏ヴァイオリン）／ロバート・トゥリッツィアーニ指揮 ウィチタ州立大学室内合奏団（2000年録音）。<a href="https://commons.wikimedia.org/wiki/File:Vivaldi_-_Four_Seasons_1_Spring_mvt_1_Allegro_-_John_Harrison_violin.oga" target="_blank" rel="noopener">Wikimedia Commons</a>より、<a href="https://creativecommons.org/licenses/by-sa/4.0/deed.ja" target="_blank" rel="noopener">CC BY-SA 4.0</a>で利用（mp3に変換）<br>
-  イラスト：トップ画面と情景の背景は、生成AI（Gemini）で作成したイメージイラストです。<br>
+  イラスト：トップ画面と情景の背景、3D合奏の床・壁・窓の外の庭・木目・衣装の布・チェンバロの絵は、生成AI（Gemini）で作成したイメージです。<br>
   場面の時間は、この録音に合わせてあります。別の録音を使うときは先生用の「設定」で直せます。<br>
   楽譜：<a href="https://www.mutopiaproject.org/" target="_blank" rel="noopener">Mutopia Project</a>「La Primavera」（1725年の初版をもとに入力・CC BY-SA 3.0）を音符データに変換して表示しています。</p>
 </section>
@@ -1401,7 +1401,7 @@ const Ens3D = (() => {
       fh:new THREE.ShapeGeometry(fHoleShape(), 8),
     };
     const C = bodyCache[key], bodyLen = OUTLINE[kind][OUTLINE[kind].length - 1][0];
-    mesh(C.body, M.wood, s);
+    mesh(C.body, [M.top, M.wood], s);              // 表板（スプルース）と横板（メイプル）
     const zt = depth * 1.35;                                          // 表板の上の高さ
     const pf = new THREE.LineLoop(C.purf, M.purfling); pf.position.z = zt + .0015; s.add(pf);
     [-1, 1].forEach(sd => { const f = mesh(C.fh, M.hole, s, false); f.position.set(bodyLen * .5 - .03, sd * .062, zt + .002); f.rotation.z = sd * -1.35; f.scale.y = sd; });
@@ -1440,7 +1440,7 @@ const Ens3D = (() => {
     g.userData.len = len; return g;
   }
   /* ---------- チェンバロ ---------- */
-  let lidTex, roseTex;
+  let lidTex, roseTex, lidPics = [], coatMats = [];
   function harpsichord(){
     const g = new THREE.Group();
     // 形を x−y 平面に描き（y は −奥行き）、x 軸まわりに倒すと奥行きが +z、厚みが上向きになる
@@ -1451,7 +1451,8 @@ const Ens3D = (() => {
     const rim = new THREE.LineLoop(new THREE.BufferGeometry().setFromPoints(s.getPoints(40).map(p => V(p.x, 0, -p.y))), M.goldLine); rim.position.y = .925; g.add(rim);
     const rim2 = rim.clone(); rim2.position.y = .7; g.add(rim2);
     // 響板（花の絵とローズ）
-    const sb = mesh(new THREE.ShapeGeometry(s, 28), M.sound, g, false); sb.rotation.x = -Math.PI/2; sb.scale.set(.93, .95, 1); sb.position.set(.01, .923, .04);
+    const sb = mesh(new THREE.ShapeGeometry(s, 28), M.sound, g, false);
+    { const uv = sb.geometry.attributes.uv, pos = sb.geometry.attributes.position; for (let i = 0; i < uv.count; i++) uv.setXY(i, (pos.getX(i) + .46) / .92, -pos.getY(i) / .92); uv.needsUpdate = true; } sb.rotation.x = -Math.PI/2; sb.scale.set(.93, .95, 1); sb.position.set(.01, .923, .04);
     const rose = mesh(new THREE.CircleGeometry(.07, 24), new THREE.MeshStandardMaterial({map:roseTex, transparent:true, roughness:.7}), g, false); rose.rotation.x = -Math.PI/2; rose.position.set(-.05, .925, .95);
     const jr = mesh(new THREE.BoxGeometry(.9, .03, .05), M.ebony, g); jr.position.set(0, .94, .26);
     // ふた（まっすぐな側の蝶番で開く）。内側に風景画
@@ -1460,6 +1461,7 @@ const Ens3D = (() => {
     const lp = mesh(new THREE.ShapeGeometry(s, 28), new THREE.MeshStandardMaterial({map:lidTex, roughness:.75, side:THREE.DoubleSide}), lid, false);
     lp.rotation.x = -Math.PI/2; lp.position.set(-.46, -.002, 0); lp.scale.set(.96, .97, 1);
     { const uv = lp.geometry.attributes.uv, pos = lp.geometry.attributes.position; for (let i = 0; i < uv.count; i++) uv.setXY(i, (pos.getX(i) + .46) / .92, -pos.getY(i) / 2.05); uv.needsUpdate = true; }
+    lidPics.push(lp);
     lid.rotation.z = -.68;
     const prop = mesh(new THREE.CylinderGeometry(.01, .01, .5, 6), M.hpcase, g); prop.position.set(-.3, 1.12, 1.0); prop.rotation.z = .5;
     // 鍵盤（フランス式：白鍵が黒、黒鍵が白）と譜面台
@@ -1494,7 +1496,7 @@ const Ens3D = (() => {
     const root = new THREE.Group(); root.position.set(cfg.x, 0, cfg.z);
     root.rotation.y = Math.atan2(-cfg.x * .35, 6);                   // 少し内側（客席の中央）を向く
     scene.add(root);
-    const coat = mat(cfg.coat, {roughness:.62}), trim = mat(new THREE.Color(cfg.coat).lerp(new THREE.Color(0xffffff), .25).getHex(), {roughness:.55}), skin = M.skin;
+    const coat = mat(cfg.coat, {roughness:.62}); coatMats.push(coat); const trim = mat(new THREE.Color(cfg.coat).lerp(new THREE.Color(0xffffff), .25).getHex(), {roughness:.55}), skin = M.skin;
     const hipY = seated ? .5 : .92, shY = seated ? 1.0 : 1.42, headY = shY + .2;
     // 脚（半ズボン・白い靴下・バックルの靴）
     const leg = (a, b, sd) => { const kn = seated ? V(sd*.12, hipY, .42) : V(sd*.095, .5, .02);
@@ -1607,7 +1609,7 @@ const Ens3D = (() => {
     const soundTex = canvasTex(256, 512, (x, w, h) => { x.fillStyle = "#e3c891"; x.fillRect(0, 0, w, h); x.strokeStyle = "rgba(150,100,40,.18)"; for (let i = 0; i < w; i += 6){ x.beginPath(); x.moveTo(i, 0); x.lineTo(i, h); x.stroke(); }
       const fl = ["#c0392b","#2b6cb0","#d4a017","#8e44ad"]; for (let i = 0; i < 26; i++){ x.fillStyle = fl[i % 4]; const fx = Math.random()*w, fy = Math.random()*h; for (let k = 0; k < 5; k++){ x.beginPath(); x.arc(fx + Math.cos(k*1.26)*4, fy + Math.sin(k*1.26)*4, 3, 0, 7); x.fill(); } x.fillStyle = "#4a6b2a"; x.fillRect(fx - 1, fy + 5, 2, 8); } });
     M = {
-      wood:mat(0x9a4a16, {roughness:.28, metalness:.05, map:grain}), ebony:mat(0x1b1612, {roughness:.35}), bridge:mat(0xdcc29a), metal:mat(0x9a9a9a, {metalness:.8, roughness:.3}),
+      wood:mat(0x9a4a16, {roughness:.28, metalness:.05, map:grain}), top:mat(0x9a4a16, {roughness:.28, metalness:.05, map:grain}), ebony:mat(0x1b1612, {roughness:.35}), bridge:mat(0xdcc29a), metal:mat(0x9a9a9a, {metalness:.8, roughness:.3}),
       purfling:new THREE.LineBasicMaterial({color:0x2a1608}), hole:mat(0x120a05, {roughness:1}), string:new THREE.LineBasicMaterial({color:0xe8e2d0}),
       bowstick:mat(0x4a2510, {roughness:.35}), hair:mat(0xf3eee2), skin:mat(0xeac6a4, {roughness:.7}), cheek:mat(0xe9a6a0, {roughness:.8}), lip:mat(0xa85a55),
       wig:mat(0xeeeae2, {roughness:.95}), ribbon:mat(0x151515), eye:mat(0x2a1d14), eyeW:mat(0xffffff, {roughness:.4}), brow:mat(0x8a7a6a),
@@ -1616,12 +1618,24 @@ const Ens3D = (() => {
       hpcase:mat(0x2d4a3e, {roughness:.4}), lid:mat(0x2d4a3e, {roughness:.4}), sound:new THREE.MeshStandardMaterial({map:soundTex, roughness:.7, side:THREE.DoubleSide}), keys:mat(0xf1ead8, {roughness:.4}),
       paper:mat(0xf3ecd8, {roughness:.95}),
     };
+    // 写真のテクスチャ（textures/）。読みこめないときは、上の手描きの模様のまま
+    const TL = new THREE.TextureLoader();
+    const useTex = (file, cb) => TL.load("textures/" + file, t => { t.encoding = THREE.sRGBEncoding; t.anisotropy = Math.min(8, R.capabilities.getMaxAnisotropy()); try{ cb(t); }catch(e){} }, undefined, () => {});
+    const rep = (t, x, y) => { t.wrapS = t.wrapT = THREE.RepeatWrapping; t.repeat.set(x, y); return t; };
+    const put = (m, t, col) => { m.map = t; if (col != null) m.color.set(col).convertSRGBToLinear(); m.needsUpdate = true; };
+    useTex("wood-spruce.jpg", t => { rep(t, 1.6, 1.6); t.center.set(.5, .5); t.rotation = Math.PI / 2; put(M.top, t, 0xd08a50); });
+    useTex("wood-maple.jpg", t => { rep(t, 2, 2); put(M.wood, t, 0xd88a55); });
+    useTex("fabric-brocade.jpg", t => { rep(t, 3, 3); coatMats.forEach(m => { m.map = t; m.needsUpdate = true; }); });
+    useTex("soundboard.jpg", t => { rep(t, 1, 1); put(M.sound, t, 0xffffff); });
+    useTex("lid-painting.jpg", t => lidPics.forEach(lp => { const uv = lp.geometry.attributes.uv, pos = lp.geometry.attributes.position;
+      for (let i = 0; i < uv.count; i++) uv.setXY(i, -pos.getY(i) / 2.05, (.46 - pos.getX(i)) / .92 * .86 + .07); uv.needsUpdate = true; put(lp.material, t, 0xffffff); }));
     // 光
     hemi = new THREE.HemisphereLight(0xfff4e0, 0x6b5440, .75); scene.add(hemi);
     sun = new THREE.DirectionalLight(0xfff0d8, 1.25); sun.position.set(-4, 9, 6); sun.castShadow = true;
     sun.shadow.mapSize.set(2048, 2048); Object.assign(sun.shadow.camera, {left:-7, right:7, top:7, bottom:-7, near:1, far:25}); sun.shadow.bias = -.0004; sun.shadow.normalBias = .02; scene.add(sun);
     // 床と壁（教会の音楽室のような広間）
     const floor = mesh(new THREE.PlaneGeometry(16, 12), new THREE.MeshStandardMaterial({map:hallFloor(), roughness:.3, metalness:.05}), scene, false); floor.rotation.x = -Math.PI/2; floor.position.z = -.5;
+    useTex("floor-marble.jpg", t => { rep(t, 5, 3.75); put(floor.material, t, 0xffffff); });
     floor.material.map.wrapS = floor.material.map.wrapT = THREE.RepeatWrapping; floor.material.map.repeat.set(4, 3);
     const wallM = mat(0xefe3cc, {roughness:.85}), trimM = mat(0xcdb68a, {roughness:.55, metalness:.15}), goldT = mat(0xc9a240, {metalness:.7, roughness:.35});
     const wall = mesh(new THREE.PlaneGeometry(16, 7), wallM, scene, false); wall.position.set(0, 3.5, -6.2);
@@ -1629,6 +1643,7 @@ const Ens3D = (() => {
     [-4.2, 0, 4.2].forEach(x => {
       const arch = new THREE.Shape(); arch.moveTo(-.9, 0); arch.lineTo(-.9, 2.2); arch.absarc(0, 2.2, .9, Math.PI, 0, true); arch.lineTo(.9, 0); arch.lineTo(-.9, 0);
       const w = mesh(new THREE.ShapeGeometry(arch, 24), winMat, scene, false); w.position.set(x, 1.4, -6.18);
+      { const uv = w.geometry.attributes.uv, pos = w.geometry.attributes.position; for (let i = 0; i < uv.count; i++) uv.setXY(i, (pos.getX(i) + .9) / 1.8, pos.getY(i) / 3.1); uv.needsUpdate = true; }
       const fr = new THREE.Shape(); fr.moveTo(-1.05, 0); fr.lineTo(-1.05, 2.2); fr.absarc(0, 2.2, 1.05, Math.PI, 0, true); fr.lineTo(1.05, 0); fr.lineTo(-1.05, 0);
       fr.holes.push(arch); const fm = mesh(new THREE.ExtrudeGeometry(fr, {depth:.08, bevelEnabled:false, curveSegments:24}), trimM, scene, false); fm.position.set(x, 1.4, -6.2);
       const m1 = mesh(new THREE.BoxGeometry(.06, 3.1, .05), trimM, scene, false); m1.position.set(x, 2.95, -6.15);
@@ -1638,13 +1653,18 @@ const Ens3D = (() => {
     [-6.3, -2.1, 2.1, 6.3].forEach(x => { const pl = mesh(new THREE.BoxGeometry(.5, 6.4, .3), trimM, scene); pl.position.set(x, 3.2, -6.05);
       const cap = mesh(new THREE.BoxGeometry(.75, .25, .45), goldT, scene); cap.position.set(x, 5.5, -6);
       const bs = mesh(new THREE.BoxGeometry(.7, .4, .42), trimM, scene); bs.position.set(x, .2, -6); });
+    // 窓の外は春の庭
+    useTex("window-garden.jpg", t => { winMat.map = t; winMat.emissiveMap = t; winMat.color.set(0xffffff); winMat.emissive.set(0xffffff); winMat.emissiveIntensity = .45; winMat.needsUpdate = true; });
     const cornice = mesh(new THREE.BoxGeometry(16, .35, .5), trimM, scene, false); cornice.position.set(0, 5.75, -5.95);
     const base = mesh(new THREE.BoxGeometry(16, .35, .2), trimM, scene, false); base.position.set(0, .17, -6.1);
-    // 額に入った風景画
+    // 額に入った風景画（壁の写真が読みこめたら隠す）
+    const sidePics = [];
     [-2.1 - .0, 2.1].forEach((x, i) => { const t = canvasTex(256, 192, (c, w, h) => landscape(c, w, h, i === 0));
       const fr = mesh(new THREE.BoxGeometry(1.0, .78, .06), goldT, scene, false); fr.position.set(x * 3.0 > 0 ? 7.88 : -7.88, 3.0, -2 + i * 2); fr.rotation.y = x > 0 ? -Math.PI/2 : Math.PI/2;
-      const pic = mesh(new THREE.PlaneGeometry(.86, .64), new THREE.MeshStandardMaterial({map:t, roughness:.8}), scene, false); pic.position.copy(fr.position).add(V(x > 0 ? -.035 : .035, 0, 0)); pic.rotation.y = fr.rotation.y; });
-    [-1, 1].forEach(sd => { const sw = mesh(new THREE.PlaneGeometry(12, 7), wallM, scene, false); sw.position.set(sd*8, 3.5, -.5); sw.rotation.y = -sd*Math.PI/2;
+      sidePics.push(fr); const pic = mesh(new THREE.PlaneGeometry(.86, .64), new THREE.MeshStandardMaterial({map:t, roughness:.8}), scene, false); sidePics.push(pic); pic.position.copy(fr.position).add(V(x > 0 ? -.035 : .035, 0, 0)); pic.rotation.y = fr.rotation.y; });
+    const sideM = mat(0xefe3cc, {roughness:.85});
+    useTex("hall-wall.jpg", t => { put(sideM, t, 0xffffff); sidePics.forEach(o => o.visible = false); });
+    [-1, 1].forEach(sd => { const sw = mesh(new THREE.PlaneGeometry(12, 7), sideM, scene, false); sw.position.set(sd*8, 3.5, -.5); sw.rotation.y = -sd*Math.PI/2;
       const sb = mesh(new THREE.BoxGeometry(.2, .35, 12), trimM, scene, false); sb.position.set(sd*7.95, .17, -.5); });
     // シャンデリア（ろうそく8本）
     const ch = new THREE.Group(); ch.position.set(0, 4.6, -1.2); scene.add(ch);
